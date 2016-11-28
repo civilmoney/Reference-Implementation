@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "CM.Server": {
+      "commandName": "Project"
+    }
+  }
+}

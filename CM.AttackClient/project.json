@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0-*",
+  "buildOptions": {
+    "emitEntryPoint": true,
+    "define": [ "DEBUG" ],
+    "optimize": false,
+    "allowUnsafe": false
+  },
+
+  "dependencies": {
+    "CM.Server": "1.0.0-*",
+    "Microsoft.NETCore.App": {
+      "type": "platform",
+      "version": "1.1.0"
+    }
+  },
+  
+  "frameworks": {
+    "netcoreapp1.1": {
+      "dependencies": {
+        "CM": {
+          "target": "project"
+        }
+      },
+      "imports": [
+        // "dnx451",
+         "portable-net45+win8"
+      ]
+    }
+  }
+}
