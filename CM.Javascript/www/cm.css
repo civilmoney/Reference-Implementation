@@ -943,9 +943,6 @@ body {
   margin: 0;
   padding: 0.5em 0 0 0.5em;
 }
-.cm .statusvisual > div {
-  padding: 0.5em;
-}
 .cm .statusvisual .status-row {
   cursor: pointer;
   white-space: nowrap;
@@ -1446,7 +1443,8 @@ body {
 .votespage .logo,
 .apipage .logo,
 .helppage .logo {
-  float: right;
+  display: block;
+  text-align: center;
 }
 .paymentpage .logo > img,
 .paymentlinkpage .logo > img,
@@ -1458,7 +1456,6 @@ body {
 .votespage .logo > img,
 .apipage .logo > img,
 .helppage .logo > img {
-  margin-top: 0.5em;
   width: 200px;
   height: 50px;
 }
@@ -1476,6 +1473,10 @@ body {
     width: 150px;
     height: 30px;
   }
+}
+.paymentpage h1 {
+  padding: 0;
+  margin: 0;
 }
 .markdown {
   line-height: 1.75em;

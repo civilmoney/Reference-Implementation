@@ -215,7 +215,7 @@ namespace CM.Javascript {
                 RecentReputation rep;
                 Helpers.CalculateRecentReputation(calcs.RecentCredits.Value, calcs.RecentDebits.Value, out rr, out rep);
                 var amount = Helpers.CalculateAccountBalance(calcs.RecentCredits.Value, calcs.RecentDebits.Value);
-                balance.Amount(amount, prefix: Constants.Symbol);
+                balance.Amount(amount, prefix: Constants.Symbol, roundTo2DP: true);
                 balance.Div("equal", "USD " + (amount < 0 ? "-" : "") + " $" + Math.Abs(amount * Constants.USDExchange).ToString("N0"));
                 rating.AmountReputation(rr);
                 rating.H3("").Reputation(rep);

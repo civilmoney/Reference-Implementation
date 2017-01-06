@@ -27,7 +27,7 @@ namespace CM.Javascript {
             idHolder.A(t.ID, url).AddEventListener(EventType.Click, RaiseOnButtonClick);
 
             if (includeAmount) {
-                container.H2("").Amount(t.Amount, prefix: Constants.Symbol);
+                container.H2("").Amount(t.Amount, prefix: Constants.Symbol, roundTo2DP: false);
             }
             if (!String.IsNullOrWhiteSpace(t.Memo))
                 container.Div("memo", Page.HtmlEncode(t.Memo));

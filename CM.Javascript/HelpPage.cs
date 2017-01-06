@@ -56,7 +56,6 @@ namespace CM.Javascript {
             });
 
             Element.H1(SR.TITLE_INSTALL_A_SERVER);
-            Element.Div("para", SR.LABEL_INSTALL_A_SERVER_INTRO);
             // To generate this HTML we're using:
             // http://dillinger.io/
             Element.Div("markdown", @"
@@ -102,12 +101,12 @@ $ sudo tail -f /var/log/civilmoney.out.log
 <p><strong>HINT:</strong> You should be able to visit <a href=""https://127-0-0-1.untrusted-server.com:8000"">https://127-0-0-1.untrusted-server.com:8000</a> and see an instance of the Civil Money website running off of your server. Replace “127-0-0-1” with the external IP address integers of your server when testing for external connectivity.</p>
 </blockquote>
 <h4><a id=""Other_LinuxUnix_DistrosMac_OSX_52""></a>Other Linux/Unix Distros/Mac OSX</h4>
-<p>If you’re a savvy unix administrator or running something like a Mac server, you can follow Microsoft’s <a href=""https://www.microsoft.com/net/core"">.NET Core</a> setup instructions and download/extract the standard <a href=""https://update.civil.money/api/get-repo/civilmoney_1.0.zip"">Civil Money binary</a> and run <code>dotnet CM.Daemon.dll</code> directly.</p>
+<p>If you’re a savvy unix administrator or running something like a Mac server, you can follow Microsoft’s <a href=""https://www.microsoft.com/net/core"">.NET Core</a> setup instructions and download/extract the standard <a href=""https://update.civil.money/api/get-repo/civilmoney_1.2.zip"">Civil Money binary</a> and run <code>dotnet CM.Daemon.dll</code> directly.</p>
 <h3><a id=""Windows_55""></a>Windows</h3>
 <p>Windows setup is pretty straight forward, but you need to install the .NET Core 1.1 prerequisite.</p>
 <ol>
 <li>Install the <a href=""https://go.microsoft.com/fwlink/?LinkID=835014"">.NET Core SDK 1.1</a></li>
-<li>Download the <a href=""https://update.civil.money/api/get-repo/civilmoney_1.0.zip"">Civil Money binary</a> and unzip the contents into a folder location on your server.</li>
+<li>Download the <a href=""https://update.civil.money/api/get-repo/civilmoney_1.2.zip"">Civil Money binary</a> and unzip the contents into a folder location on your server.</li>
 <li>Open an elevated command prompt:</li>
 </ol>
 <pre><code>&gt; cd &lt;your unzipped folder location&gt;

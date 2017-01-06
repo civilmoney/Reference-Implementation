@@ -105,8 +105,8 @@ namespace CM.Javascript {
                 var right = row.Div("cell-half");
 
                 left.H3(Page.HtmlEncode(_ToSign[i].ID));
-                left.H2("").Amount(_ToSign[i].Amount, prefix: Constants.Symbol);
-                right.H3(Assets.SVG.Tag.ToString(16, 16, "#000000") + " " + SR.LABEL_TAG_ORDER_NO);
+                left.H2("").Amount(_ToSign[i].Amount, prefix: Constants.Symbol, roundTo2DP: false);
+                right.H3(Assets.SVG.Tag.ToString(16, 16, "#000000") + " " + SR.LABEL_TAG);
 
                 _ToSign[i].TagBox = right.TextBox(""); // this will populate after load.
                 _ToSign[i].TagBox.Placeholder = "(" + SR.LABEL_OPTIONAL + ")";

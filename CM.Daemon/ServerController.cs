@@ -365,7 +365,7 @@ namespace CM.Daemon {
                 var req = System.Net.HttpWebRequest.CreateHttp("https://" + AUTHORITATIVE_DOMAIN + "/api/log-error/server");
                 req.Method = "POST";
                 req.ContentType = "text/plain; charset=utf-8";
-
+                req.Headers[System.Net.HttpRequestHeader.ContentLength] = b.Length.ToString();
                 using (var s = await req.GetRequestStreamAsync()) {
                     s.Write(b, 0, b.Length);
                 }

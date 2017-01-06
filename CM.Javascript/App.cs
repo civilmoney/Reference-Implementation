@@ -51,11 +51,14 @@ namespace CM.Javascript {
 
         private HTMLAnchorElement _Voting;
 
+        private bool _IsInitialPageLoad;
+
         public App() {
             Client = new Client();
             Client.PeerStateChanged += Client_PeerStateChanged;
             //Window.OnHashChange = CheckLocation;
             Window.OnPopState = CheckLocation;
+            _IsInitialPageLoad = true;
 
             string lang = null;
             if (Window.LocalStorage != null)
@@ -210,7 +213,9 @@ namespace CM.Javascript {
                 newPage.Build();
                 newPage.IsBuilt = true;
             }
-            Window.History.PushState(null, newPage.Title, newPage.Url);
+            if (!_IsInitialPageLoad)
+                Window.History.PushState(null, newPage.Title, newPage.Url);
+            _IsInitialPageLoad = false;
             Window.Document.Title = newPage.Title;
             _CurrentHash = Window.Location.PathName;
             _CurrentPage = newPage;

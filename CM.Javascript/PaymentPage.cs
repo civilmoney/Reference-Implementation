@@ -55,7 +55,7 @@ namespace CM.Javascript {
             var serverStatus = Element.Div("statusvisual");
 
             var form = Element.Div();
-            form.Div("logo", "<img src=\"/cmlogo.svg\" type=\"image/svg\">");
+            //form.Div("logo", "<img src=\"/cmlogo.svg\" type=\"image/svg\">");
             form.H1(SR.LABEL_PAY_TO);
             _To = new AccountInputBox(form, _Payee);
 
@@ -122,7 +122,7 @@ namespace CM.Javascript {
             right = row.Div("cell-half");
             right.H3(SR.LABEL_DONT_HAVE_AN_ACCOUNT);
             right = right.Div("register");
-            right.Button(SR.LABEL_JOIN_THE_REVOLUTION, (e) => {
+            right.Button(SR.LABEL_CREATE_MY_ACCOUNT, (e) => {
                 RegisterPage.ReturnPath = App.Identity.CurrentPath;
                 App.Identity.Navigate("/register");
             });
@@ -134,7 +134,7 @@ namespace CM.Javascript {
 
             row = form.Div("row");
             left = row.Div("cell-half");
-            left.H3(Assets.SVG.Tag.ToString(16, 16, "#000000") + " " + SR.LABEL_TAG_ORDER_NO);
+            left.H3(Assets.SVG.Tag.ToString(16, 16, "#000000") + " " + SR.LABEL_TAG);
             _Tag = left.TextBox("");
             _Tag.Placeholder = "(" + SR.LABEL_OPTIONAL + ")";
             _Tag.MaxLength = 48;

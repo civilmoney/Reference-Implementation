@@ -891,7 +891,7 @@ body {
             padding: 0.5em 0 0 0.5em;
         }
         > div {
-            padding: 0.5em;
+           // padding: 0.5em;
         }
         .status-row { 
             cursor: pointer;
@@ -1316,12 +1316,18 @@ body {
         
     }
     .logo {
-        float: right;
+        display: block;
+        text-align: center;
         > img {
-            margin-top: 0.5em;
             width: 200px; height: 50px; 
             @media (max-width: @medium-device) { width: 150px; height: 30px;  }
        }     
+    }
+}
+.paymentpage {
+    h1 {
+        padding:0;
+        margin:0;
     }
 }
 .markdown{

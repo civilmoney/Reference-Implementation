@@ -47,7 +47,7 @@ namespace CM.Javascript {
 
             Element.Div(null, SR.HTML_CIVIL_MONEY_PROVIDES);
             var buttons = Element.Div("buttons");
-            buttons.Button(SR.LABEL_JOIN_THE_REVOLUTION, "/register");
+            buttons.Button(SR.LABEL_CREATE_MY_ACCOUNT, "/register");
             buttons.Span(" " + SR.LABEL_OR + " ");
             buttons.Button(SR.LABEL_LEARN_MORE, "/about");
         }

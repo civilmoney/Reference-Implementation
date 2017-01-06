@@ -216,7 +216,7 @@ namespace CM.Javascript {
                 case Schema.PayeeStatus.Decline: prefix = SR.LABEL_PAYEE_STATUS_DECLINE; break;
                 case Schema.PayeeStatus.Refund: prefix = SR.LABEL_PAYEE_STATUS_REFUND; break;
             }
-            var amountDiv = region.Div("amount").Amount(amount, prefix: prefix);
+            var amountDiv = region.Div("amount").Amount(amount, prefix: prefix, roundTo2DP: false);
         }
 
         public void Update(Schema.Transaction t) {

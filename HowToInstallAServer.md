@@ -51,13 +51,13 @@ $ sudo tail -f /var/log/civilmoney.out.log
 
 
 #### Other Linux/Unix Distros/Mac OSX
-If you're a savvy unix administrator or running something like a Mac server, you can follow Microsoft's [.NET Core](https://www.microsoft.com/net/core) setup instructions and download/extract the standard [Civil Money binary](https://update.civil.money/api/get-repo/civilmoney_1.0.zip) and run `dotnet CM.Daemon.dll` directly.
+If you're a savvy unix administrator or running something like a Mac server, you can follow Microsoft's [.NET Core](https://www.microsoft.com/net/core) setup instructions and download/extract the standard [Civil Money binary](https://update.civil.money/api/get-repo/civilmoney_1.2.zip) and run `dotnet CM.Daemon.dll` directly.
 
 ### Windows
 Windows setup is pretty straight forward, but you need to install the .NET Core 1.1 prerequisite.
 
 1. Install the [.NET Core SDK 1.1](https://go.microsoft.com/fwlink/?LinkID=835014)
-2. Download the [Civil Money binary](https://update.civil.money/api/get-repo/civilmoney_1.0.zip) and unzip the contents into a folder location on your server.
+2. Download the [Civil Money binary](https://update.civil.money/api/get-repo/civilmoney_1.2.zip) and unzip the contents into a folder location on your server.
 3. Open an elevated command prompt:
 ```
 > cd <your unzipped folder location>

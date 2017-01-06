@@ -214,7 +214,7 @@ namespace CM.Server {
             Log.Write(this, LogLevel.INFO, "Running.");
         }
 
-     
+
 
         public void Stop() {
             _IsRunning = false;
@@ -299,7 +299,7 @@ namespace CM.Server {
 
                 var dir = new System.IO.DirectoryInfo(AppContext.BaseDirectory);
                 // Essentially: ../../../../CM.Javascript/www
-                var path = Path.Combine(Path.Combine(dir.Parent.Parent.Parent.Parent.FullName, "CM.Javascript"), "www"); 
+                var path = Path.Combine(Path.Combine(dir.Parent.Parent.Parent.Parent.FullName, "CM.Javascript"), "www");
                 var file = Path.Combine(path, name);
                 if (!System.IO.File.Exists(file))
                     return null;
@@ -353,7 +353,7 @@ namespace CM.Server {
                 var path = context.Url.AbsolutePath;
                 var args = path.Substring(1).Split('/');
 
-               
+
                 bool isAPIRequest = args[0] == "api" && args.Length > 1;
 
                 if (isAPIRequest) {
@@ -369,12 +369,20 @@ namespace CM.Server {
                        && !file.EndsWith(".svg")
                        && !file.EndsWith(".woff")
                        && !file.EndsWith(".css")) {
+
+                        // This is a landing page request. The path may be anything from a user account,
+                        // to a voting screen. It is up to JavaScript to present the correct content.
+
                         shouldSendSecurityHeaders = true;
 #if DEBUG_JS
                         file = "debug.htm";
 #else
-                            file = "default.htm";
+                        file = "default.htm";
 #endif
+                        // If we are an authoritative https://civil.money server, log some basic
+                        // telemetry during the pilot phase, so we can gauge when/if the project
+                        // becomes popular.
+                        Reporter?.LogTelemetry(context);
                     }
 
 #if DEBUG_JS
@@ -382,7 +390,7 @@ namespace CM.Server {
                     var res = GetWWWResourceDevelopment(file);
 
 #else
-                        var res = GetWWWResource(file);
+                    var res = GetWWWResource(file);
 #endif
                     if (res != null) {
 #if !DEBUG_JS
@@ -484,8 +492,8 @@ namespace CM.Server {
                             FileMode.Open,
                             FileAccess.Read,
                             FileShare.Read)) {
-                    await context.ReplyAsync(HttpStatusCode.OK, 
-                        new Dictionary<string, string> {}, fs)
+                    await context.ReplyAsync(HttpStatusCode.OK,
+                        new Dictionary<string, string> { }, fs)
                         .ConfigureAwait(false);
                 }
             } else {
@@ -530,7 +538,7 @@ namespace CM.Server {
             await context.ReplyAsync(HttpStatusCode.NotFound)
                 .ConfigureAwait(false);
         }
-        
+
 
         private async Task HandleApiGetReleaseInfo(SslWebContext context, string netcoreAppVersion, string application) {
             if (application.IndexOfAny(UnsafePathChars) > -1) {
@@ -581,11 +589,11 @@ namespace CM.Server {
                 //}
                 string signature = null;
                 using (var stream = info.OpenRead())
-                using (var rsa =  System.Security.Cryptography.RSA.Create()) {
+                using (var rsa = System.Security.Cryptography.RSA.Create()) {
                     rsa.ImportParameters(_UpdateServerSigningKey);
                     signature = Convert.ToBase64String(rsa.SignData(stream, System.Security.Cryptography.HashAlgorithmName.SHA256, System.Security.Cryptography.RSASignaturePadding.Pkcs1));
                 }
-                  
+
                 s.CRLF(String.Format("{0} {1} {2}", relativePath.Replace("\\", "/").Replace(" ", "%20"), info.Length.ToString(), signature));
             }
 
@@ -606,7 +614,7 @@ namespace CM.Server {
                 var report = await context.ReadRequestAsUtf8String()
                     .ConfigureAwait(false);
                 System.IO.File.AppendAllText(file,
-                    DateTime.Now.ToString("s") + " [" + sender + "]: "
+                    DateTime.Now.ToString("s") + " [" + sender + ", " + application + "]: "
                     + report
                     + "\r\n=================\r\n");
 
@@ -614,6 +622,41 @@ namespace CM.Server {
                     .ConfigureAwait(false);
             } catch (Exception ex) {
                 Log.Write(this, LogLevel.INFO, "Remote error from " + sender + " failed to log: " + ex.ToString() + "\r\n" + context.RequestHeaders.ToContentString());
+            }
+        }
+
+        private async Task HandleApiLogTelem(SslWebContext context, string typeName) {
+
+            if (typeName != "http") { // sanitation/validation
+                await context.ReplyAsync(HttpStatusCode.BadRequest, null, "Invalid telemetry type")
+                   .ConfigureAwait(false);
+                return;
+            }
+            if (context.ContentLength == 0) {
+                await context.ReplyAsync(HttpStatusCode.BadRequest, null, "Expected an error body")
+                    .ConfigureAwait(false);
+                return;
+            }
+            var sender = context.RemoteEndPoint.Address;
+
+            // We'll log telemetry by UTC day
+            var file = Path.Combine(Program.BaseDirectory, "telemetry");
+            if (!Directory.Exists(file))
+                Directory.CreateDirectory(file);
+            file = Path.Combine(file, typeName + "-telem-" + DateTime.UtcNow.ToString("yyyy-MM-dd") + ".txt");
+            try {
+                Log.Write(this, LogLevel.INFO, "Remote telemetry received from " + sender + " (" + context.ContentLength + ")");
+                var report = await context.ReadRequestAsUtf8String()
+                    .ConfigureAwait(false);
+                System.IO.File.AppendAllText(file,
+                    "==== " + DateTime.Now.ToString("s") + " [" + sender + "] ====\r\n"
+                    + report
+                    + "\r\n=================\r\n");
+
+                await context.ReplyAsync(HttpStatusCode.OK)
+                    .ConfigureAwait(false);
+            } catch (Exception ex) {
+                Log.Write(this, LogLevel.INFO, "Remote telemetry from " + sender + " failed to log: " + ex.ToString() + "\r\n" + context.RequestHeaders.ToContentString());
             }
         }
 
@@ -650,7 +693,7 @@ namespace CM.Server {
                         // -> 1.0.0/{file} {size} {sha256-base64}
                         //    1.0.0/some%20resource/{file} {size} {sha256-base64}
                         case "get-release-info":
-                            if(_UpdateServerSigningKey.D == null)
+                            if (_UpdateServerSigningKey.D == null)
                                 await context.ReplyAsync(HttpStatusCode.BadRequest, null, "This server does not support updates.")
                                     .ConfigureAwait(false);
                             else if (parts.Length < 3)
@@ -687,6 +730,18 @@ namespace CM.Server {
                                 await HandleApiLogError(context, parts[2])
                                     .ConfigureAwait(false);
                             return;
+                        // POST api/log-telem/{type name}
+                        case "log-telem":
+                            if (context.Method != "POST")
+                                await context.ReplyAsync(HttpStatusCode.BadRequest, null, "Expected POST")
+                                    .ConfigureAwait(false);
+                            else if (parts.Length < 3)
+                                await context.ReplyAsync(HttpStatusCode.BadRequest, null, "Expected telemetry type name")
+                                    .ConfigureAwait(false);
+                            else
+                                await HandleApiLogTelem(context, parts[2])
+                                    .ConfigureAwait(false);
+                            return;
                         // GET api/get-propositions
                         // -> json of VotingProposition[]
                         case "get-propositions":
@@ -709,7 +764,7 @@ namespace CM.Server {
                                 CryptoFunctions.RNG(b);
                                 await context.ReplyAsync(HttpStatusCode.OK, null, Convert.ToBase64String(b)).ConfigureAwait(false);
                             } else {
-                                await context.ReplyAsync(HttpStatusCode.BadRequest,null,"Expected a length parameter between 1 and 4096.").ConfigureAwait(false);
+                                await context.ReplyAsync(HttpStatusCode.BadRequest, null, "Expected a length parameter between 1 and 4096.").ConfigureAwait(false);
                             }
                             break;
                     }
@@ -732,10 +787,10 @@ namespace CM.Server {
                 }
                 await Task.Delay(60000).ConfigureAwait(false);
                 if (DHT.Predecessor == null && !hasWarnedOfNoPredecessor) {
-                    Log.Write(this, LogLevel.WARN, 
-                        "### NETWORK PROBLEM ### No predecessor has been established after a minute of running. Please check your NAT/firewall/etc for TCP port {0} access.", 
+                    Log.Write(this, LogLevel.WARN,
+                        "### NETWORK PROBLEM ### No predecessor has been established after a minute of running. Please check your NAT/firewall/etc for TCP port {0} access.",
                         this.Configuration.Port);
-                   hasWarnedOfNoPredecessor = true;
+                    hasWarnedOfNoPredecessor = true;
                 }
             }
         }
@@ -745,8 +800,8 @@ namespace CM.Server {
             var lastPingRandomNode = TimeSpan.Zero;
             _LastMaintenanceLoopTime = Clock.Elapsed;
             string lastError = null;
-            int taskTimeout = 60 * 1000;
-           
+            const int taskTimeout = 60 * 1000;
+
 
             while (_IsRunning) {
                 try {

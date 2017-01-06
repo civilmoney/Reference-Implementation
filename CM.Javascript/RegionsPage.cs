@@ -131,7 +131,7 @@ namespace CM.Javascript {
                         var date = Helpers.DateFromISO8601(data["lastUpdatedUtc"].ToString());
                         revenueRow.H4(SR.LABEL_TIME_LAST_UPDATED + " " + Helpers.DateToISO8601(date));
                         revenueRow.H2(SR.LABEL_RECENT_REVENUE + ":");
-                        revenueRow.H1("").Amount(revenue, prefix: Constants.Symbol);
+                        revenueRow.H1("").Amount(revenue, prefix: Constants.Symbol, roundTo2DP: true);
 
                         //if (revenue == 0)
                         //    div.Div("", String.Format("There is currently no revenue data for {0}.", parts[1]));
@@ -224,7 +224,7 @@ namespace CM.Javascript {
                                     ? Assets.SVG.CircleTick.ToString(16, 16, "#288600")
                                     : Assets.SVG.CircleError.ToString(16, 16, "#cccccc"))
                                     + HtmlEncode(id), url);
-                                row.Div().Amount(decimal.Parse(parts[4]));
+                                row.Div().Amount(decimal.Parse(parts[4]), roundTo2DP: false);
                                 _Results.AppendChild(d);
                                 hadData = true;
                             }

@@ -48,12 +48,18 @@ namespace CM {
             }
         }
 
-        public static HTMLElement Amount(this Node el, decimal num, string prefix = "") {
+        public static HTMLElement Amount(this Node el, decimal num, string prefix = "", bool roundTo2DP = false) {
             var amount = Math.Abs(num);
             var neg = num < 0 ? " - " : "";
+            var decimalComponent = (amount % 1);
+            var decimalComponentStr = decimalComponent.ToString(roundTo2DP ? "0.00" : "0.000000")
+                .Substring(2);
+            decimalComponentStr = decimalComponentStr.TrimEnd(new char[] { '0' });
+            while (decimalComponentStr.Length < 2)
+                decimalComponentStr += "0";
             return el.Amount(prefix,
-                neg + (amount - (amount % 1)).ToString("N0").Replace(",", SR.CHAR_THOUSAND_SEPERATOR),
-                (amount % 1).ToString(SR.CHAR_DECIMAL + "00"));
+                neg + (amount - decimalComponent).ToString("N0").Replace(",", SR.CHAR_THOUSAND_SEPERATOR),
+                SR.CHAR_DECIMAL + decimalComponentStr); //.ToString(SR.CHAR_DECIMAL + new string('0', Math.Min(2, decimalComponent.ToString().Length)))
         }
 
         public static HTMLElement Amount(this Node el, string prefix = "", string num = "", string dec = "") {

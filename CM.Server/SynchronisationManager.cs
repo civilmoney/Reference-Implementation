@@ -1,17 +1,19 @@
 ﻿#region License
-// 
-// Civil Money is free and unencumbered software released into the public domain (unlicense.org), unless otherwise 
+
+//
+// Civil Money is free and unencumbered software released into the public domain (unlicense.org), unless otherwise
 // denoted in the source file.
 //
-#endregion
+
+#endregion License
 
 using CM.Schema;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CM.Server {
@@ -111,6 +113,7 @@ namespace CM.Server {
             public TimeSpan AnnounceAccountsWhenResponsible = TimeSpan.FromMinutes(2);
             public TimeSpan AnnounceAccountsWhenNotResponsible = TimeSpan.FromMinutes(15);
 #else
+
             /// <summary>
             /// Announcement interval for accounts that we're presently responsible for.
             /// </summary>
@@ -128,11 +131,10 @@ namespace CM.Server {
 
             /// <summary>
             /// Announcement interval for accounts that we're no longer responsible for. This should
-            /// be quite long in order to minimise noise on the network. This is a safety feature in 
+            /// be quite long in order to minimise noise on the network. This is a safety feature in
             /// case multiple peers for a particular account all permanently disappear at once.
             /// </summary>
             public TimeSpan AnnounceAccountsWhenNotResponsible = TimeSpan.FromMinutes(60);
-
 
 #endif
 
@@ -147,7 +149,6 @@ namespace CM.Server {
             /// always send the account at least once a day, just for safety.
             /// </summary>
             public TimeSpan RepeatPeerAnnouncementAlwaysEvery = TimeSpan.FromHours(12);
-
 
             /// <summary>
             /// If an account is in a Transient state or can only be located on the original
@@ -193,7 +194,10 @@ namespace CM.Server {
         private ConcurrentDictionary<string, SyncState> _MemCached;
         private ConcurrentDictionary<string, SyncState> _Deferred;
         private ConcurrentDictionary<string, PeerSyncHistory> _PeerSyncHistory;
-        
+
+        private Task _CurrentSyncTask;// for loop task debugging
+        private Task<bool> _CurrentPullTask; // for loop task debugging
+
         private bool _IsRunning;
         private SynchronisationIntervals _Intervals;
         private DistributedHashTable _DHT;
@@ -222,12 +226,11 @@ namespace CM.Server {
                     OnSerialiseSyncState,
                     OnDeserialiseSyncState);
             } catch (Exception ex) {
-
                 log.Write(this, LogLevel.WARN, "Sync database needs reset: " + ex);
                 var ext = new[] { ".htdata", ".htindex", ".htindex-bak" };
-                for(int i=0;i< ext.Length;i++)
-                if (System.IO.File.Exists(syncFile + ext[i]))
-                    System.IO.File.Delete(syncFile + ext[i]);
+                for (int i = 0; i < ext.Length; i++)
+                    if (System.IO.File.Exists(syncFile + ext[i]))
+                        System.IO.File.Delete(syncFile + ext[i]);
 
                 _Persisted = new LinearHashTable<string, SyncState>(
                  syncFile,
@@ -244,8 +247,6 @@ namespace CM.Server {
             _PeerSyncHistory = new ConcurrentDictionary<string, PeerSyncHistory>();
             _Intervals = new SynchronisationIntervals();
         }
-
-  
 
         private void _Store_ObjectModified(IStorable obj) {
             if (obj is Account) {
@@ -291,85 +292,109 @@ namespace CM.Server {
             }
             var queue = new List<KeyValuePair<string, SyncState>>();
             var lastSummaryReport = Clock.Elapsed;
-            while (_IsRunning) {
-                bool didSomething = false;
+            const int taskTimeout = 60 * 1000;
+            try {
+                while (_IsRunning) {
+                    bool didSomething = false;
 
-                // Only sync once we're stable within the DHT network.
-                if (_DHT.StablisedDuration > _Intervals.MinimumDHTStablisedDuration) {
-                    queue.Clear();
-                    foreach (var kp in _MemCached) {
-                        var state = kp.Value;
-                        if (state.Status == SyncStatus.None) {
-                            state.Status = IsCurrentlyResponsible(kp.Key) ? SyncStatus.ResponsibleForAccount
-                                 : SyncStatus.NotResponsibleForAccount;
-                        }
+                    // Only sync once we're stable within the DHT network.
+                    if (_DHT.StablisedDuration > _Intervals.MinimumDHTStablisedDuration) {
+                        queue.Clear();
+                        foreach (var kp in _MemCached) {
+                            var state = kp.Value;
+                            if (state.Status == SyncStatus.None) {
+                                state.Status = IsCurrentlyResponsible(kp.Key) ? SyncStatus.ResponsibleForAccount
+                                     : SyncStatus.NotResponsibleForAccount;
+                            }
 
-                        var interval = state.Status == SyncStatus.NotResponsibleForAccount ? _Intervals.AnnounceAccountsWhenNotResponsible
-                            : _Intervals.AnnounceAccountsWhenResponsible;
+                            var interval = state.Status == SyncStatus.NotResponsibleForAccount ? _Intervals.AnnounceAccountsWhenNotResponsible
+                                : _Intervals.AnnounceAccountsWhenResponsible;
 
-                        if ((DateTime.UtcNow - state.LastAnnounceUtc) > interval
-                            && state.Status != SyncStatus.InProgress
-                            && state.Status != SyncStatus.StorageError
-                            && state.Status != SyncStatus.Enqueued) {
-                            queue.Add(kp);
+                            if ((DateTime.UtcNow - state.LastAnnounceUtc) > interval
+                                && state.Status != SyncStatus.InProgress
+                                && state.Status != SyncStatus.StorageError
+                                && state.Status != SyncStatus.Enqueued) {
+                                queue.Add(kp);
+                            }
                         }
-                    }
-                    if (queue.Count > 0) {
-                        // Sort oldest first
-                        queue.Sort((a, b) => { return a.Value.LastAnnounceUtc.CompareTo(b.Value.LastAnnounceUtc); });
-                        for (int i = 0; i < queue.Count && i < 100; i++) {
-                            var kp = queue[i];
-                            await AnnounceAccount(kp.Key, kp.Value);
-                            didSomething = true;
-                        }
-                        if ((Clock.Elapsed - lastSummaryReport).TotalMinutes >= 1) {
-                            double per = _MemCached.Count != 0 ? queue.Count / (double)_MemCached.Count : 0;
+                        if (queue.Count > 0) {
+                            // Sort oldest first
+                            queue.Sort((a, b) => { return a.Value.LastAnnounceUtc.CompareTo(b.Value.LastAnnounceUtc); });
+                            for (int i = 0; i < queue.Count && i < 100; i++) {
+                                var kp = queue[i];
+                                _CurrentSyncTask = AnnounceAccount(kp.Key, kp.Value);
+                                using (var waitCancel = new CancellationTokenSource()) {
+                                    await Task.WhenAny(_CurrentSyncTask, Task.Delay(taskTimeout, waitCancel.Token));
+                                    waitCancel.Cancel();
+                                }
+                                if (!_CurrentSyncTask.IsCompleted) {
+                                    _Log.Write(this, LogLevel.WARN, "AnnounceAccount {0} timed out.", kp.Key);
+                                }
+                                _CurrentSyncTask = null;
+                                didSomething = true;
+                            }
+                            if ((Clock.Elapsed - lastSummaryReport).TotalMinutes >= 1) {
+                                double per = _MemCached.Count != 0 ? queue.Count / (double)_MemCached.Count : 0;
 
-                            _Log.Write(this, LogLevel.INFO, "Accounts {0}, Queue {1} ({2}), Deferred {3}",
-                               _MemCached.Count.ToString("N0"), queue.Count.ToString("N0"), 
-                               per.ToString("P0"), _Deferred.Count.ToString("N0"));
-                            lastSummaryReport = Clock.Elapsed;
+                                _Log.Write(this, LogLevel.INFO, "Accounts {0}, Queue {1} ({2}), Deferred {3}",
+                                   _MemCached.Count.ToString("N0"), queue.Count.ToString("N0"),
+                                   per.ToString("P0"), _Deferred.Count.ToString("N0"));
+                                lastSummaryReport = Clock.Elapsed;
+                            }
                         }
-                    }
-                    var deferred = _Deferred.ToArray();
-                    int deferredPulls = 0;
-                    foreach (var kp in deferred) {
-                        if (kp.Value.PullDeferalCount >= _Intervals.DeferredRetryIntervals.Length
-                            || (DateTime.UtcNow - kp.Value.LastPullUtc) > _Intervals.DeferredRetryIntervals[kp.Value.PullDeferalCount]) {
-                            if (kp.Value.Status != SyncStatus.InProgress
-                                && kp.Value.Status != SyncStatus.Enqueued) {
-                                if (kp.Value.RemoteSyncAnnounce != null) {
-                                    didSomething = true;
-                                    kp.Value.Status = SyncStatus.Enqueued;
-                                    if (await PullAccount(kp.Key, kp.Value, kp.Value.RemoteSyncAnnounce)) {
+                        var deferred = _Deferred.ToArray();
+                        int deferredPulls = 0;
+                        foreach (var kp in deferred) {
+                            if (kp.Value.PullDeferalCount >= _Intervals.DeferredRetryIntervals.Length
+                                || (DateTime.UtcNow - kp.Value.LastPullUtc) > _Intervals.DeferredRetryIntervals[kp.Value.PullDeferalCount]) {
+                                if (kp.Value.Status != SyncStatus.InProgress
+                                    && kp.Value.Status != SyncStatus.Enqueued) {
+                                    if (kp.Value.RemoteSyncAnnounce != null) {
+                                        didSomething = true;
+                                        kp.Value.Status = SyncStatus.Enqueued;
+                                        _CurrentPullTask = PullAccount(kp.Key, kp.Value, kp.Value.RemoteSyncAnnounce);
+                                        using (var waitCancel = new CancellationTokenSource()) {
+                                            await Task.WhenAny(_CurrentPullTask, Task.Delay(taskTimeout, waitCancel.Token));
+                                            waitCancel.Cancel();
+                                        }
+                                        if (_CurrentPullTask.IsCompleted
+                                            && _CurrentPullTask.Result) {
+                                            SyncState tmp;
+                                            _Deferred.TryRemove(kp.Key, out tmp);
+                                        }
+                                        _CurrentPullTask = null;
+                                    } else {
                                         SyncState tmp;
                                         _Deferred.TryRemove(kp.Key, out tmp);
                                     }
-                                } else {
-                                    SyncState tmp;
-                                    _Deferred.TryRemove(kp.Key, out tmp);
+                                    Persist(kp.Key, kp.Value);
+                                    if (deferredPulls++ == 100)
+                                        break;
                                 }
-                                Persist(kp.Key, kp.Value);
-                                if (deferredPulls++ == 100)
-                                    break;
                             }
                         }
                     }
-                }
 
-                if (!didSomething)
-                    await Task.Delay(5000);
-                else
-                    _Persisted.Flush();
+                    if (!didSomething)
+                        await Task.Delay(5000);
+                    else
+                        _Persisted.Flush();
+                }
+            } catch (Exception ex) {
+                _Log.Write(this, LogLevel.FAULT, "SynchronisationManager has crashed: {0}", ex);
+            } finally {
+                _IsRunning = false;
             }
         }
-        bool IsCurrentlyResponsible(string id) {
+
+        private bool IsCurrentlyResponsible(string id) {
             for (int i = 0; i < Constants.NumberOfCopies; i++) {
                 if (_DHT.IsCurrentlyResponsible(Helpers.FromBigEndian(Helpers.DHT_ID("copy" + (i + 1) + id))))
                     return true;
             }
             return false;
         }
+
         private async Task<bool> AnnounceAccount(string accountID, SyncState state) {
             SyncAnnounce sync = state.LocalSyncAnnounce;
             try {
@@ -400,7 +425,6 @@ namespace CM.Server {
                     // if not, do I have a newer copy than the network?
                     var a = await _Store.TryFindOnNetwork<Account>(Constants.PATH_ACCNT + "/" + accountID);
                     if (a != null) {
-
                         if (sync.UpdatedUtc == a.UpdatedUtc) {
                             // Mine's the same as the network's. Don't bother announcing.
                             return false;
@@ -469,7 +493,7 @@ namespace CM.Server {
         }
 
         private bool DoesAccountInfoNeedUpdated(SyncAnnounce myCopy, SyncAnnounce peersCopy) {
-            return myCopy == null 
+            return myCopy == null
                 || myCopy.UpdatedUtc < peersCopy.UpdatedUtc;
         }
 
@@ -519,16 +543,15 @@ namespace CM.Server {
         /// True if the sync completed successfully. Otherwise false, which indicates that the pull
         /// should be deferred to another time.
         /// </returns>
-        private async Task<bool> PullAccount(string accountID, SyncState state, SyncAnnounce peersCopy) {  
+        private async Task<bool> PullAccount(string accountID, SyncState state, SyncAnnounce peersCopy) {
             CMResult hr;
             lock (state) {
                 if (state.Status == SyncStatus.InProgress)
                     return false;
                 state.Status = SyncStatus.InProgress;
             }
-    
-            try {
 
+            try {
                 SyncAnnounce myCopy = state.LocalSyncAnnounce;
 
                 // make sure the account still exists and hasn't been deleted off disk
@@ -537,11 +560,11 @@ namespace CM.Server {
                     _Log.Write(this, LogLevel.INFO, "Account {0} re-syncing due to loss.", accountID);
                     myCopy = null;
                 }
-                
+
                 if (myCopy == null) {
                     GenerateSyncAnnounce(accountID, out myCopy);
                     state.LocalSyncAnnounce = myCopy;
-                } 
+                }
 
                 if (DoesAccountInfoNeedUpdated(myCopy, peersCopy)) {
                     // We set to true when the deferred attempts have all failed
@@ -609,7 +632,6 @@ namespace CM.Server {
 
                     System.Diagnostics.Debug.Assert(a != null, "Account shouldn't be null here.");
                     if ((myCopy == null || myCopy.UpdatedUtc < a.UpdatedUtc)) {
-
                         // Storage.Put will validate the account signatures etc
                         var res = await _Store.Put(a);
                         hr = res.Code;
@@ -619,7 +641,7 @@ namespace CM.Server {
                         }
                         // Storage.Put will also do a final QueryCommit against the network, prior to commit
                         // if we have a corroborated network copy.
-                        hr = await _Store.Commit(res.Token, 
+                        hr = await _Store.Commit(res.Token,
                             canSkipNetworkCorroboration,
                             sendPushNotifications: false);
                         if (hr != CMResult.S_OK) {
@@ -722,7 +744,6 @@ namespace CM.Server {
                 TransactionIndex mine;
                 if (!localTrans.TryGetValue(toSync[i].ID, out mine)
                     || mine.UpdatedUtc < t.UpdatedUtc) {
-                   
                     // Put will validate the transaction
                     var res = await _Store.Put(t);
                     CMResult hr = res.Code;
@@ -731,7 +752,7 @@ namespace CM.Server {
                         continue;
                     }
                     // Store will do a final QueryCommit against the network, prior to commit.
-                    hr = await _Store.Commit(res.Token, 
+                    hr = await _Store.Commit(res.Token,
                         canSkipNetworkCorroboration,
                         sendPushNotifications: false);
                     if (hr != CMResult.S_OK) {
@@ -800,14 +821,13 @@ namespace CM.Server {
                 }
 
                 if (v == null) {
-                    _Log.Write(this, LogLevel.WARN, "Vote {0} for {1} is not on the network.", 
+                    _Log.Write(this, LogLevel.WARN, "Vote {0} for {1} is not on the network.",
                         toSync[i].PropositionID, accountID);
                     continue;
                 }
 
                 if (toSync[i].PropositionID != v.PropositionID
                     || toSync[i].VoterID != v.VoterID) {
-
                     System.Diagnostics.Debug.Assert(false, "Mismatched vote IDs should never happen.");
 
                     _Log.Write(this, LogLevel.WARN, "Vote '{0}' for {1} inexplicably came in as '{2}'.",
@@ -821,7 +841,6 @@ namespace CM.Server {
                 VoteIndex mine;
                 if (!localVotes.TryGetValue(toSync[i].PropositionID, out mine)
                     || mine.UpdatedUtc < v.UpdatedUtc) {
-
                     // Put will validate the vote
                     var res = await _Store.Put(v);
                     CMResult hr = res.Code;
@@ -919,9 +938,8 @@ namespace CM.Server {
         }
 
         private List<string> ListLocalItemUpdatedUTCs(string id, string type) {
-
             if (type != Constants.PATH_TRANS
-                && type != Constants.PATH_VOTES) 
+                && type != Constants.PATH_VOTES)
                 throw new NotImplementedException();
 
             var ar = new List<string>();
@@ -955,6 +973,7 @@ namespace CM.Server {
 
             return ar;
         }
+
         private List<string> ListLocalItems(string id, string type) {
             var ar = new List<string>();
             Schema.ListResponse res;
@@ -962,7 +981,7 @@ namespace CM.Server {
             uint total = 0;
             do {
                 var hr = _Store.List(new Schema.ListRequest() {
-                    Request = new Message.RequestHeader("LIST","", "ACCNT/" + id + "/" + type),
+                    Request = new Message.RequestHeader("LIST", "", "ACCNT/" + id + "/" + type),
                     UpdatedUtcFromInclusive = Constants.MinimumSaneDateTime,
                     UpdatedUtcToExclusive = DateTime.UtcNow.AddDays(1),
                     Sort = "UTC ASC",
@@ -1043,7 +1062,7 @@ namespace CM.Server {
             Deferring,
             Enqueued
         }
-        
+
         private class SyncState {
 
             /// <summary>
@@ -1052,11 +1071,13 @@ namespace CM.Server {
             public byte Version = 2;
 
             public byte PullDeferalCount;
+
             /// <summary>
             /// Defaults to UtcNow so that announcements don't happen as soon as
             /// new accounts arrive.
             /// </summary>
             public DateTime LastAnnounceUtc;
+
             public SyncAnnounce RemoteSyncAnnounce;
             public SyncAnnounce LocalSyncAnnounce;
             public DateTime LastPullUtc;
@@ -1109,17 +1130,20 @@ namespace CM.Server {
         /// we've announced a particular version of an account to. We will
         /// announce at most 5 times.
         /// </summary>
-        class PeerSyncHistory {
+        private class PeerSyncHistory {
+
             public class Destination {
                 public string Endpoint;
                 public int SentCount;
                 public TimeSpan LastSent;
             }
+
             public List<Destination> Destinations = new List<Destination>();
             public byte[] TransactionsHash;
             public byte[] VotesHash;
             public DateTime UpdatedUtc;
-            object _Sync = new object();
+            private object _Sync = new object();
+
             /// <summary>
             /// Determines whether or not an announcements should be made to the specified
             /// peer based on current SynchronisationIntervals.
@@ -1136,6 +1160,7 @@ namespace CM.Server {
                     return true;
                 }
             }
+
             /// <summary>
             /// Increments the successful send counter for the specified end point.
             /// </summary>
@@ -1156,6 +1181,7 @@ namespace CM.Server {
                     });
                 }
             }
+
             /// <summary>
             /// Determines whether the account has changed, and if so, resets
             /// the history so that an announcement will be made to everybody.

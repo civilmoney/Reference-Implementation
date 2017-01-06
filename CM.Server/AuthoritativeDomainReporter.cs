@@ -54,6 +54,7 @@ namespace CM.Server {
         private TimeSpan _LastVotePoll;
         private Log _Log;
         private LinearHashTable<string, string> _Persisted;
+
         static readonly Newtonsoft.Json.JsonSerializerSettings _JsonSettings = new Newtonsoft.Json.JsonSerializerSettings() {
             ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
         };
@@ -76,7 +77,9 @@ namespace CM.Server {
                 Storage.Container.OnSerialiseKey,
                 Storage.Container.OnDeserialiseKey);
 
-            LoadVoteTallys(); 
+            LoadVoteTallys();
+
+            _Telem = new TelemetryReport();
         }
         
         static string Serialize<T>(T obj) {
@@ -139,6 +142,9 @@ namespace CM.Server {
                         } else
                             _Log.Write(this, LogLevel.WARN, "Vote compilation is taking {0}", (Clock.Elapsed - _LastVoteCompile));
                     }
+
+                    // SUBMIT TELEMETRY
+                    _Telem?.Flush(_Log);
                 }
 
             } catch (Exception ex) {

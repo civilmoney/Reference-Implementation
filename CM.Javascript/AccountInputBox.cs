@@ -133,7 +133,7 @@ namespace CM.Javascript {
                             _Rep.Reputation(rep, true, false).ClassName="glyph";
                             _Rep.AmountReputation(rr);
                             _Rep.Reputation(rep, false, true).ClassName = "lab";
-                            _Bal.Amount(Helpers.CalculateAccountBalance(calc.RecentCredits.Value, calc.RecentDebits.Value), prefix: Constants.Symbol);
+                            _Bal.Amount(Helpers.CalculateAccountBalance(calc.RecentCredits.Value, calc.RecentDebits.Value), prefix: Constants.Symbol, roundTo2DP: true);
                            
                         }
                         if (_ShowGlyph)

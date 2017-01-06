@@ -369,9 +369,18 @@ namespace CM.Server {
             SslStream ssl;
             var c = new TcpClient();
             c.SendTimeout = 10000;
+            const int connectTimeout = 5 * 1000;
+         
             try {
-          
-                await c.ConnectAsync(ep.Address, ep.Port);
+                var connectTask = c.ConnectAsync(ep.Address, ep.Port);
+                using (var waitCancel = new CancellationTokenSource()) {
+                    await Task.WhenAny(connectTask, Task.Delay(connectTimeout, waitCancel.Token));
+                    waitCancel.Cancel();
+                }
+                if (!connectTask.IsCompleted || !c.Connected) {
+                    c.Dispose();
+                    return null;
+                }
                 // Authoritative civil.money servers will not have a matching
                 ssl = new SslStream(c.GetStream(), false, (sender, cert, chain, errors) => {
                     return cert.Subject.IndexOf("CN=*." + DNS.UNTRUSTED_DOMAIN + ",") > -1

@@ -30,7 +30,7 @@ namespace CM.Javascript {
 
         public override string Title {
             get {
-                return SR.LABEL_JOIN_THE_REVOLUTION;
+                return SR.LABEL_CREATE_MY_ACCOUNT;
             }
         }
 
@@ -111,7 +111,7 @@ namespace CM.Javascript {
                 + SR.HTML_CIVIL_MONEY_HONOUR_CODE);
 
             form.H3(" ");
-            var button = form.Div().Button(SR.LABEL_JOIN_THE_REVOLUTION);
+            var button = form.Div().Button(SR.LABEL_CREATE_MY_ACCOUNT);
             button.Style.Display = Display.None;
             pass2.OnChange = (e) => {
                 if (pass1.Value == pass2.Value) {

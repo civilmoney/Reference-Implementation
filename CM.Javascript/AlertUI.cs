@@ -186,7 +186,7 @@ namespace CM.Javascript {
                            Assets.SVG.CircleTick.ToString(16, 16, "#288600")
                            : Assets.SVG.Warning.ToString(16, 16, "#cccccc"))
                            + " " + item.ConsensusCount.ToString() + " " + SR.LABEL_CONFIRMATIONS);
-                        numbers.H2("").Amount(item.Amount, prefix: Constants.Symbol);
+                        numbers.H2("").Amount(item.Amount, prefix: Constants.Symbol, roundTo2DP: false);
                         var ti = new TransactionInfo(div, item, false);
                         ti.OnButtonClick = Dismiss;
                     } else {

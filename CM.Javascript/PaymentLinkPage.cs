@@ -106,7 +106,7 @@ namespace CM.Javascript {
 
             _AmountFeedback = new Feedback(left);
 
-            right.H3(Assets.SVG.Tag.ToString(16, 16, "#000000") + " " + SR.LABEL_TAG_ORDER_NO);
+            right.H3(Assets.SVG.Tag.ToString(16, 16, "#000000") + " " + SR.LABEL_TAG);
             _Tag = right.TextBox("");
             _Tag.Placeholder = "(" + SR.LABEL_OPTIONAL + ")";
             _Tag.AddEventListener(EventType.KeyUp, (e) => {

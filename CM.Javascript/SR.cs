@@ -60,8 +60,8 @@ namespace CM.Javascript {
         /// <summary>Go</summary>
         public static string LABEL_GO;
 
-        /// <summary>Join the revolution</summary>
-        public static string LABEL_JOIN_THE_REVOLUTION;
+        /// <summary>Create my account</summary>
+        public static string LABEL_CREATE_MY_ACCOUNT;
 
         /// <summary>Please Select</summary>
         public static string LABEL_PLEASE_SELECT;
@@ -502,13 +502,6 @@ namespace CM.Javascript {
         /// <summary>Install a Server</summary>
         public static string TITLE_INSTALL_A_SERVER;
 
-        /// <summary>
-        /// The more servers, the stronger and more resilient the Civil Money network can become.
-        /// If you are in possession of a Windows or Linux server with a permanent IP address and
-        /// reliable high bandwidth network connection, please feel free to install an instance
-        /// of the server.
-        /// </summary>
-        public static string LABEL_INSTALL_A_SERVER_INTRO;
 
         /// <summary>Download</summary>
         public static string LABEL_DOWNLOAD;
@@ -666,7 +659,7 @@ namespace CM.Javascript {
         /// <summary>
         /// Tag/Order #
         /// </summary>
-        public static string LABEL_TAG_ORDER_NO;
+        public static string LABEL_TAG;
 
         /// <summary>
         /// Transaction created successfully.
