@@ -1,6 +1,7 @@
 About Civil Money
 ===========
-[Civil Money](https://civil.money) is an open source debt-free monetary framework which aims to become a unified global currency that can guide us towards a more civilised society. It includes features such as:
+[Civil Money](https://civil.money) is an open source debt-free monetary framework which aims to become a unified global currency that can guide us toward a more civilised society. It includes features such as:
+
 - A generous universal basic income. 
 - A democratic voting process for any fundamental changes to the system.
 - A low barrier to entry.
