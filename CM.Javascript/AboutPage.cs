@@ -7,6 +7,7 @@
 
 #endregion License
 
+using Bridge.Html5;
 using System;
 
 namespace CM.Javascript {
@@ -35,15 +36,15 @@ namespace CM.Javascript {
                 new Box(
                     SR.HTML_ABOUT_1_1,
                     SR.HTML_ABOUT_1_2,
-                    null),
+                    null,true),
                  new Box(
                     SR.HTML_ABOUT_2_1,
                     SR.HTML_ABOUT_2_2,
-                    null),
+                    "work", true),
                  new Box(
                      SR.HTML_ABOUT_3_1,
                      SR.HTML_ABOUT_3_2,
-                    null),
+                    "whatif", true),
                   new Box(
                     SR.HTML_ABOUT_4_1,
                     SR.HTML_ABOUT_4_2,
@@ -94,7 +95,7 @@ namespace CM.Javascript {
                     null),
                    new Box(
                     SR.HTML_ABOUT_15_1,
-                    "<a href=\"/register\">https://civil.money/register</a>",
+                    null,
                     null),
             };
 
@@ -102,6 +103,7 @@ namespace CM.Javascript {
             string svgHtml = Bridge.Browser.IsIE ? "<object type=\"image/svg+xml\" data=\"/{0}.svg\" /></object>"
                 : "<img type=\"image/svg+xml\" src=\"/{0}.svg\" />";
 
+            HTMLDivElement finalParagraph = null;
             for (int i = 0; i < boxes.Length; i++) {
                 var b = boxes[i];
                 var block = Element.Div("block block-" + i);
@@ -114,9 +116,15 @@ namespace CM.Javascript {
                     text.Div("pic", String.Format(svgHtml, b.Icon));
                 else if (b.Icon != null && (i % 2) != 0 && !b.FullRowImage)
                     row.Div("cell-half").Div("pic", String.Format(svgHtml, b.Icon));
+                finalParagraph = block.Div("row");
                 if (b.Paragraph != null)
-                    block.Div("row").H2(b.Paragraph);
+                    finalParagraph.H2(b.Paragraph);
             }
+
+            // finalParagraph register link, but with javascript navigation to
+            // retain ReturnPath
+            finalParagraph.H2("").A("https://civil.money/register", "/register");
+
         }
 
         private class Box {

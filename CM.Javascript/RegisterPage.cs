@@ -43,15 +43,16 @@ namespace CM.Javascript {
         public override void Build() {
             Element.ClassName = "registerpage";
             var form = Element.Div();
-            form.H1(SR.TITLE_REGISTER);
-            form.Div(null, SR.LABEL_REGISTER_INTRO);
+            form.H1(SR.LABEL_CREATE_MY_ACCOUNT);
+            form.Div(null, SR.HTML_REGISTER_INTRO);
+            form.Div(null, "&nbsp;");
             form.H3(SR.LABEL_ACCOUNT_NAME);
             var nameDiv = form.Div();
             var accountName = nameDiv.TextBox("");
 
             accountName.AddEventListener(EventType.KeyPress, (Event e) => {
                 var ev = (KeyboardEvent)e;
-                if (ev.ShiftKey || (ev.KeyCode != '-' && ev.KeyCode != '.' && !char.IsLetterOrDigit((char)ev.KeyCode))) {
+                if ((ev.KeyCode != '-' && ev.KeyCode != '.' && !char.IsLetterOrDigit((char)ev.KeyCode))) {
                     e.PreventDefault();
                     e.StopPropagation();
                 }

@@ -95,7 +95,15 @@ namespace CM.Server {
             try {
                 if ((Clock.Elapsed - _LastNetworkPoll) > _Intervals.NetworkPoll
                     && !NetworkScan.IsInProgress) {
-                    await NetworkScan.Update(_DHT, Constants.Seeds, token);
+                    var scanTask = NetworkScan.Update(_Log, _DHT, Constants.Seeds, token);
+                    using (var waitCancel = new CancellationTokenSource()) {
+                        await Task.WhenAny(scanTask, Task.Delay((int)_Intervals.NetworkPoll.TotalMilliseconds, waitCancel.Token));
+                        waitCancel.Cancel();
+                    }
+                    if (!scanTask.IsCompleted) {
+                        _Log.Write(this, LogLevel.WARN, "NetworkScan " + scanTask.Id + " timed out (" + scanTask.Status + "). "+ scanTask.Exception);
+                        NetworkScan.IsInProgress = false;
+                    }
                     _LastNetworkPoll = Clock.Elapsed;
                 }
 

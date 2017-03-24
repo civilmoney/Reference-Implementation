@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <DefineConstants>TRACE</DefineConstants>
+    <DebugType>portable</DebugType>
+    <AssemblyName>CM.Server</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PackageId>CM.Server</PackageId>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <RuntimeFrameworkVersion>1.1.1</RuntimeFrameworkVersion>
+    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50;portable-net45+win8</PackageTargetFallback>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <StartupObject />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>True</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="untrusted-server-pass12345678.pfx;..\CM.Javascript\www\webworkers.js;..\CM.Javascript\www\default.htm;..\CM.Javascript\www\CM.Min.js;..\CM.Javascript\www\cm.min.css;..\CM.Javascript\www\cmlogo.svg;..\CM.Javascript\www\change.svg;..\CM.Javascript\www\civilmoneylogos.svg;..\CM.Javascript\www\datadistribution.svg;..\CM.Javascript\www\demurrage.svg;..\CM.Javascript\www\disputes.svg;..\CM.Javascript\www\hardtimes.svg;..\CM.Javascript\www\nobanks.svg;..\CM.Javascript\www\nodebt.svg;..\CM.Javascript\www\taxation.svg;..\CM.Javascript\www\ubi.svg;..\CM.Javascript\www\valuetime.svg;..\CM.Javascript\www\voting.svg;..\CM.Javascript\www\whatif.svg;..\CM.Javascript\www\work.svg;..\CM.Javascript\www\favicon.ico" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+    <ProjectReference Include="..\CM\CM.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
+  </ItemGroup>
+
+</Project>

@@ -26,7 +26,7 @@ namespace CM.Server {
             Peers = new System.Collections.Concurrent.ConcurrentDictionary<string, string>();
         }
 
-        public static bool IsInProgress { get; private set; }
+        public static bool IsInProgress { get; set; }
 
         /// <summary>
         /// The amount time it's taking/taken to scan the entire
@@ -46,7 +46,7 @@ namespace CM.Server {
         /// </summary>
         public static System.Collections.Concurrent.ConcurrentDictionary<string, string> Peers { get; private set; }
 
-        public static async Task Update(DistributedHashTable dht, CMSeed[] seeds, CancellationToken token) {
+        public static async Task Update(Log log, DistributedHashTable dht, CMSeed[] seeds, CancellationToken token) {
             if (IsInProgress)
                 return;
 
@@ -120,6 +120,8 @@ namespace CM.Server {
                         Peers.TryRemove(originalList[i], out succ);
                     }
                 }
+            } catch (Exception ex) {
+                log.Write(null, LogLevel.FAULT, "NetworkScan failed: " + ex);
             } finally {
                 _LastEndTime = Clock.Elapsed;
                 IsInProgress = false;

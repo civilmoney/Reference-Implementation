@@ -50,7 +50,7 @@ namespace CM.Server {
             /// </summary>
             public void Log(string path, string referrer, string lang) {
                 if (!String.IsNullOrWhiteSpace(path)) {
-                    path = path.ToLower().Trim();
+                    path = path.Trim();
                     int v;
                     _Paths.TryGetValue(path, out v);
                     _Paths[path] = ++v;

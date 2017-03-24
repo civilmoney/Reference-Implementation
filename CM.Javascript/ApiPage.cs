@@ -104,11 +104,11 @@ Governing authority accounts for every geographical region can be created for in
 <p>Every peer holds a connection to a <code>predecessor</code> and <code>successor</code>. Thus, the network is basically a massive circular daisy chain. In-memory lookup tables assist in more efficiently resolving the responsible peer for any given <code>DHT_ID</code> by reducing the number of hops.</p>
 <p>Each <abbr title=""Distributed Hash Table"">DHT</abbr> peer is responsible for numerical <code>DHT_IDs</code> landing in between itself and its <code>successor</code>.</p>
 <p>Account records are stored on the network at:</p>
-<pre><code>Server #1 = DHT_ID(&quot;copy1&quot; + AccountID)
-Server #2 = DHT_ID(&quot;copy2&quot; + AccountID)
-Server #3 = DHT_ID(&quot;copy3&quot; + AccountID)
-Server #4 = DHT_ID(&quot;copy4&quot; + AccountID)
-Server #5 = DHT_ID(&quot;copy5&quot; + AccountID)
+<pre><code>Server #1 = DHT_ID(&quot;copy1&quot; + LOWER(AccountID))
+Server #2 = DHT_ID(&quot;copy2&quot; + LOWER(AccountID))
+Server #3 = DHT_ID(&quot;copy3&quot; + LOWER(AccountID))
+Server #4 = DHT_ID(&quot;copy4&quot; + LOWER(AccountID))
+Server #5 = DHT_ID(&quot;copy5&quot; + LOWER(AccountID))
 </code></pre>
 <p>Each of those servers will <em>independently</em> corroborate any <code>PUT</code> action with its own <abbr title=""Distributed Hash Table"">DHT</abbr>_ID resolution. When enough servers meeting the constant <code>MINIMUM-COPIES-REQUIRED</code> are corroborated, only then can an account, transaction or vote record be committed.</p>
 <h3><a id=""All_client_and_interpeer_communication_is_performed_over_HTTP_Secure_WebSockets_WSS_122""></a>All client and inter-peer communication is performed over HTTP Secure WebSockets (WSS.)</h3>

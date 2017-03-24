@@ -44,7 +44,7 @@ namespace CM.Javascript {
             _Top = Element.Div("top");
             _Feedback = new Feedback(_Top.Div("row margins"));
            
-            _Top.Div("row margins").H1(HtmlEncode(_ID));
+            var title = _Top.Div("row margins").H1(HtmlEncode(_ID));
             var prog = new ServerProgressIndicator(_Top);
             if (!Helpers.IsIDValid(_ID)) {
                 _Feedback.Set(
@@ -54,10 +54,10 @@ namespace CM.Javascript {
 
                 return;
             }
-           // _Feedback.Set(SVG.Wait, FeedbackType.Default,
+            // _Feedback.Set(SVG.Wait, FeedbackType.Default,
             //       SR.LABEL_LOADING_PLEASE_WAIT);
+            
 
-           
             if (Prefetched != null && Prefetched.ID == _ID) {
                 _Account = Prefetched;
                 Prefetched = null;
@@ -75,6 +75,9 @@ namespace CM.Javascript {
                 {
                     var r = sender as AsyncRequest<FindAccountRequest>;
                     _Account = r.Item.Output;
+                    _ID = _Account.ID; // Correct casing
+                    title.InnerHTML = HtmlEncode(_ID);
+
                     if (_Account == null || !_Account.Response.IsSuccessful) {
                         var res = r.Result;
                         if (res == CMResult.S_OK)

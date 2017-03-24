@@ -733,9 +733,9 @@ namespace CM.Server {
                     continue;
                 }
 
-                System.Diagnostics.Debug.Assert(toSync[i].ID == t.ID, "Mismatched IDs should never happen.");
-
-                if (toSync[i].ID != t.ID) {
+                System.Diagnostics.Debug.Assert(String.Compare(toSync[i].ID, t.ID, true)==0, "Mismatched IDs should never happen.");
+              
+                if (String.Compare(toSync[i].ID, t.ID, true) != 0) {
                     _Log.Write(this, LogLevel.WARN, "Transaction {0} for {1} inexplicably came in as {2}.", toSync[i].ID, accountID, t.ID);
                     continue;
                 }

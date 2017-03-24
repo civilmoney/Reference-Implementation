@@ -62,10 +62,10 @@ namespace CM.Schema {
 
         /// <summary>
         /// A user-chosen unique account ID or name. Naming rules:
-        /// - Account IDs must match the regular expression ^[\p{Lo}|\p{Ll}][\p{Lo}|\p{Ll}|0-9|\.|\-]{2,47}$
-        /// - That is, starts with a letter, lower-case only. Period '.' and dash '-' are allowed. Between 3 and 48 characters in length.
+        /// - Account IDs must match the regular expression ^[\p{L}|\p{Mn}|UnicodeRanges][\p{L}|\p{Mn}|UnicodeRanges|0-9|\-]{2,47}$
+        /// - That is, starts with a letter. Period '.' and dash '-' are allowed. Between 3 and 48 characters in length.
         /// - The size of ID must be &lt;= 48 UTF-8 bytes. This means that the 'perceived' maximum length is less than 48 if non-ASCII character ranges are used.
-        /// - Account IDs must be lower-case, for consistency and disambiguation reasons.
+        /// - Account IDs are case in-sensitive during lookup.
         /// - Account IDs must be rejected if equal to an ISO-31662 code and no GOVERNING-AUTHORITY attribute is present. These IDs are reserved for governing authorities.
         /// - The ID cannot be changed.
         /// </summary>

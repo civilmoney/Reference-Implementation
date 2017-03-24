@@ -619,7 +619,7 @@ namespace CM.Server {
             // accounts into folders based on their first two base64 characters,
             // that way we don't end up with millions of containers all in
             // one folder.
-            var b64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(id))
+            var b64 = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(id.ToLower()))
                 .Replace("/", "_");
             return Constants.PATH_ACCNT + "/" + b64.Substring(0, 2) + "/" + b64;
         }
@@ -827,10 +827,10 @@ namespace CM.Server {
             }
 
             var a = new Account(data);
-            System.Diagnostics.Debug.Assert(a.ID == id,
+            System.Diagnostics.Debug.Assert(String.Compare(a.ID, id,true)==0,
                 String.Format("ID and data store mismatch. This must NEVER happen. Expected '{0}', got '{1}'.",
                 id, a.ID));
-            if (a.ID != id)
+            if (String.Compare(a.ID, id, true) != 0)
                 return null;
 
             // We validate our own data. Civil Money trusts nothing.
@@ -860,7 +860,7 @@ namespace CM.Server {
             var keys = container.GetKeys();
             for (int i = 0; i < keys.Length; i++) {
                 var k = keys[i];
-                if (k.StartsWith(path)) {
+                if (k.StartsWith(path, StringComparison.OrdinalIgnoreCase)) {
                     var time = Helpers.DateFromISO8601(k.Substring(path.Length));
                     if (time > updatedUtc) {
                         updatedUtc = time;

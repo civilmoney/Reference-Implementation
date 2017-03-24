@@ -82,7 +82,7 @@ namespace CM {
          /// <summary>
         /// Returns true if the ID is valid. The actual validation should be:
         /// <para>
-        /// ^[\p{L}|\p{Mn}][\p{L}|\p{Mn}|0-9|\.|\-]{2,47}$
+        /// ^[\p{Ll}|\p{Mn}][\p{Ll}|\p{Mn}|0-9|\.|\-]{2,47}$
         /// </para>
         /// </summary>
         public static bool IsIDValid(string id) {
@@ -201,7 +201,7 @@ namespace CM {
         }
 
         public static byte[] DHT_ID(string value) {
-            var b = Cryptography.MD5.ComputeHash(Encoding.UTF8.GetBytes(value)).Take(Constants.DHTIDSize).ToArray();
+            var b = Cryptography.MD5.ComputeHash(Encoding.UTF8.GetBytes(value.ToLower())).Take(Constants.DHTIDSize).ToArray();
             return b;
         }
         public static byte[] DHT_IDForEndpoint(string ipAddressAndPort) {

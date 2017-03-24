@@ -35,7 +35,7 @@ namespace CM.Javascript {
                 accountName.Placeholder = watermark??SR.LABEL_ACCOUNT_NAME;
                 accountName.AddEventListener(EventType.KeyPress, (Event e) => {
                     var ev = (KeyboardEvent)e;
-                    if (ev.ShiftKey || (ev.KeyCode != '-' && !char.IsLetterOrDigit((char)ev.KeyCode))) {
+                    if ((ev.KeyCode != '-' && !char.IsLetterOrDigit((char)ev.KeyCode))) {
                         e.PreventDefault();
                         e.StopPropagation();
                         if (ev.KeyCode == 13) {

@@ -73,7 +73,7 @@ namespace CM.Javascript {
         public static string LABEL_REGION;
 
         /// <summary>Civil Money is not like traditional online banking systems...</summary>
-        public static string LABEL_REGISTER_INTRO;
+        public static string HTML_REGISTER_INTRO;
 
         /// <summary>Secret pass phrase</summary>
         public static string LABEL_SECRET_PASS_PHRASE;

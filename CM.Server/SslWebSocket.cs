@@ -53,6 +53,11 @@ namespace CM.Server {
     /// </summary>
     /// <remarks>permessage-deflate is not currently tested/supported.</remarks>
     public class SslWebSocket : IDisposable {
+        /// <summary>
+        /// No message will ever take more than a minute unless something is really wrong.
+        /// </summary>
+        private const int WriteTimeoutMilliseconds = 1000 * 60; 
+
         private const string DEFLATE_EXTENSION = "permessage-deflate";
 #pragma warning disable CS0649
         private bool _IsDeflateEnabled;
@@ -246,7 +251,14 @@ namespace CM.Server {
             var code = type == WebSocketMessageType.Binary ? OpCode.Binary
                 : type == WebSocketMessageType.Text ? OpCode.Text
                 : OpCode.Close;
-            await Write(code, buffer.Array, buffer.Offset, buffer.Count, endOfMessage, token);
+            var writeTask = Write(code, buffer.Array, buffer.Offset, buffer.Count, endOfMessage, token);
+            using (var waitCancel = new CancellationTokenSource()) {
+                await Task.WhenAny(writeTask, Task.Delay(WriteTimeoutMilliseconds, waitCancel.Token));
+                waitCancel.Cancel();
+            }
+            if (!writeTask.IsCompleted) {
+                throw new TimeoutException("WebSocket send time-out exceeded.");
+            }
         }
 
         internal async Task<bool> TryNegotiateAsync(string demandProtocol, string demandOrigin, System.Threading.CancellationToken token) {

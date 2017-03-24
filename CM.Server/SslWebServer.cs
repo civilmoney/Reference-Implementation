@@ -206,7 +206,7 @@ namespace CM.Server {
                    OnRemoteCertificateValidation,
                    OnLocalCertificateValidation,
                    EncryptionPolicy.RequireEncryption);
-
+                
                 await ssl.AuthenticateAsServerAsync(_ServerCert, false,
                                                     System.Security.Authentication.SslProtocols.Tls
                                                     | System.Security.Authentication.SslProtocols.Tls11
@@ -232,7 +232,7 @@ namespace CM.Server {
             var ctx = new SslWebContext(ssl, c, this, (IPEndPoint)c.Client.RemoteEndPoint);
             _ConnectedClients[ctx] = null;
 
-            while (ssl.IsAuthenticated && c.Connected && ctx.IsConnected) {
+            while (ctx.IsConnected) {
                 try {
                     var readTask = ssl.ReadAsync(ctx.ReadBuffer, 0, ctx.ReadBuffer.Length, cancel.Token);
                     var timeoutTask = Task.Delay(30 * 1000);
@@ -272,8 +272,10 @@ namespace CM.Server {
                                 }
                             }
 
+                            ctx.ReadPos += 2;// skip \r\n
+
                             if (ctx.WebSocket != null) {
-                                ctx.ReadPos += 2;// skip \r\n
+                               
                                 Debug.Assert(ctx.ReadPos == ctx.ReadLength);
                                 if (await ctx.WebSocket.TryNegotiateAsync(DemandWebSocketProtocol, DemandWebSocketOrigin, cancel.Token)
                                     .ConfigureAwait(false)) {

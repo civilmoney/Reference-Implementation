@@ -1,12 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.4
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CM", "CM\CM.csproj", "{D637B1AC-6A17-44D9-87FF-661D8CEF707F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CM.Javascript", "CM.Javascript\CM.Javascript.csproj", "{7F74349D-D3E8-4B16-A7FA-6D4950CA54E0}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{A7309C60-0562-487F-A11B-49071F9DE8A3}"
 	ProjectSection(SolutionItems) = preProject
 		.licenseheader = .licenseheader
@@ -15,20 +11,24 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{A7309C
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CM.Tests", "CM.Tests\CM.Tests.csproj", "{74A4E859-C0F2-4208-BBF1-6D510C2C55AE}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CM.Daemon", "CM.Daemon\CM.Daemon.xproj", "{D13A6507-DBDA-4B0E-8313-429656EE962E}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CM.Server", "CM.Server\CM.Server.xproj", "{02755F37-FB7F-4E33-A6AD-08780851B997}"
-EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "CM.AttackClient", "CM.AttackClient\CM.AttackClient.xproj", "{DE78B134-0D23-4BDE-9E86-3398B1953FFD}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Artwork", "Artwork", "{5A9DE24F-D5BC-4A0B-81FB-2FBB8E837CF7}"
 	ProjectSection(SolutionItems) = preProject
 		CM.Artwork\AboutPageIllustrations.design = CM.Artwork\AboutPageIllustrations.design
 		CM.Artwork\README.md = CM.Artwork\README.md
 		CM.Artwork\UIElements.design = CM.Artwork\UIElements.design
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CM", "CM\CM.csproj", "{D637B1AC-6A17-44D9-87FF-661D8CEF707F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CM.Javascript", "CM.Javascript\CM.Javascript.csproj", "{7F74349D-D3E8-4B16-A7FA-6D4950CA54E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CM.Tests", "CM.Tests\CM.Tests.csproj", "{74A4E859-C0F2-4208-BBF1-6D510C2C55AE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CM.Daemon", "CM.Daemon\CM.Daemon.csproj", "{D13A6507-DBDA-4B0E-8313-429656EE962E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CM.Server", "CM.Server\CM.Server.csproj", "{02755F37-FB7F-4E33-A6AD-08780851B997}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CM.AttackClient", "CM.AttackClient\CM.AttackClient.csproj", "{DE78B134-0D23-4BDE-9E86-3398B1953FFD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

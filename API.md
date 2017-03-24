@@ -26,11 +26,11 @@ Each DHT peer is responsible for numerical `DHT_IDs` landing in between itself a
 
 Account records are stored on the network at:
 ```
-Server #1 = DHT_ID("copy1" + AccountID)
-Server #2 = DHT_ID("copy2" + AccountID)
-Server #3 = DHT_ID("copy3" + AccountID)
-Server #4 = DHT_ID("copy4" + AccountID)
-Server #5 = DHT_ID("copy5" + AccountID)
+Server #1 = DHT_ID("copy1" + LOWER(AccountID))
+Server #2 = DHT_ID("copy2" + LOWER(AccountID))
+Server #3 = DHT_ID("copy3" + LOWER(AccountID))
+Server #4 = DHT_ID("copy4" + LOWER(AccountID))
+Server #5 = DHT_ID("copy5" + LOWER(AccountID))
 ```
 
 Each of those servers will _independently_ corroborate any `PUT` action with its own DHT_ID resolution. When enough servers meeting the constant `MINIMUM-COPIES-REQUIRED` are corroborated, only then can an account, transaction or vote record be committed.

@@ -84,7 +84,7 @@ namespace CM.Server {
                 st.ConnectionCount = 0;
                 st.WindowStart = Clock.Elapsed;
             }
-            if (st.ConnectionCount <= MaxIPConnectionsPerMinute)
+            if (st.ConnectionCount <= MaxIPWebSocketConnectionsPerMinute)
                 return false;
             st.LogOnce(Log, "WebSocket banned");
             return true;

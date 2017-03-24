@@ -38,8 +38,11 @@ TITLE_REGISTER,Register,
 TITLE_HELP,Help,
 TITLE_CHOOSE_YOUR_LANGUAGE,Choose your language,
 LABEL_CHOOSE_YOUR_LANGUAGE,""We apologise that not all languages are available. If you are interested in helping out, please contact us."",
-LABEL_REGISTER_INTRO,""Civil Money is not like traditional online banking systems or fiat currencies. It features a credit rating system based on your publicly visible contributions to society (income) and personal circumstance.
-Account information is kept in multiple locations around the globe and you will protect the authenticity and ownership of your account through the use of a cryptographic pass phrase. Your pass phrase should never be transmitted over the internet.
+HTML_REGISTER_INTRO,""Civil Money is not like traditional websites. It does not want even so much as your e-mail address, let alone any of your personally identifying information.
+<br/>
+<br/>The authenticity and reputation of your account is established only between yourself and the people or businesses in real life that you do business with.
+<br/>
+<br/>Please choose an account name and a secret pass phrase below to get started.
 "",
 LABEL_HISTORY_INTRO,Any accounts that have been viewed on this device are listed here for quick access.,
 LABEL_HISTORY_NO_ITEMS,There are no items in your viewing history.,
@@ -68,12 +71,12 @@ LABEL_LOADING_PLEASE_WAIT,""Loading, please wait..."",
 LABEL_REPUTATION_GOOD,Good Standing,
 LABEL_REPUTATION_OVERSPENT,Overspent,
 LABEL_REPUTATION_BAD,Bad,
-LABEL_NEW_PASSWORD_INSTRUCTIONS,""You'll need to re-enter this any time you do anything. Use multiple words to make up a memorable phrase. Complexity is not as important as overall length - an all lowercase sentence with spaces is fine."",
+LABEL_NEW_PASSWORD_INSTRUCTIONS,""Your pass phrase is never transmitted over the internet or stored on any servers, so it is irretrievable if forgotten. You'll need to enter this pass phrase any time you do anything. Please use multiple words to make up a unique but memorable sentence. Complexity isn't as important as overall length. An all lower-cased sentence with spaces is ideal, keeping in mind that computers can do millions of guesses per second. "",
 HTML_I_PROMISE_TO_FOLLOW_THE_HONOUR_CODE, ""I promise to follow the <b>Civil Money Honour Code</b>"",
 HTML_CIVIL_MONEY_HONOUR_CODE,""<ol>
 <li>I will try my best to not be a jerk. If somebody is being one to me, I will either ignore them or politely remind them about the Civil Money Honour Code.</li>
 <li>I will respect any person's decision to decline my payment, regardless of reason or for no reason at all.</li>
-<li>I will hold in the highest esteem any person doing an unpleasant job in exchange for Civil Money and endeavour to eliminate unpleasant jobs through the sharing of ideas, science and ingenuity.</li>
+<li>I will hold in the highest regard any person doing an unpleasant job in exchange for Civil Money and endeavour to eliminate unpleasant jobs through the sharing of ideas, science and ingenuity.</li>
 <li>I accept that Civil Money is backed only by the community at large and holds no intrinsic value, and is also an imperfect system. As such, the higher the cost of a good or service, the closer I will scrutinise a person's credit rating and transaction history, just as banks do today for a loan.</li>
 <li>I accept that the value of all Civil Money transactions begin to depreciate to zero after 12 months, which helps to stimulate the economy, aids in the prevention of inflation, over accumulation of money, and forgives people of their debts to society.</li>
 </ol>
@@ -260,7 +263,7 @@ HTML_ABOUT_3_2, ""Today's monetary system is based upon debt and an illusion of 
 HTML_ABOUT_4_1, ""Every person whether retired, studying, disabled or working receives a generous basic income."",
 HTML_ABOUT_4_2, ""Roughly equivalent to USD $60,000 /yr. The idea is that <b>if</b> you work, it is gravy. Work on something because you're passionate about it, not because you have to. Raise your kids properly. Go to school. Do something amazing. If the people and local businesses that you rely on for day-to-day living all choose to accept payment in Civil Money, the decision will be up to you."",
 HTML_ABOUT_5_1, ""There are no more banks, foreign exchange rates or financial speculation markets."",
-HTML_ABOUT_5_2, ""Every user of Civil Money is a money lender. By accepting payment from a person or business, even if they have a low credit score or a negative account balance, you are extending trust. You get paid either way by simply clicking 'accept' on a payment, but the question to ask is, <em>&quot;should I?&quot;</em> <b>You are now the bank</b>, and the level of compassion towards a customer's personal circumstance is up to each individual business or seller."",
+HTML_ABOUT_5_2, ""Every user of Civil Money is a money lender. By accepting payment from a person or business, even if they have a low credit score or a negative account balance, you are extending trust. You get paid either way by simply clicking 'accept' on a payment, but the question to ask is, <em>&quot;should I?&quot;</em> <b>You are the bank</b>, and the level of compassion towards a customer's personal circumstance is up to each individual business or seller."",
 HTML_ABOUT_6_1, ""There is no such thing as physical cash."",
 HTML_ABOUT_6_2, ""There are only publicly visible and verifiable balances and credit scores, which imply a level community good-standing. Credit scores offer an insight at a glance for low value everyday purchases, whilst in-depth transaction analysis and reporting can more thoroughly validate an account's legitimacy for higher priced transactions."",
 HTML_ABOUT_7_1, ""The value of one Civil Money is always equal to one hour of a person's time."",
@@ -310,7 +313,7 @@ HTML_ABOUT_14_2, ""<h3>Potential Negative Implications</h3>
 </ol>
 
 "",
-HTML_ABOUT_15_1, ""Ready for a change?"",
+HTML_ABOUT_15_1, ""All you need is temporary access to a smartphone or web browser."",
 
 ";
     }

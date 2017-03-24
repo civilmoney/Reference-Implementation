@@ -194,6 +194,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="www\bridge.min.js" />
+    <Content Include="www\change.svg" />
     <Content Include="www\civilmoneylogos.svg" />
     <Content Include="www\cm.css">
       <DependentUpon>cm.less</DependentUpon>
@@ -218,6 +219,8 @@
     <Content Include="www\voting.svg" />
     <Content Include="www\webworkers.js" />
     <Content Include="www\default.htm" />
+    <Content Include="www\whatif.svg" />
+    <Content Include="www\work.svg" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Bridge, Version=1.14.0.0, Culture=neutral, processorArchitecture=MSIL">
