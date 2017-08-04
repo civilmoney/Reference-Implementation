@@ -221,7 +221,7 @@ namespace CM.Javascript {
                                 var url = "/" + id.Replace(" ", "+");
                                 row.Div("link").A(
                                     (parts[5] == "OK"
-                                    ? Assets.SVG.CircleTick.ToString(16, 16, "#288600")
+                                    ? Assets.SVG.CircleTick.ToString(16, 16, Assets.SVG.STATUS_GREEN_COLOR)
                                     : Assets.SVG.CircleError.ToString(16, 16, "#cccccc"))
                                     + HtmlEncode(id), url);
                                 row.Div().Amount(decimal.Parse(parts[4]), roundTo2DP: false);

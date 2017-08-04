@@ -26,7 +26,7 @@ namespace CM.Server {
         internal int ReadPos;
         internal SslStream Stream;
         private SemaphoreSlim _AsyncWriteAccess;
-        private TcpClient _Client;
+        private Socket _Client;
         private DeflateStream _Decompress;
         private bool _GotPreamble;
         private SslWebServer _Owner;
@@ -34,7 +34,7 @@ namespace CM.Server {
         private string _RawUrl;
         private Uri _Uri;
 
-        public SslWebContext(SslStream s, TcpClient client, SslWebServer owner, IPEndPoint remoteEp) {
+        public SslWebContext(SslStream s, Socket client, SslWebServer owner) {
             _Owner = owner;
             _Client = client;
             _AsyncWriteAccess = new SemaphoreSlim(1);
@@ -42,7 +42,7 @@ namespace CM.Server {
             ReadBuffer = new byte[4096];
             Stream = s;
             RequestHeaders = new NamedValueList();
-            RemoteEndPoint = remoteEp;
+            RemoteEndPoint = (IPEndPoint)client.RemoteEndPoint;
         }
 
         public long ContentLength { get; private set; }

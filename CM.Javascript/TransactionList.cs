@@ -31,6 +31,7 @@ namespace CM.Javascript {
         }
 
         public abstract string UniqueKey { get; }
+        public abstract DateTime Utc { get; }
 
         public abstract void Build();
 
@@ -73,7 +74,7 @@ namespace CM.Javascript {
         public bool IsScrollAtBottom {
             get {
                 var bottom = _Results.Position().Y + _Results.ScrollHeight;
-                var windowBottom = Window.ScrollY + Window.InnerHeight;
+                var windowBottom = Window.PageYOffset + Window.InnerHeight;
                 return (bottom < windowBottom);
             }
         }
@@ -133,11 +134,23 @@ namespace CM.Javascript {
                         res.OnCheckedChanged = OnCheckedChanged;
                         res.Build();
                         _Data[res.UniqueKey] = res;
-                        _Results.AppendChild(res.Element);
+                        res.Element["res"] = res;
+                        InsertResultSorted(res);
                     }
                     existing.OnCorroborated(p.EndPoint);
                 }
             }
+        }
+
+        void InsertResultSorted(ListResult res) {
+            for (int i = 0; i < _Results.Children.Length; i++) {
+                var child = _Results.Children[i]["res"].As<ListResult>();
+                if (child.Utc < res.Utc) {
+                    _Results.InsertBefore(res.Element, _Results.Children[i]);
+                    return;
+                }
+            }
+            _Results.AppendChild(res.Element);
         }
     }
 
@@ -157,11 +170,9 @@ namespace CM.Javascript {
             _Key = _Index.ID;
         }
 
-        public override string UniqueKey {
-            get {
-                return _Key;
-            }
-        }
+        public override DateTime Utc => _Index.UpdatedUtc;
+
+        public override string UniqueKey => _Key;
 
         public override void Build() {
             Inner = Element.Div("summary");
@@ -184,8 +195,10 @@ namespace CM.Javascript {
             region.AddEventListener(EventType.MouseUp, OnRowClick);
 
             Counter = region.Div().Span(Corroborators.Count.ToString(), "counter");
+            var modified = "<small>" + _Index.UpdatedUtc.ToString("yyyy-MM-dd HH:mm:ss") + "</small>";
             var date = region.Div(null, _Index.CreatedUtc.ToString("yyyy-MM-dd")) as HTMLElement;
-            var party = region.Div(null, Page.HtmlEncode(otherPerson)) as HTMLElement;
+           
+            var party = region.Div(null, Page.HtmlEncode(otherPerson)+ modified) as HTMLElement;
 
             var amount = Helpers.CalculateTransactionDepreciatedAmount(DateTime.UtcNow, _Index.CreatedUtc, _Index.Amount)
                 * (isPayee ? 1 : -1);
@@ -226,7 +239,9 @@ namespace CM.Javascript {
             Element.Clear();
             Build();
             if (_Info != null) { // was it expanded? rebuild that too
-                _Info = new HTMLDivElement();
+                _Info = new HTMLDivElement() {
+                    ClassName = "info"
+                };
                 BuildTransactionInfo(t);
                 Element.AppendChild(_Info);
             }

@@ -56,7 +56,7 @@ namespace CM.Server {
         private LinearHashTable<string, string> _Persisted;
 
         static readonly Newtonsoft.Json.JsonSerializerSettings _JsonSettings = new Newtonsoft.Json.JsonSerializerSettings() {
-            ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
+            ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver()
         };
 
         public AuthoritativeDomainReporter(string dataFolder, DistributedHashTable dht, Storage storage, Log log) {

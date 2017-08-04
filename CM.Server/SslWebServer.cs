@@ -51,7 +51,10 @@ namespace CM.Server {
 
         public bool IsListening { get; private set; }
 
-        public async void Start() {
+        Thread _HttpsThread;
+        Thread _HttpThread;
+
+        public void Start() {
             if (IsListening)
                 return;
 
@@ -61,52 +64,68 @@ namespace CM.Server {
             _Log.Write(this, LogLevel.INFO, "HTTPS listener started.");
             _Listener.Start();
             IsListening = true;
-            while (IsListening) {
-                try {
-                    var client = await _Listener.AcceptTcpClientAsync().ConfigureAwait(false);
-                    var address = ((IPEndPoint)client.Client.RemoteEndPoint).Address;
-                    if (!_AttackPrevention.ShouldDropTcpConnection(address)) {
-#pragma warning disable CS4014
-                        Task.Run(() => HandleClient(client));
-#pragma warning restore CS4014
-                    } else {
-                        Debug.WriteLine("IP rejected " + address);
-                        client.Dispose();
+            _HttpsThread = new Thread(() => {
+                while (IsListening) {
+                    try {
+                        // AcceptSocketAsync has a tendency to drop inbound connections
+                        // during a flood.
+                        // await _Listener.AcceptTcpClientAsync().ConfigureAwait(false);
+                        var client = _Listener.Server.Accept();
+                        var address = ((IPEndPoint)client.RemoteEndPoint).Address;
+                        if (!_AttackPrevention.ShouldDropTcpConnection(address)) {
+                            AcceptAsync(HandleClient(client));
+                        } else {
+                            Debug.WriteLine("IP rejected " + address);
+                            client.Dispose();
+                        }
+                    } catch (Exception ex) {
+                        _Log.Write(this, LogLevel.WARN, "TCP error: " + ex.Message);
                     }
-                } catch (Exception ex) {
-                    _Log.Write(this, LogLevel.WARN, "TCP error: " + ex.Message);
                 }
+            });
+            _HttpsThread.Start();
+               
+        }
+
+        async void AcceptAsync(Task t) {
+            await Task.Yield();
+            try {
+                await t;
+            } catch (Exception ex) {
+                // All expected issues are already handled, so we should never get here.
+                _Log.Write(this, LogLevel.WARN, "HTTP Fatal: " + ex);
             }
         }
-        
 
-        public async void StartPort80Redirect() {
+        public void StartPort80Redirect() {
             _Port80Listener = new TcpListener(new IPEndPoint(IPAddress.Any, 80));
             // Workaround for linux re-bind bug
             _Port80Listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             _Log.Write(this, LogLevel.INFO, "HTTP Port 80 redirect started.");
             _Port80Listener.Start();
-            while (IsListening) {
-                try {
-                    var client = await _Port80Listener.AcceptTcpClientAsync().ConfigureAwait(false);
-                    var address = ((IPEndPoint)client.Client.RemoteEndPoint).Address;
-                    if (!_AttackPrevention.ShouldDropTcpConnection(address)) {
-#pragma warning disable CS4014
-                        Task.Run(() => RedirectClient(client));
-#pragma warning restore CS4014
-                    } else {
-                        Debug.WriteLine("IP rejected " + address);
-                        client.Dispose();
+            _HttpThread = new Thread(() => {
+                while (IsListening) {
+                    try {
+                        //var client = await _Port80Listener.AcceptTcpClientAsync().ConfigureAwait(false);
+                        var client = _Port80Listener.Server.Accept();
+                        var address = ((IPEndPoint)client.RemoteEndPoint).Address;
+                        if (!_AttackPrevention.ShouldDropTcpConnection(address)) {
+                            AcceptAsync(RedirectClient(client));
+                        } else {
+                            Debug.WriteLine("IP rejected " + address);
+                            client.Dispose();
+                        }
+                    } catch (Exception ex) {
+                        _Log.Write(this, LogLevel.WARN, "TCP error: " + ex.Message);
                     }
-                } catch (Exception ex) {
-                    _Log.Write(this, LogLevel.WARN, "TCP error: " + ex.Message);
                 }
-            }
+            });
+            _HttpThread.Start();
         }
 
-        private async Task RedirectClient(TcpClient c) {
+        private async Task RedirectClient(Socket c) {
             try {
-                using (var stream = c.GetStream()) {
+                using (var stream = new NetworkStream(c)) {
                     var b = new byte[1024];
                     int read;
                     string path = null;
@@ -122,7 +141,7 @@ namespace CM.Server {
                                 if (newLine && path != null) {
                                     // End of headers, we're done.
                                     b = Encoding.ASCII.GetBytes(
-                                        String.Format("{0} 301 Moved Permanently\r\nLocation: https://civil.money{1}\r\nContent-Length: 0\r\n",
+                                        String.Format("{0} 301 Moved Permanently\r\nLocation: https://civil.money{1}\r\nContent-Length: 0\r\n\r\n",
                                         protocol, path));
                                     stream.Write(b, 0, b.Length);
                                     return;
@@ -154,7 +173,7 @@ namespace CM.Server {
                     }
                 }
             } finally {
-                c.Client.Dispose();
+                c.Dispose();
             }
         }
 
@@ -180,11 +199,25 @@ namespace CM.Server {
             if (_ConnectedClients.Count > 0) {
                 _Log.Write(this, LogLevel.WARN, "{0} lingering connections after stop.", _ConnectedClients.Count);
             }
+
+            try {
+                _Listener.Server.Shutdown(SocketShutdown.Both); // Required for unix, otherwise Accept() hangs
+            } catch { }
             _Listener.Stop();
+
             if (_Port80Listener != null) {
                 _Log.Write(this, LogLevel.INFO, "HTTP Port 80 redirect stopping.");
+                try {
+                    _Port80Listener.Server.Shutdown(SocketShutdown.Both);
+                } catch { }
                 _Port80Listener.Stop();
             }
+
+            _HttpsThread?.Join();
+            _HttpsThread = null;
+
+            _HttpThread?.Join();
+            _HttpThread = null;
         }
 
         internal void OnContextClosed(SslWebContext c) {
@@ -192,15 +225,14 @@ namespace CM.Server {
             _ConnectedClients.TryRemove(c, out foo);
         }
 
-        private async Task HandleClient(TcpClient c) {
-
+        private async Task HandleClient(Socket c) {
+            await Task.Yield();
             c.SendTimeout = 10000;
 
-            var stream = c.GetStream();
-
+            NetworkStream stream = null;
             SslStream ssl = null;
-
             try {
+                stream = new NetworkStream(c);
                 ssl = new SslStream(stream,
                    true,
                    OnRemoteCertificateValidation,
@@ -217,19 +249,19 @@ namespace CM.Server {
                 _Log.Write(this, LogLevel.WARN, "SSL error: " + ex.Message);
                 if (ssl != null)
                     ssl.Dispose();
-                stream.Dispose();
+                stream?.Dispose();
                 return;
             }
 
             if (!IsListening) {
-                stream.Dispose();
+                stream?.Dispose();
                 return;
             }
 
             var line = new StringBuilder();
             var ms = new System.IO.MemoryStream();
             var cancel = new CancellationTokenSource();
-            var ctx = new SslWebContext(ssl, c, this, (IPEndPoint)c.Client.RemoteEndPoint);
+            var ctx = new SslWebContext(ssl, c, this);
             _ConnectedClients[ctx] = null;
 
             while (ctx.IsConnected) {

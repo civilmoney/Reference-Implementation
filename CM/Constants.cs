@@ -57,16 +57,24 @@ namespace CM {
         public const string PATH_VOTES = "VOTES";
 
 #if DEBUG
-        public const string WebSocketProtocol = "test.civil.money";
+        public static string WebSocketProtocol = "test.civil.money";
         public static readonly CMSeed[] Seeds = new CMSeed[] {
             new CMSeed("127-0-0-1."+DNS.UNTRUSTED_DOMAIN+":8000", "127.0.0.1:8000"),
             new CMSeed("127-0-0-1."+DNS.UNTRUSTED_DOMAIN+":8001", "127.0.0.1:8001")
         };
+
+        // For testing over a closed network with a non-loopback IP, change to something 
+        // like this:
+        //public static readonly CMSeed[] Seeds = new CMSeed[] {
+        //    new CMSeed("192-168-0-88."+DNS.UNTRUSTED_DOMAIN+":8000", "192.169.0.88:8000"),
+        //    new CMSeed("192-168-0-88."+DNS.UNTRUSTED_DOMAIN+":8001", "192.169.0.88:8001")
+        //};
+
         /// <summary>
         /// True for debug mode only. It is useful to be able to run multiple servers 
         /// off 1x machine.
         /// </summary>
-        public const bool Peer_DHT_ID_Uses_Port = true;
+        public static bool Peer_DHT_ID_Uses_Port = true;
 #else
         public const string WebSocketProtocol = "v1.civil.money";
 
@@ -75,7 +83,7 @@ namespace CM {
         public static readonly CMSeed[] Seeds = new CMSeed[] {
             new CMSeed("seed1.civil.money:443", "89.36.215.217:443"), // FR
             new CMSeed("seed2.civil.money:443", "85.255.13.218:443"), // CZ
-            new CMSeed("seed3.civil.money:443", "104.244.153.122:443"), // US
+            new CMSeed("seed3.civil.money:443", "212.237.61.8:443"), // IT2
             new CMSeed("seed4.civil.money:443", "185.58.225.189:443"), // UK
             new CMSeed("seed5.civil.money:443", "89.40.127.213:443"), // DE
             new CMSeed("seed6.civil.money:443", "89.46.74.86:443") // IT

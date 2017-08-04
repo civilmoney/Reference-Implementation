@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace CM.Server {
 
-    internal delegate void ProcessRequestDelegate(Connection conn, Message m);
+   
 
     /// <summary>
     /// Encapsulates all server message processing logic
@@ -175,7 +175,7 @@ namespace CM.Server {
         }
 
         private async void Sync(Connection conn, Message m) {
-            await _Server.SyncManager.OnSyncAnnounceReceived(m.Cast<SyncAnnounce>(), conn);
+            _Server.SyncManager.OnSyncAnnounceReceived(m.Cast<SyncAnnounce>(), conn.RemoteEndpoint.Address.ToString());
             await conn.Reply(m, CMResult.S_OK);
         }
 

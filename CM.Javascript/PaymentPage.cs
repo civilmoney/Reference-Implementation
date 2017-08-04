@@ -49,16 +49,21 @@ namespace CM.Javascript {
         }
 
         public override void Build() {
-            Element.ClassName = "paymentpage";
-            _MainFeedback = new Feedback(Element, big: true);
-            var returnButtons = Element.Div();
-            var serverStatus = Element.Div("statusvisual");
+            var page = Element.Div("paymentpage");
+            var noAccount = Element.Div("noaccountfooter");
 
-            var form = Element.Div();
+          
+            var form = page.Div("top");
             //form.Div("logo", "<img src=\"/cmlogo.svg\" type=\"image/svg\">");
             form.H1(SR.LABEL_PAY_TO);
             _To = new AccountInputBox(form, _Payee);
 
+            _MainFeedback = new Feedback(page, big: true);
+            var returnButtons = page.Div();
+            var serverStatus = page.Div("statusvisual");
+
+
+            form = page.Div("bottom");
             var row = form.Div("row");
             var left = row.Div("cell-half");
             var right = row.Div("cell-half");
@@ -113,37 +118,25 @@ namespace CM.Javascript {
             left = row.Div("cell-half");
             right = row.Div("cell-half");
 
-            left.H3(SR.LABEL_PAY_FROM);
-            _From = new AccountInputBox(left, watermark: SR.LABEL_YOUR_ACCOUNT_NAME);
-            _From.OnAccountChanged = (a) => {
-                OnShowAmountHint();
-            };
-
-            right = row.Div("cell-half");
-            right.H3(SR.LABEL_DONT_HAVE_AN_ACCOUNT);
-            right = right.Div("register");
-            right.Button(SR.LABEL_CREATE_MY_ACCOUNT, (e) => {
-                RegisterPage.ReturnPath = App.Identity.CurrentPath;
-                App.Identity.Navigate("/register");
-            });
-            right.Span(" " + SR.LABEL_OR + " ");
-            right.Button(SR.LABEL_LEARN_MORE, (e) => {
-                RegisterPage.ReturnPath = App.Identity.CurrentPath;
-                App.Identity.Navigate("/about");
-            });
-
-            row = form.Div("row");
-            left = row.Div("cell-half");
-            left.H3(Assets.SVG.Tag.ToString(16, 16, "#000000") + " " + SR.LABEL_TAG);
+            left.H3(SR.LABEL_TAG);
             _Tag = left.TextBox("");
             _Tag.Placeholder = "(" + SR.LABEL_OPTIONAL + ")";
             _Tag.MaxLength = 48;
 
-            row = form.Div("row");
-            row.H3(SR.LABEL_SECURITY);
+            right.H3(SR.LABEL_PAY_FROM);
+            _From = new AccountInputBox(right, watermark: SR.LABEL_YOUR_ACCOUNT_NAME);
+            _From.OnAccountChanged = (a) => {
+                OnShowAmountHint();
+            };
 
-            var ch = row.Div("confirm").CheckBox(SR.HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS);
+           
+            row = form.Div("row");
+            // row.H3(SR.LABEL_SECURITY);
+
             var reminder = row.Div("reminder", SR.LABEL_CIVIL_MONEY_SECURITY_REMINDER);
+            var confirm = row.Div("confirm");
+            var ch = confirm.CheckBox(SR.HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS);
+          
             if (!String.IsNullOrWhiteSpace(_Link.Amount)) {
                 OnShowAmountHint();
             }
@@ -187,6 +180,7 @@ namespace CM.Javascript {
                 t.Amount = amount.Value;
                 serverStatus.Clear();
                 form.Style.Display = Display.None;
+                noAccount.Style.Display = Display.None;
                 buttonsRow.Style.Display = Display.None;
 
                 _MainFeedback.Set(Assets.SVG.Wait, FeedbackType.Default,
@@ -248,7 +242,7 @@ namespace CM.Javascript {
                         }
                     }
                 }, JSCryptoFunctions.Identity);
-            });
+            }, className: "green-button");
             submit.Style.Display = Display.None;
 
             buttonsRow.Button(SR.LABEL_CANCEL, "/" + _Payee);
@@ -256,8 +250,8 @@ namespace CM.Javascript {
                 passAndSubmit.Style.Display = ch.Checked ? Display.Block : Display.None;
                 submit.Style.Display = ch.Checked ? Display.Inline : Display.None;
                 reminder.Style.Display = ch.Checked ? Display.None : Display.Block;
-                if (ch.Checked)
-                    pass.Focus();
+                confirm.Style.Display = ch.Checked ? Display.None : Display.Block;
+                pass.Focus();
             };
             if (_Description.ReadOnly) {
                 _Amount.OnEnterKeySetFocus(_From.Input);
@@ -268,6 +262,23 @@ namespace CM.Javascript {
             _From.Input.OnEnterKeySetFocus(_Tag);
             // _Tag.OnEnterKeySetFocus(ch);
             pass.OnEnterKey(submit.Click);
+
+         
+
+            // right = row.Div("cell-half");
+            noAccount.H1(SR.LABEL_DONT_HAVE_AN_ACCOUNT);
+            noAccount.Div(null, SR.HTML_CIVIL_MONEY_PROVIDES);
+            var buttons = noAccount.Div("buttons");
+            buttons.Button(SR.LABEL_CREATE_MY_ACCOUNT, (e) => {
+                RegisterPage.ReturnPath = App.Identity.CurrentPath;
+                App.Identity.Navigate("/register");
+            }, className: "blue-button");
+            buttons.Span(" " + SR.LABEL_OR + " ");
+            buttons.Button(SR.LABEL_LEARN_MORE, (e) => {
+                RegisterPage.ReturnPath = App.Identity.CurrentPath;
+                App.Identity.Navigate("/about");
+            });
+
         }
 
         private decimal? GetAmount() {

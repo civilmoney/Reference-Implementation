@@ -33,9 +33,13 @@ namespace CM {
             var lines = Data.Split('\n');
             Values = new Region[lines.Length];
             _Lookup = new Dictionary<string, string>();
+#if JAVASCRIPT
+        
+            var rx = new Bridge.Html5.RegExp("\"[^\"]+\"", "gi");
+#endif
             for (int i = 0; i < lines.Length; i++) {
 #if JAVASCRIPT
-                var bits = lines[i].Match(new Bridge.Text.RegularExpressions.Regex("\"[^\"]+\"", "gi"));
+                var bits = Bridge.Html5.StringPrototype.Match(lines[i], rx);
                 Values[i].ID = bits[0].Replace("\"", "");
                 Values[i].Name = bits[1].Replace("\"", "");
 #else

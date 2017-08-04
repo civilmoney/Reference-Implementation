@@ -22,11 +22,12 @@ TITLE_CIVIL_MONEY,Civil Money,Civil Money
 LABEL_CIVIL_MONEY_SUB_HEADING,A civilised monetary framework.,
 LABEL_ACCOUNT_NAME,Account Name,
 LABEL_GO,Go,
-HTML_CIVIL_MONEY_PROVIDES,""<h3>Civil Money gives you</h3>
+HTML_CIVIL_MONEY_PROVIDES,""<h3>Civil Money is free to join, accepts no personally identifying information and gives you:</h3>
 <ul>
-<li>A universal basic income</li>
-<li>Seeding based on regional productivity (inverse taxation)</li>
-<li>Transparent transactions and accountability</li>
+<li>A <b>generous</b> universal basic income</li>
+<li>Easy dispute resolution</li>
+<li>Automatic taxation/funding for your country and region</li>
+<li>Transparent transactions, honesty and accountability</li>
 <li>A more civilised cash-free society</li>
 </ul>"",
 LABEL_CREATE_MY_ACCOUNT,Create my account,
@@ -62,16 +63,17 @@ LABEL_INCOME_ELIGIBILITY_RETIRED,Retired,
 LABEL_VALUE_NOT_SET,Not set,
 TITLE_OWN_THIS_ACCOUNT,Own this account?,
 LABEL_MAKE_A_PAYMENT,Make a payment,
-LABEL_REQUEST_A_PAYMENT,Request a payment,
+LABEL_REQUEST_A_PAYMENT,Point of Sale / Generate link,
 LABEL_EDIT_ACCOUNT,Edit account,
 LABEL_ACCEPTANCE_LOGOS,Acceptance logos,
 LABEL_SKILLS_AND_SERVICES,Skills & Services,
 TITLE_TRANSACTION_HISTORY,Transaction History,
+TITLE_TRANSACTION_DETAILS,Transaction Details,
 LABEL_LOADING_PLEASE_WAIT,""Loading, please wait..."",
 LABEL_REPUTATION_GOOD,Good Standing,
 LABEL_REPUTATION_OVERSPENT,Overspent,
 LABEL_REPUTATION_BAD,Bad,
-LABEL_NEW_PASSWORD_INSTRUCTIONS,""Your pass phrase is never transmitted over the internet or stored on any servers, so it is irretrievable if forgotten. You'll need to enter this pass phrase any time you do anything. Please use multiple words to make up a unique but memorable sentence. Complexity isn't as important as overall length. An all lower-cased sentence with spaces is ideal, keeping in mind that computers can do millions of guesses per second. "",
+LABEL_NEW_PASSWORD_INSTRUCTIONS,""Your pass phrase is never transmitted over the internet or stored on any servers. It is irrecoverable if forgotten. Please use multiple words to make up a unique but memorable sentence. Complexity isn't as important as overall length. An all lower-cased sentence with spaces is ideal, keeping in mind that computers can do millions of guesses per second. "",
 HTML_I_PROMISE_TO_FOLLOW_THE_HONOUR_CODE, ""I promise to follow the <b>Civil Money Honour Code</b>"",
 HTML_CIVIL_MONEY_HONOUR_CODE,""<ol>
 <li>I will try my best to not be a jerk. If somebody is being one to me, I will either ignore them or politely remind them about the Civil Money Honour Code.</li>
@@ -98,7 +100,7 @@ LABEL_ACCOUNT_BLANK_IS_ALREADY_TAKEN,Account name '{0}' is already taken.,
 LABEL_ACCOUNT_BLANK_LOOKS_OK,Account name '{0}' looks OK!,
 LABEL_STATUS_CHECKING_ACCOUNT_NAME,Checking account name,
 LABEL_STATUS_PROBLEM_REACHING_A_SERVER,Unfortunately we can't reach a server right now.,
-LABEL_CIVIL_MONEY_SECURITY_REMINDER,""If your web browser's address bar is not visible or its URL does not begin withhttps://civil.money/ or if in the future you don't receive this reminder, pleasedo not type in your pass phrase, as the page you are on might be trying to steal your account."",
+LABEL_CIVIL_MONEY_SECURITY_REMINDER,""If your web browser's address bar is not visible or its URL does not begin withhttps://civil.money/ or if in the future you don't receive this reminder, pleasedo not type in your pass phrase, as the page you are on might be trying to harvest your secret pass phrase."",
 HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS,I've checked my web browser's address and it definitely begins with <b>https://civil.money/</b>,
 LABEL_A_VALID_PAYEE_ACCOUNT_NAME_IS_REQUIRED,A valid payee account name is required.,
 LABEL_YOUR_ACCOUNT_NAME_IS_REQUIRED,Your account name is required.,
@@ -173,28 +175,7 @@ LABEL_DOWNLOAD,Download,
 TITLE_SOURCE_CODE,Source Code,
 LABEL_SOURCE_CODE_INTRO,""Civil Money is free and unencumbered software released into the public domain. The reference implementation and API has been published on GitHub."",
 TITLE_ABOUT,About Civil Money,
-HTML_ABOUT,""Civil Money is a debt-free monetary system. <br/><br/>The end-game for Civil Money is to enable every person on earth to be able to raise their
-family properly or get on with doing whatever it is they're truly passionate about or good
-at, regardless of whether or not that skill is in high demand or pays a regular income. If
-you're musician, perform. If you're a mother, raise your children. If you're a builder, build
-something awesome. If you're a researcher, solve a problem. Not for the money, but
-because you think it's worthwhile. A universal basic income frees every able-bodied person
-to progress humanity as whole, instead of this absurd and relentless pursuit of money,
-which is nothing more than a database entry sitting on your bank's computer. We are
-wasting our entire lives, killing one another, compromising on our morals, all because
-we've created an unnecessary artificial need of money to survive.<br/><br/>With a purely algorithmic and reputation-based approach to wealth distribution,
-non-productive and destructive for-profit-only industries could fall by the wayside. Every
-user of Civil Money is in effect a money lender. There is nothing preventing you from
-accepting money from a person with a low credit score or even a negative balance -- you get paid
-either way by simply accepting their payment. The only question to ask is, <em>should you</em>.
-Predatory or deceitful users should be declined and politely reminded of the Civil Money Honour Code.
-The level of compassion towards a customer's personal circumstance is up to each individual business or seller.<br/><br/>An inverse-taxation system ensures that geographic regions generate tax revenue based
-on their actual economic activity in near real-time, and without relying on individual reporting. 10%
-of every transaction generates new money for the region of the seller for use by a Governing Authority
-Civil Money account.<br/><br/>The Civil Money monetary system is not a platform for communication or advertisement. As such
-posting of e-mail addresses, phone numbers, personal information or methods of contact are
-expressly discouraged. Dispute resolution is implicit in the system's design and ensures
-that disputed transactions are always settled amicably, even when both parties disagree."",
+
 TITLE_ACCOUNT_SETTINGS,Account Settings,
 LABEL_ACCOUNT_SETTINGS_INTRO,""Account settings are designed to show minimal personally identifying informationwhilst still providing some sort of context about your role in the community."",
 LABEL_INCOME_ELIGIBILITY_INTRO,""There is no reason to lie here. Good sellers should accept your payment for essential items if your transaction history is reasonable regardless of balance. Health Problem and Retired status does not give you a free pass to overspend your basic income."",
@@ -225,13 +206,13 @@ LABEL_PAY_FROM,From,
 LABEL_MEMO,Memo,
 LABEL_AMOUNT,Amount,
 LABEL_OPTIONAL,Optional,
-LABEL_TAG,Tag,
+LABEL_TAG,Tag/Label,
 LABEL_STATUS_TRANSACTION_CREATED_SUCCESSFULLY,Transaction created successfully.,
 LABEL_STATUS_TRANSACTION_UPDATED_SUCCESSFULLY,Transaction updated successfully.,
 LABEL_STATUS_NO_TRANSACTIONS_UPDATED,None of the transactions could be updated.,
 LABEL_STATUS_ALL_TRANSACTIONS_UPDATED,All transaction were updated successfully.,
 LABEL_STATUS_SOME_TRANSACTIONS_FAILED,Some of the transactions could not be updated.,
-LABEL_LINK_FOR_PAYMENT_TO,Link for payment to {0},
+LABEL_LINK_FOR_PAYMENT_TO,Generate link for payment to {0},
 LABEL_READONLY,Read only,
 LABEL_PREVIEW,Preview,
 LABEL_OR,or,
@@ -254,66 +235,63 @@ TITLE_PLEASE_PAY,Please pay,
 LABEL_MATCHING_TRANSACTION_RECEIVED_FROM,Matching transaction received from,
 LABEL_POINT_OF_SALE,Point of Sale,
 TITLE_THE_CIVIL_MONEY_HONOUR_CODE,The Civil Money Honour Code,
-HTML_ABOUT_1_1, ""Imagine if you didn't have to work."",
-HTML_ABOUT_1_2, ""What would you do?"",
-HTML_ABOUT_2_1, ""Today we work because we need money to survive."",
-HTML_ABOUT_2_2, ""But why does it have to be this way?"",
-HTML_ABOUT_3_1, ""What if instead, everybody had a generous basic allowance and we were free to pursue whatever it is we're truly passionate about?"",
-HTML_ABOUT_3_2, ""Today's monetary system is based upon debt and an illusion of scarcity, which if you think about it, seems rather counter-productive and uncivilised.<br/><br/>Let's try something else..."",
-HTML_ABOUT_4_1, ""Every person whether retired, studying, disabled or working receives a generous basic income."",
-HTML_ABOUT_4_2, ""Roughly equivalent to USD $60,000 /yr. The idea is that <b>if</b> you work, it is gravy. Work on something because you're passionate about it, not because you have to. Raise your kids properly. Go to school. Do something amazing. If the people and local businesses that you rely on for day-to-day living all choose to accept payment in Civil Money, the decision will be up to you."",
-HTML_ABOUT_5_1, ""There are no more banks, foreign exchange rates or financial speculation markets."",
-HTML_ABOUT_5_2, ""Every user of Civil Money is a money lender. By accepting payment from a person or business, even if they have a low credit score or a negative account balance, you are extending trust. You get paid either way by simply clicking 'accept' on a payment, but the question to ask is, <em>&quot;should I?&quot;</em> <b>You are the bank</b>, and the level of compassion towards a customer's personal circumstance is up to each individual business or seller."",
-HTML_ABOUT_6_1, ""There is no such thing as physical cash."",
-HTML_ABOUT_6_2, ""There are only publicly visible and verifiable balances and credit scores, which imply a level community good-standing. Credit scores offer an insight at a glance for low value everyday purchases, whilst in-depth transaction analysis and reporting can more thoroughly validate an account's legitimacy for higher priced transactions."",
-HTML_ABOUT_7_1, ""The value of one Civil Money is always equal to one hour of a person's time."",
-HTML_ABOUT_7_2, ""The mathematical constant of time can help prevent inflation, however goods and services must be priced appropriately. Civil Money only works if we spend wisely and scrutinise the fair value of items and services that we're purchasing (labour + materials + a reasonable margin) to stop things getting out of hand.
-<br/><br/>A reasonable exchange rate in traditional currency is <b>//c 1.00 = USD $50</b>. This is based on an upper-middle class USD$ 80,000/yr income over an 8hr work day, 200 days a year (excludes 165 days of weekends/personal/sick/vacation time.)
+HTML_ABOUT,""<h1>A society built on a minted currency is a toxic one.</h1><p>People are killing one another, working multiple jobs and neglecting their children. All because of nothing more than imaginary computer data sitting on bank servers. For many people their entire life's existence revolves around undoing database entries that were created each time they needed a loan in order to buy a house, car, or even food. Let's fix it.</p><img src=/ubi.svg><h2>Every human whether retired, studying, disabled or working receives a generous basic income.</h2><p>Roughly equivalent to USD $60,000 /yr. The idea is that <b>if</b> you work, it is gravy. Work on something because you're passionate about it, not because you have to. Raise your kids properly. Go to school. Do something amazing. If the people and local businesses that you rely on for day-to-day living all choose to accept payment in Civil Money, the decision will be up to you.</p>
+<img src=/taxation.svg>
+<h2>An automatic, inverted taxation system generates money for regions based on their actual contribution to humanity.</h2>
+<p>Tax evasion is impossible, we don't subtract money out of pocket and there is never any tax filing. In other words - <b>tax is dead.</b></p>
+<p>10% of every settled transaction is automatically generated and placed into an authoritative Civil Money account for the seller's geographical region. Any change to the inverse-taxation algorithm will not directly impact people's account balances. Inverse-taxation is a data analysis/computer sciences problem. Specifically, we want to exclude transactions for inverse-tax when a money trail or account looks like it might have been deliberately created to generate false revenue.</p>
+
+<img src=/datadistribution.svg>
+<h2>All account and transaction information is public and distributed around the world.</h2>
+<p>Data is stored on random untrusted computers and authenticity is established through a consensus model and well-established cryptographic signing techniques.</p>
+<p>There is nothing novel or unique about Civil Money's technology.</p>
+<p>Because all data is public, it cannot be used for crime. Not that crime need exist in the first place, given the generous basic income. Predatory or deceitful users should be declined, ignored and politely reminded of the Civil Money Honour Code.</p>
+
+<img src=/nobanks.svg>
+<h2>There are no more banks, foreign exchange rates or financial speculation markets.</h2>
+<p>Every user of Civil Money is a money lender. You will get paid no matter what by simply clicking 'accept' on any payment, but the question you should ask yourself is, <em>&quot;should I?&quot;</em> <b>You are a bank</b>, and a willingness to cooperate and support an exciting sounding business venture, or the level of compassion toward a person's unfortunate life circumstance is up to each individual seller. </p>
+<p>The ultimate aim of Civil Money is to gradually repair broken relationships and guide everybody into behaving openly and honestly with one another, at the same time empowering people to cooperate more easily by completely removing our counter-productive and toxic notion of debt and artificial scarcity from our social fabric. It aims to supplant the traditional economics <em>""""it's every man for himself""""</em> way of thinking, which is the root cause of most of the world's maladies.</p>
+
+<img src=/valuetime.svg>
+<h2>The value of one Civil Money is always equal to one hour of a person's time, but also 50 bucks.</h2>
+<p>The mathematical constant of time can help somewhat to prevent inflation, however goods and services must be priced appropriately. Civil Money only works if we spend wisely and scrutinise the fair value of items and services that we're purchasing (labour + materials + a reasonable margin) to stop things getting out of hand.</p>
+<p>A reasonable exchange rate in traditional currency is <b>//c 1.00 = USD $50</b>. This is based on an upper-middle class USD$ 80,000/yr income over an 8hr work day, 200 days a year (excludes 165 days of weekends/personal/sick/vacation time.)</p>
 <blockquote>USD$ 80,000 / 1600hrs = $50/hr.<br />
 Since 1hr = //p 1.00 it follows that //p 1.00 = USD$50</blockquote>
-This means that a person making designer T-shirts in Bangladesh, which might take a few hours, can no longer be expected to sell their time for a pittance or be compelled to work for a slave wage. Provided that they have access to materials and a personal website, that person can now sell their shirts directly to anybody in the world for a fair value of //p 3.00, equivalent to USD$150, or about what a retail chain might charge in western countries today."",
-HTML_ABOUT_8_1, ""Payments begin to depreciate after 12 months."",
-HTML_ABOUT_8_2, ""This means it is impossible for a minority to hoard cash as they do today. Instead, everybody is encouraged to spend their money soon, which ensures the distribution of wealth and a happy and healthy economy.<br/>
-<br/>Capitalism is not prohibited, however your capital can no longer be held long-term in the form of money. Instead it must be converted into physical assets and property."",
-HTML_ABOUT_9_1, ""Because payments depreciate, your credit score automatically restores itself if you fall on hard times."",
-HTML_ABOUT_9_2, ""Depreciation of account debits along with a perpetually replenishing basic income ensures that people retain their dignity in the event of financial disaster. Nobody needs to struggle without access to essential goods and services for an extended period of time, if at all."",
-HTML_ABOUT_10_1, ""Inverse-taxation generates revenue for regions based on economic activity."",
-HTML_ABOUT_10_2, ""Tax evasion is impossible, we don't subtract money out of pocket and there is never any tax filing.<br/><br/>10% of every settled transaction is automatically generated and placed into an authoritative Civil Money account for the seller's geographical region. Any change to the inverse-taxation algorithm will not directly impact people's account balances. Inverse-taxation is a data analysis/computer sciences problem. Specifically, we exclude transactions for inverse-tax when a money trail or account looks like it might have been deliberately created to generate false revenue."",
-HTML_ABOUT_11_1, ""All account and transaction information is public and distributed around the world."",
-HTML_ABOUT_11_2, ""Data is stored on random untrusted computers and authenticity is established through a consensus model and well-established cryptographic signing techniques.<br/>
-<br/>There is nothing novel or unique about Civil Money's technology.<br/><br/>
-Because all data is public, it cannot be used for crime. Not that crime need exist in the first place, given the generous basic income. Predatory or deceitful users should be declined, ignored and politely reminded of the Civil Money Honour Code."",
-HTML_ABOUT_12_1, ""Every person can vote on changes to the system."",
-HTML_ABOUT_12_2, ""People can digitally sign votes in the same manner as regular transactions. A two-thirds majority is needed for any proposition to pass, meaning a significant winning margin is required before any changes are introduced. No vote counts more than another, however the minimum requirement for voting is a good standing and at least one settled transaction for every 30 day period, for the past year. This is simply to deter casual vote stuffing.<br/><br/>Because Civil Money is a completely transparent system, researchers are encouraged to collect, validate and calculate results independently and report their findings. Voting outcomes are a scientific process and not locked in stone until a consensus with a reasonably low margin of error is established."",
-HTML_ABOUT_13_1, ""'Double spending' is allowed. As such, dispute resolution is built-in."",
-HTML_ABOUT_13_2, ""In the event of a dispute, a customer can always get their money back whilst the seller keeps their payment as well. <br/>
-<br/>The catch is, it reflects badly on anybody who abuses this system, or any seller who routinely does not volunteer a refund during disputes. This creates access to fair dispute resolution in any nations that currently have no reliable legal system in place, whilst simultaneously reducing the burden on small-claims courts in the countries that do."",
-HTML_ABOUT_14_1, ""Implications."",
-HTML_ABOUT_14_2, ""<h3>Potential Negative Implications</h3>
-<ol>
-<li>Privacy doesn't exist, meaning there is a potential for doxing or identity theft when the account ID is associated with a known physical identity. On the other hand, Civil Money users are at least cognisant of the visibility of their activities, and companies could one day end the practice of using bills as a form of identity verification.</li>
-<li>Civil Money is presently open to internet blocking techniques. This can be partially addressed with the use of native/non-web browser based apps.</li>
-<li>Necessity is sometimes said to be &quot;the mother of invention&quot;. Removing that necessity may or may not stall technological progress. We can only hope that it does the exact opposite and inspire people to invent amazing technological and scientific breakthroughs, because they no longer need to waste their time putting food on the table.</li>
-<li>Fewer people will be willing to do unpleasant tasks. For this reason the people that do them should be held in the highest regard by the those around them. Meanwhile, we should be working on ways to eliminate unpleasant tasks through technology.</li>
-<li>Sudden widespread affordability of general goods by everyone could mean increased productivity, potentially having a negative environmental impact.</li>
-</ol>
-<br/><br/>
-<h3>Potential Positive Implications</h3>
-<ol>
-<li>Because you don't <em>have</em> to work, Civil Money eliminates our unsustainable profit-driven economy, which relies on imaginary short-term gains (fiat currency) at the expense of real and finite resources.</li>
-<li>Poverty need no longer exist. There is not usually a compelling reason to decline a Civil Money payment from any person in need. They're always 'good for it', and our mental model of money's scarcity or perceived idea of what money is worth needn't even exist.</li>
-<li>Money no longer infers power or status. One can only speculate as to the geopolitical outcome where every country and person within those countries are on an even playing field.</li>
-<li>Wealth and quality of life is no longer generally predetermined by birth family and geographical place of birth.</li>
-<li>Monetary based crimes are both unnecessary and trivially traced. Other types of criminal activity typically brought on through shear desperation or necessity could be greatly reduced if not eliminated.</li>
-<li>Tax evasion is both impossible and unnecessary.</li>
-<li>Regions are implicitly seeded revenue for social services and infrastructure based on the true local productivity of its people.</li>
-<li>Inflation need not exist as //c is pegged to time/labour.</li>
-<li>A unified currency reduces global trade barriers and creates fairness and equality for every person on Earth.</li>
-<li>The positive environmental impact from reducing 'for profit only' resource destruction could be substantial. We hope that it will be greater than the negative impacts of increased productivity through widespread affordability.</li>
-</ol>
+<p>This means that a person making designer T-shirts in Bangladesh, which might take a few hours, can no longer be expected to sell their time for a pittance or be compelled to work for a slave wage. Provided that they have access to materials and a personal website, that person can now sell their shirts directly to anybody in the world for a fair value of //p 3.00, equivalent to USD$150, or about what a retail chain might charge in western countries today.</p>
 
+<img src=/disputes.svg>
+<h2>Dispute resolution is built-in.</h2>
+<p>In the event of a dispute, a customer can always get their money back whilst the seller keeps their payment as well. Arguments are always settled amicably by default.</p>
+<p>Rampant use of the dispute system would lead to inflation, so <b>the catch is</b>, it reflects badly on anyone who abuses it, or any seller who routinely does not volunteer a refund during disputes. </p>
+<p>This system enables access to a fair dispute resolution process to people in countries that currently have no reliable legal system in place, whilst simultaneously reducing the burden on small-claims courts in the countries that do.</p>
+
+<img src=/demurrage.svg>
+<h2>Payments start to depreciate after 12 months.</h2>
+<p>This is difficult to grasp at first, and people are going to baulk at the idea. But it's super important and ultimately a non-issue once you've discarded your traditional understanding of money and savings.</p>
+<p><b>You never need to save, there is no debt, and investment and interest do not exist because every individual is a bank.</b></p>
+<p>A fundamental problem with money today is that those who have some of it, can make more of it, simply by moving it.</p>
+<p>Under Civil Money it is impossible for a minority to hoard cash or use it as a tool to make more money. Instead, everyone is encouraged to spend their money soon, which ensures the <b>distribution</b> of wealth and a happy and healthy global economy. Accounts that ping-pong money in order to circumvent depreciation can be openly identified and declined.</p>
+<p><b>Capitalism is not prohibited.</b> But your capital must no longer be held onto long-term in the form of money. Instead it must be converted into physical assets and property. You know... real things.</p>
+
+<img src=/hardtimes.svg>
+<h2>Because payments depreciate, your credit score automatically restores itself if you fall on hard times.</h2>
+<p>Depreciation of account debits along with a perpetually replenishing basic income ensures that people retain their dignity in the event of financial disaster. Nobody needs to struggle without access to essential goods and services for an extended period of time, if at all.</p>
+
+<h2>The barrier to entry is virtually non-existent, and personally identifying information is disallowed.</h2>
+<p>Civil Money is designed to work just as effectively for a remote village in Africa sharing a single smartphone, as it does a person standing in a shopping mall at a point of sale terminal. All you ever need is <b>temporary</b> access to a reasonably up-to-date web browser to create an account or complete a transaction.</p>
+<p>Because all data is public and poorly implemented business processes sometimes use bills or receipt numbers as a proof of identity, we do not permit storage of anything that traditionally has been used as a source of ID. Civil Money does not allow storage of even so much as your e-mail address.</p>
+
+<img src=/voting.svg>
+<h2>Every person can vote on changes to the system.</h2>
+<p>People can digitally sign votes in the same manner as regular transactions. A two-thirds majority is needed for any proposition to pass, meaning a significant winning margin is required before any changes are introduced. No vote counts more than another, however the minimum requirement for voting is a good standing and at least one settled transaction for every 30 day period, for the past year. This is simply to deter casual vote stuffing.</p>
+<p>Because Civil Money is a completely transparent system, researchers are encouraged to collect, validate and calculate results independently and report their findings. Voting outcomes are a scientific process and not locked in stone until a consensus with a reasonably low margin of error is established.</p>
+
+<h2>Identity verification is not a feature of Civil Money.</h2>
+<p><b>The value and authenticity of your account only exists through pre-established relationships with people and companies that you choose to associate with.</b></p>
+<p>Any idiot can make a bunch of fake accounts and send themselves money -- however it's a worthless pursuit and they're just wasting their time. The Civil Money design is such that illegitimate transactions and accounts are deemed worthless by the community at large, who may easily run a credit report in order to trace a corroborated money trail and determine a customer's legitimacy.</p>
+<p>At the end of the day money doesn't matter any more, only real relationships. Let's build people homes and sell people cars based on what they're truly contributing to society, by putting everyone on an even playing field and taking the imaginary value of cash out of existence.</p>
 "",
-HTML_ABOUT_15_1, ""All you need is temporary access to a smartphone or web browser."",
 
 ";
     }

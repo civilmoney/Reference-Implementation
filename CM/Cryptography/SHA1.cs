@@ -10,6 +10,9 @@ namespace CM.Cryptography {
     /// <summary>
     /// A portable C# SHA-1, based on work by Brad Conte (bradconte.com) MIT License
     /// </summary>
+#if JAVASCRIPT
+    [Bridge.External] // We compile once and move into webworkers.js
+#endif
     public static class SHA1 {
 
         public static byte[] ComputeHash(byte[] data) {
@@ -47,21 +50,31 @@ namespace CM.Cryptography {
             }
 
             public void Reset() {
-                if (datalen != 0) {
+
 #if JAVASCRIPT
             Bridge.Script.Write(@"
-                if(typeof(Array.prototype.fill)=='function'){
-                    this.data.fill(0);
-                } else {
-                    var i = 0;
-                    while(i<this.data.length)
-                        this.data[i++] = 0;
+                 if (this.datalen != 0) {
+                    if(typeof(Array.prototype.fill)=='function'){
+                        this.data.fill(0);
+                    } else {
+                        var i = 0;
+                        while(i<this.data.length)
+                            this.data[i++] = 0;
+                    }
                 }
+                this.datalen = 0;
+                this.state[0] = 0x67452301;
+                this.state[1] = 0xEFCDAB89;
+                this.state[2] = 0x98BADCFE;
+                this.state[3] = 0x10325476;
+                this.state[4] = 0xc3d2e1f0;
+                this.bitlen[0] = 0;
+                this.bitlen[1] = 0;
             ");
 #else
+                if (datalen != 0) {
                     for (int i = 0; i < data.Length; i++)
                         data[i] = 0;
-#endif
                 }
                 datalen = 0;
                 state[0] = 0x67452301;
@@ -71,6 +84,7 @@ namespace CM.Cryptography {
                 state[4] = 0xc3d2e1f0;
                 bitlen[0] = 0;
                 bitlen[1] = 0;
+#endif
             }
 
             public uint[] M = new uint[80];
@@ -89,7 +103,7 @@ namespace CM.Cryptography {
             Bridge.Script.Write(@"
                 var a, b, c, d, e, t;
                 var i, j;
-                var m = ctx.m;
+                var m = ctx.M;
                 var k = CM.Cryptography.SHA1.k;
 
                 for (i = 0, j = 0; i < 16; i++, j += 4) {
@@ -244,7 +258,7 @@ namespace CM.Cryptography {
                     while (i < 64) {
                         ctx.data[i++] = 0;
                     }
-                    CM.Cryptography.SHA1.transform(ctx, ctx.data);
+                    CM.Cryptography.SHA1.Transform(ctx, ctx.data);
                     for (i = 0; i < 56; i++) {
                         ctx.data[i] = 0;
                     }
@@ -253,7 +267,7 @@ namespace CM.Cryptography {
                 // Append to the padding the total message's length in bits and transform.
                 var hi = { v : ctx.bitlen[0] };
                 var lo = { v : ctx.bitlen[1] };
-                CM.Cryptography.SHA1.iNT64_ADD(hi, lo, (((ctx.datalen) * 8)));
+                CM.Cryptography.SHA1.INT64_ADD(hi, lo, (((ctx.datalen) * 8)));
                 ctx.bitlen[0] = hi.v;
                 ctx.bitlen[1] = lo.v;
 
@@ -265,7 +279,7 @@ namespace CM.Cryptography {
                 ctx.data[58] = (((((ctx.bitlen[1] >>> 8) & 255))));
                 ctx.data[57] = (((((ctx.bitlen[1] >>> 16) & 255))));
                 ctx.data[56] = (((((ctx.bitlen[1] >>> 24) & 255))));
-                CM.Cryptography.SHA1.transform(ctx, ctx.data);
+                CM.Cryptography.SHA1.Transform(ctx, ctx.data);
 
                 // Since this implementation uses little endian byte ordering and MD uses big endian,
                 // reverse all the bytes when copying the final state to the output hash.

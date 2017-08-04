@@ -20,9 +20,6 @@ namespace CM.Schema {
         /// <summary>
         /// A unique identifier for the proposition.
         /// </summary>
-#if JAVASCRIPT
-        [Bridge.Name("id")]
-#endif
         public uint ID;
         /// <summary>
         /// The date and time that this proposition was issued

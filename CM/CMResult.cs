@@ -28,8 +28,8 @@ namespace CM {
             Bridge.Script.Write(@"
             if(desc==null)
             for(var v in CM.CMResult)
-                 if(CM.CMResult[v] && CM.CMResult[v].code==this.code){
-                     desc = CM.CMResult[v].description;
+                 if(CM.CMResult[v] && CM.CMResult[v].Code==this.Code){
+                     desc = CM.CMResult[v].Description;
                      break;
                  }
             ");

@@ -10,7 +10,7 @@ body {
   padding: 0;
   margin: 0;
   height: 100%;
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.4285;
   display: flex;
   flex-flow: column;
@@ -21,7 +21,7 @@ body {
 .homepage,
 .statuspage,
 .registerpage,
-.accountpage .details,
+.accountpage,
 .paymentpage,
 .paymentlinkpage,
 .accounteditpage,
@@ -30,10 +30,13 @@ body {
 .languagepage,
 .notfoundpage,
 .votespage,
+.castvotepage,
 .apipage,
 .helppage,
+.noaccountfooter,
 .transactionpage,
-.authorisepage {
+.authorisepage,
+.presentationpage {
   margin: auto;
   padding: 20px 60px 60px 60px;
   max-width: 800px;
@@ -44,7 +47,7 @@ body {
   .homepage,
   .statuspage,
   .registerpage,
-  .accountpage .details,
+  .accountpage,
   .paymentpage,
   .paymentlinkpage,
   .accounteditpage,
@@ -53,10 +56,13 @@ body {
   .languagepage,
   .notfoundpage,
   .votespage,
+  .castvotepage,
   .apipage,
   .helppage,
+  .noaccountfooter,
   .transactionpage,
-  .authorisepage {
+  .authorisepage,
+  .presentationpage {
     padding: 20px 20px 60px 60px;
   }
 }
@@ -148,6 +154,22 @@ body {
     -webkit-transform: translate(30px, 0);
   }
 }
+@keyframes button-activate {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+@-webkit-keyframes wk-button-activate {
+  from {
+    -webkit-transform: scale(1);
+  }
+  to {
+    -webkit-transform: scale(1.1);
+  }
+}
 ::-webkit-input-placeholder {
   color: #ccc;
 }
@@ -205,6 +227,9 @@ body {
 .cm h2 {
   font-weight: 200;
 }
+.cm h3 {
+  font-weight: 400;
+}
 .cm h1 {
   color: #000;
   margin-top: 0;
@@ -225,7 +250,7 @@ body {
 .cm > .main.menushown {
   padding-left: 140px;
 }
-@media (max-width: 539px) {
+@media (min-width: 1080px) {
   .cm > .main.menushown {
     padding-right: 140px;
   }
@@ -501,11 +526,19 @@ body {
 .cm .readonly {
   border-bottom-color: transparent !important;
 }
+.cm input,
+.cm select,
+.cm button,
+.cm label {
+  border-radius: 0;
+  outline-width: 0;
+}
 .cm button {
-  padding: 0.5em 1em;
+  padding: 1em 2em;
   background: #ccc;
-  border: 1px solid #ccc;
+  border: 0;
   color: #000;
+  border-radius: 2px;
 }
 .cm button:hover,
 .cm button:active {
@@ -520,11 +553,35 @@ body {
   color: #000;
   opacity: 0.3;
 }
-.cm input,
-.cm select,
-.cm button {
-  border-radius: 0;
-  outline-width: 0;
+.cm button.green-button {
+  background: #00B800;
+  color: #fff;
+  border: 0;
+}
+.cm button.green-button:hover,
+.cm button.green-button:focus,
+.cm button.green-button:active {
+  -webkit-animation: wk-button-activate 0.05s ease-out forwards;
+  animation: button-activate 0.05s ease-out forwards;
+}
+.cm button.green-button:disabled {
+  -webkit-animation: none;
+  animation: none;
+}
+.cm button.blue-button {
+  background: #448aff;
+  color: #fff;
+  border: 0;
+}
+.cm button.blue-button:hover,
+.cm button.blue-button:focus,
+.cm button.blue-button:active {
+  -webkit-animation: wk-button-activate 0.05s ease-out forwards;
+  animation: button-activate 0.05s ease-out forwards;
+}
+.cm button.blue-button:disabled {
+  -webkit-animation: none;
+  animation: none;
 }
 .cm .center {
   text-align: center;
@@ -546,6 +603,7 @@ body {
   left: 0;
   background: #fff;
   border: 1px solid #ccc;
+  border-radius: 2px;
   box-sizing: border-box;
 }
 .cm .check label:nth-child(2):after {
@@ -580,9 +638,12 @@ body {
   opacity: 1;
 }
 .cm .feedback {
+  position: relative;
+  z-index: 1;
   display: block;
   margin-top: 0.25em;
   padding: 0.5em;
+  border-radius: 2px;
 }
 .cm .feedback.hidden {
   display: none;
@@ -606,14 +667,14 @@ body {
   margin-left: 30px;
 }
 .cm .feedback.error {
-  background: #cc0000;
+  background: rgba(204, 0, 0, 0.9);
   color: #fff;
 }
 .cm .feedback.error path {
   fill: #ffffff !important;
 }
 .cm .feedback.success {
-  background: #288600;
+  background: #00B800;
   color: #fff;
 }
 .cm .feedback.success path {
@@ -641,38 +702,43 @@ body {
   vertical-align: super;
 }
 .cm .server-prog {
-  width: 120px;
-  height: 120px;
-  position: relative;
-  margin: 50px auto 20px auto;
+  width: 160px;
+  height: 160px;
   display: none;
+  margin: auto;
+  position: relative;
+}
+.cm .server-prog > div:nth-of-type(1) {
+  width: 160px;
+  height: 160px;
 }
 .cm .server-prog > .main-glyph {
-  width: 120px;
-  height: 120px;
-  position: relative;
-  text-align: center;
-  vertical-align: middle;
-  display: table-cell;
+  width: 160px;
+  height: 160px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: -webkit-box;
+  display: flex;
+  -webkit-box-align: center;
 }
 .cm .server-prog > .main-glyph > div {
   background: #fff;
   border-radius: 1000px;
   height: 45px;
   width: 45px;
-  display: inline-block;
+  margin: auto;
 }
 .cm .server-prog > .main-glyph > div svg {
   margin: 6px;
 }
 .cm .server-prog .earth {
-  margin: 10px;
   position: absolute;
-  vertical-align: middle;
-  text-align: center;
-  display: table-cell;
+  top: 50%;
+  left: 50%;
   width: 100px;
   height: 100px;
+  margin: -50px;
 }
 .cm .server-prog .earth .cloud {
   position: absolute;
@@ -800,7 +866,7 @@ body {
   padding-top: 10px;
 }
 .cm .button-row button {
-  margin-left: 1em;
+  margin: 4px 0 0 4px;
 }
 .cm .button-row.center {
   text-align: center;
@@ -835,7 +901,6 @@ body {
 .cm .accountinputbox .val {
   display: table-cell;
   vertical-align: middle;
-  min-height: 36px;
   width: 100%;
   padding-left: 1px;
 }
@@ -870,7 +935,7 @@ body {
 .cm .accountinputbox .repbal .rep {
   display: table-cell;
   vertical-align: middle;
-  padding: 0.25em 1em 0 1em;
+  padding: 0.2em 1em 0 1em;
   text-align: right;
   white-space: nowrap;
 }
@@ -881,14 +946,13 @@ body {
 .cm .accountinputbox .repbal .rep .lab {
   display: block;
   font-size: 0.75em;
-  margin: -0.3em 0 0.35em 0;
+  margin: -0.3em 0 0.1em 0;
 }
 .cm .accountinputbox .repbal .bal {
-  min-height: 32px;
   display: table-cell;
   vertical-align: middle;
   text-align: center;
-  padding: 0.25em 1em 0 1em;
+  padding: 0.2em 1em 0 1em;
   min-width: 80px;
   background: #000;
   color: #fff;
@@ -903,7 +967,7 @@ body {
 .cm .accountinputbox .repbal .bal .label {
   display: block;
   font-size: 0.75em;
-  margin: -0.3em 0 0.35em 0;
+  margin: -0.3em 0 0.1em 0;
 }
 .cm .accountinputboxatts {
   color: #666;
@@ -934,14 +998,29 @@ body {
   width: 100%;
   background: none;
 }
+.cm .statuses .statusvisual {
+  display: inline-block;
+  border: 1px solid #eee;
+  border-radius: 2px;
+}
 .cm .statusvisual {
-  clear: both;
-  display: block;
   background: #fff;
+  margin: 20px 0;
+}
+.cm .statusvisual:empty {
+  display: none;
 }
 .cm .statusvisual h3 {
-  margin: 0;
-  padding: 0.5em 0 0 0.5em;
+  margin: 0 0 1em 0;
+  padding: 0.5em 1em;
+  text-align: center;
+  background: #eee;
+}
+.cm .statusvisual .server-prog {
+  position: relative;
+  left: auto;
+  top: auto;
+  margin: auto;
 }
 .cm .statusvisual .status-row {
   cursor: pointer;
@@ -1006,7 +1085,8 @@ body {
 }
 .cm .transinfo h4 {
   color: #666;
-  margin: 0;
+  margin: 1em 0 0 0;
+  font-weight: 200;
 }
 .cm .transinfo a {
   font-size: 1.5em;
@@ -1032,7 +1112,11 @@ body {
   vertical-align: text-bottom;
 }
 .cm .transinfo .qr-cell {
-  min-width: 128px;
+  width: 128px;
+}
+.cm .transinfo .qr-cell svg {
+  border-radius: 4px;
+  margin-left: -13px;
 }
 .cm .transinfo .button-row {
   text-align: left;
@@ -1041,9 +1125,13 @@ body {
   margin: 0.5em 0.5em 0 0;
 }
 .cm .list .res {
-  border-bottom: 1px solid #eee;
-  margin: -1em -20px 1.5em -20px;
-  padding: 1.5em 20px 0.5em 20px;
+  box-shadow: 0 0px 2px 0 #ccc;
+  margin: 8px 0;
+  padding: 1.5em 20px 0.5em 0;
+  border-radius: 2px;
+}
+.cm .list .res:hover {
+  box-shadow: 0 0px 8px 0 #ccc;
 }
 .cm .list .res .summary::before,
 .cm .list .res .summary::after {
@@ -1055,9 +1143,10 @@ body {
 }
 .cm .list .res .summary .checkregion {
   position: absolute;
+  margin: -1px 8px;
 }
 .cm .list .res .summary .hitregion {
-  margin-left: 30px;
+  margin-left: 34px;
   min-height: 2em;
   cursor: pointer;
 }
@@ -1081,6 +1170,12 @@ body {
 .cm .list .res .summary .hitregion > div:nth-child(3) {
   width: 150px;
 }
+.cm .list .res .summary .hitregion > div:nth-child(3) small {
+  display: block;
+  font-style: italic;
+  font-size: 10px;
+  color: #999;
+}
 .cm .list .res .summary .hitregion > div:nth-child(4) {
   width: 200px;
   float: right;
@@ -1091,26 +1186,22 @@ body {
   padding-right: 0.5em;
 }
 .cm .list .res .info {
-  padding: 0 0 1em 30px;
+  padding: 0 0 1em 34px;
 }
 @media (max-width: 539px) {
   .cm .list .res .info {
-    padding-left: 0;
+    padding-left: 10px;
   }
+}
+.cm .reminder {
+  margin-top: 1em;
 }
 .cm .confirm {
   clear: both;
-  background: #cc0000;
-  color: #fff;
-  margin: 10px -10px 10px -10px;
-  padding: 10px;
+  margin: 10px 0 10px 0;
 }
-.cm .confirm .check label:nth-child(2) {
-  background: #cc0000;
-  border-color: #fff;
-}
-.cm .confirm .check label:nth-child(2)::after {
-  border-color: #fff;
+.cm .confirm b {
+  color: #cc0000;
 }
 .cm .pill {
   background: #eee;
@@ -1119,10 +1210,7 @@ body {
 .homepage {
   max-width: 500px;
   padding-top: 4em;
-}
-.homepage h3 {
-  font-family: sans-serif;
-  font-size: 1.5em;
+  padding-bottom: 0;
 }
 .homepage .search {
   margin: 2em 0 4em 0;
@@ -1148,9 +1236,6 @@ body {
     text-align: center;
     margin: 0.5em 0;
   }
-}
-.homepage ul {
-  margin: 0 0 2em 0;
 }
 .statuspage .peers {
   display: flex;
@@ -1201,42 +1286,109 @@ body {
 .registerpage select + select {
   margin-top: 0.25em;
 }
+.registerpage li {
+  padding-bottom: 1em;
+}
 .accountpage {
   width: 100%;
-  min-width: 300px;
-  padding-bottom: 60px;
+  padding-right: 60px;
 }
 .accountpage .top {
-  max-width: unset;
-  padding-bottom: 1em;
-  padding-top: 1em;
+  position: relative;
+  z-index: 1;
+  display: -webkit-box;
+  display: flex;
+  flex-wrap: wrap;
 }
 .accountpage .top h1 {
   font-size: 4em;
   line-height: 1em;
   margin: 0 0 0.25em 0;
+  word-break: break-all;
 }
-.accountpage .top h2 {
-  line-height: 1em;
+.accountpage .top .left {
+  -webkit-flex: 100 1 auto;
+  flex: 100 1 auto;
+  display: inline-block;
+}
+.accountpage .top .right {
+  -webkit-flex: 1 0 auto;
+  flex: 1 0 auto;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-box-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.accountpage .top .rep,
+.accountpage .top .balance {
+  padding: 1em;
+  display: inline-block;
+  text-align: center;
+}
+.accountpage .top .rep .equal,
+.accountpage .top .balance .equal {
+  font-style: italic;
+}
+.accountpage .top .rep .amount,
+.accountpage .top .balance .amount {
+  font-size: 2em;
+}
+.accountpage .top .rep h3,
+.accountpage .top .balance h3 {
   margin: 0;
+  font-size: 1em;
+}
+.accountpage .top .rep h3 svg,
+.accountpage .top .balance h3 svg {
+  vertical-align: top;
+  margin-right: 0.25em;
+}
+@media (max-width: 539px) {
+  .accountpage .top {
+    display: block;
+    text-align: center;
+  }
+  .accountpage .top .left,
+  .accountpage .top .right {
+    display: block;
+  }
+}
+.accountpage .top .rep .amount {
+  font-size: 2.5em;
+}
+.accountpage .top:after {
+  content: " ";
+  display: table;
+  clear: both;
+}
+.accountpage .server-prog {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  margin: -80px;
+  z-index: 0;
+}
+.accountpage .makepayment {
+  text-align: center;
+  padding: 2em 0;
 }
 .accountpage .details {
   padding-top: 10px;
   padding-bottom: 0;
-  margin: auto;
-}
-.accountpage .details h4 {
-  margin: 1em 0 0 0;
 }
 .accountpage .details h2 {
   font-size: 2em;
 }
 .accountpage .details .right {
   text-align: right;
+  margin-right: -20px;
 }
-@media (max-width: 479px) {
+@media (max-width: 539px) {
   .accountpage .details .right {
-    text-align: left;
+    margin-right: 0;
+    text-align: center;
   }
 }
 @media (max-width: 479px) {
@@ -1247,54 +1399,13 @@ body {
 .accountpage .rating {
   padding: 1.5em;
 }
-.accountpage .rating,
-.accountpage .qr {
-  text-align: center;
-  height: 128px;
-  color: #000;
-}
-.accountpage .rating .amount,
-.accountpage .qr .amount {
-  font-size: 4em;
-}
-.accountpage .rating h3,
-.accountpage .qr h3 {
-  margin: 0;
-}
-.accountpage .rating h3 svg,
-.accountpage .qr h3 svg {
-  vertical-align: top;
-  margin-right: 0.25em;
+@media (max-width: 479px) {
+  .accountpage .list {
+    margin-right: -40px;
+  }
 }
 .accountpage .bar {
   background: #000;
-}
-.accountpage .balance {
-  padding: 1em;
-  color: #fff;
-  text-align: center;
-}
-.accountpage .balance .amount {
-  font-size: 2em;
-}
-.accountpage .balance button {
-  background: #fff;
-  color: #000;
-  border: 0;
-  margin-top: 0.5em;
-}
-@media (max-width: 479px) {
-  .accountpage .balance button {
-    margin-top: 0;
-  }
-}
-.accountpage .balance button:hover,
-.accountpage .balance button:active {
-  background: #288600;
-  color: #fff;
-}
-.accountpage .balance .equal {
-  font-style: italic;
 }
 .accountpage .multiselect {
   position: fixed;
@@ -1303,12 +1414,17 @@ body {
   right: 0;
   background: #000;
   color: #fff;
-  padding: 20px 60px;
+  padding: 20px 60px 60px 60px;
+  text-align: center;
   z-index: 3;
-  padding-bottom: 60px;
+}
+@media (max-width: 479px) {
+  .accountpage .multiselect {
+    padding: 20px 20px 60px 20px;
+  }
 }
 .accountpage .multiselect .button-row {
-  text-align: left;
+  text-align: center;
 }
 .accountpage .multiselect h2 {
   margin: 0;
@@ -1321,6 +1437,7 @@ body {
 .languagepage,
 .notfoundpage,
 .votespage,
+.castvotepage,
 .apipage,
 .helppage {
   width: 100%;
@@ -1334,6 +1451,7 @@ body {
 .languagepage input[type=text],
 .notfoundpage input[type=text],
 .votespage input[type=text],
+.castvotepage input[type=text],
 .apipage input[type=text],
 .helppage input[type=text],
 .paymentpage input[type=password],
@@ -1344,6 +1462,7 @@ body {
 .languagepage input[type=password],
 .notfoundpage input[type=password],
 .votespage input[type=password],
+.castvotepage input[type=password],
 .apipage input[type=password],
 .helppage input[type=password],
 .paymentpage input[type=number],
@@ -1354,6 +1473,7 @@ body {
 .languagepage input[type=number],
 .notfoundpage input[type=number],
 .votespage input[type=number],
+.castvotepage input[type=number],
 .apipage input[type=number],
 .helppage input[type=number],
 .paymentpage select,
@@ -1364,6 +1484,7 @@ body {
 .languagepage select,
 .notfoundpage select,
 .votespage select,
+.castvotepage select,
 .apipage select,
 .helppage select {
   width: 100%;
@@ -1376,6 +1497,7 @@ body {
 .languagepage select + select,
 .notfoundpage select + select,
 .votespage select + select,
+.castvotepage select + select,
 .apipage select + select,
 .helppage select + select {
   margin-top: 0.25em;
@@ -1388,6 +1510,7 @@ body {
 .languagepage h3 .check,
 .notfoundpage h3 .check,
 .votespage h3 .check,
+.castvotepage h3 .check,
 .apipage h3 .check,
 .helppage h3 .check {
   float: right;
@@ -1401,6 +1524,7 @@ body {
 .languagepage .cell-half h3,
 .notfoundpage .cell-half h3,
 .votespage .cell-half h3,
+.castvotepage .cell-half h3,
 .apipage .cell-half h3,
 .helppage .cell-half h3 {
   width: 90%;
@@ -1413,12 +1537,13 @@ body {
 .languagepage .cell-half:nth-child(1),
 .notfoundpage .cell-half:nth-child(1),
 .votespage .cell-half:nth-child(1),
+.castvotepage .cell-half:nth-child(1),
 .apipage .cell-half:nth-child(1),
 .helppage .cell-half:nth-child(1) {
   width: 45%;
   margin-right: 5%;
 }
-@media (max-width: 479px) {
+@media (max-width: 539px) {
   .paymentpage .cell-half:nth-child(1),
   .paymentlinkpage .cell-half:nth-child(1),
   .accounteditpage .cell-half:nth-child(1),
@@ -1427,6 +1552,7 @@ body {
   .languagepage .cell-half:nth-child(1),
   .notfoundpage .cell-half:nth-child(1),
   .votespage .cell-half:nth-child(1),
+  .castvotepage .cell-half:nth-child(1),
   .apipage .cell-half:nth-child(1),
   .helppage .cell-half:nth-child(1) {
     width: 100%;
@@ -1441,6 +1567,7 @@ body {
 .languagepage .logo,
 .notfoundpage .logo,
 .votespage .logo,
+.castvotepage .logo,
 .apipage .logo,
 .helppage .logo {
   display: block;
@@ -1454,6 +1581,7 @@ body {
 .languagepage .logo > img,
 .notfoundpage .logo > img,
 .votespage .logo > img,
+.castvotepage .logo > img,
 .apipage .logo > img,
 .helppage .logo > img {
   width: 200px;
@@ -1468,13 +1596,84 @@ body {
   .languagepage .logo > img,
   .notfoundpage .logo > img,
   .votespage .logo > img,
+  .castvotepage .logo > img,
   .apipage .logo > img,
   .helppage .logo > img {
     width: 150px;
     height: 30px;
   }
 }
-.paymentpage h1 {
+.noaccountfooter {
+  width: 100%;
+  max-width: 500px;
+  min-width: initial;
+}
+.noaccountfooter h1 {
+  color: #444;
+}
+.noaccountfooter ul {
+  margin: 0 0 2em 0;
+}
+.noaccountfooter .buttons {
+  text-align: center;
+}
+.noaccountfooter .buttons > span {
+  padding: 0 1em;
+}
+@media (max-width: 479px) {
+  .noaccountfooter .buttons > * {
+    display: block;
+    width: 100%;
+  }
+}
+.transactionpage,
+.authorisepage,
+.paymentlinkpage,
+.paymentpage,
+.castvotepage {
+  box-shadow: 0 0 12px 0 #ccc;
+}
+@media (max-width: 800px) {
+  .transactionpage,
+  .authorisepage,
+  .paymentlinkpage,
+  .paymentpage,
+  .castvotepage {
+    box-shadow: none;
+  }
+}
+.transactionpage .top,
+.authorisepage .top,
+.paymentlinkpage .top,
+.paymentpage .top,
+.castvotepage .top {
+  background: #f7f7f7;
+  margin: -20px -60px 20px -60px;
+  padding: 20px 60px 20px 60px;
+  margin-bottom: 20px;
+}
+@media (max-width: 479px) {
+  .transactionpage .top,
+  .authorisepage .top,
+  .paymentlinkpage .top,
+  .paymentpage .top,
+  .castvotepage .top {
+    margin: -20px -20px 20px -60px;
+    padding: 20px 20px 20px 60px;
+  }
+}
+.transactionpage .top .accountinputbox,
+.authorisepage .top .accountinputbox,
+.paymentlinkpage .top .accountinputbox,
+.paymentpage .top .accountinputbox,
+.castvotepage .top .accountinputbox {
+  background: transparent;
+}
+.transactionpage h1,
+.authorisepage h1,
+.paymentlinkpage h1,
+.paymentpage h1,
+.castvotepage h1 {
   padding: 0;
   margin: 0;
 }
@@ -1752,7 +1951,7 @@ body {
 .votespage .against > div > span,
 .votespage .ineligible > div > span {
   position: absolute;
-  margin: -28px 0 0 0.25em;
+  margin: -31px 0 0 0.25em;
   font-size: 2em;
   font-weight: 800;
 }
@@ -1779,7 +1978,7 @@ body {
   background: #cc0000;
 }
 .votespage .for > div {
-  background: #288600;
+  background: #00B800;
 }
 .votespage .ineligible > div {
   background: #666;
@@ -1824,255 +2023,38 @@ body {
   }
 }
 .presentationpage {
-  margin-top: -30px;
-}
-@media (max-width: 539px) {
-  .presentationpage .cell-half,
-  .presentationpage .cell-third {
-    width: 100%;
-    float: none;
-  }
-}
-.presentationpage .block {
-  padding: 4em;
-}
-.presentationpage .block h1:before {
-  word-wrap: normal;
-  position: absolute;
-  padding: 0.2em;
-  background: #ff0066;
-  color: #fff;
-  display: block;
-  width: 50px;
-  margin-left: -70px;
-}
-.presentationpage .block h1 {
-  color: #444;
-  font-family: sans-serif;
-  font-weight: 800;
-  font-size: 3em;
-  line-height: 0.9em;
-  word-wrap: break-word;
-  padding-left: 70px;
-}
-@media (max-width: 479px) {
-  .presentationpage .block h1 {
-    font-size: 2em;
-  }
-}
-.presentationpage .block h2 {
-  font-weight: normal;
-  font-size: 1.25em;
-  padding: 1em;
-}
-.presentationpage .block .pic {
-  margin: 4em;
-}
-@media (max-width: 539px) {
-  .presentationpage .block .pic {
-    margin: 2em;
-  }
-}
-.presentationpage .block .pic img,
-.presentationpage .block .pic object {
-  display: block;
   width: 100%;
-  max-height: 300px;
-  margin: auto;
+  padding-bottom: 60px;
 }
-.presentationpage .block ol > li {
-  list-style: none;
-  padding: 0.5em 1.5em 1em 50px;
-}
-.presentationpage .block ol {
-  counter-reset: li;
-  padding: 0;
-}
-.presentationpage .block ol > li:before {
-  content: counter(li);
-  counter-increment: li;
-  position: absolute;
-  background: #ff0066;
-  color: #fff;
-  margin: -6px 0 0 -50px;
-  font-weight: 800;
-  text-align: center;
-  font-size: 1.25em;
-  border-radius: 100px;
-  width: 35px;
-  height: 35px;
-  line-height: 33px;
-}
-.presentationpage .block-0,
-.presentationpage .block-1,
-.presentationpage .block-2 {
-  text-align: center;
-}
-.presentationpage .block-0 h1,
-.presentationpage .block-1 h1,
-.presentationpage .block-2 h1 {
-  padding-left: 0;
-}
-.presentationpage .block-0 h2,
-.presentationpage .block-1 h2,
-.presentationpage .block-2 h2 {
+.presentationpage > div h1 {
+  column-span: all;
   line-height: 1em;
-}
-.presentationpage .block-0 {
-  background: #000;
-}
-.presentationpage .block-0 h1 {
-  color: #fff;
-  font-size: 4em;
-}
-@media (max-width: 479px) {
-  .presentationpage .block-0 h1 {
-    font-size: 3em;
-  }
-}
-.presentationpage .block-0 h2 {
   font-size: 3em;
-  font-weight: bold;
-  background: none;
-  color: #ff0066;
-  padding: 0.5em;
 }
-.presentationpage .block-1 {
-  background: #fff;
+.presentationpage > div > p:nth-of-type(1) {
+  column-span: all;
+  font-style: italic;
+  line-height: 2em;
+  margin-bottom: 3em;
 }
-.presentationpage .block-1 h1 {
-  color: #ff0066;
-  font-size: 4em;
-}
-@media (max-width: 479px) {
-  .presentationpage .block-1 h1 {
-    font-size: 3em;
-  }
-}
-.presentationpage .block-1 h2 {
-  line-height: 1.25em;
-  font-size: 2em;
-  font-weight: bold;
-  background: #ff0066;
-  color: #fff;
-  padding: 0.5em;
-}
-.presentationpage .block-2 {
-  background: #fff;
-}
-.presentationpage .block-2 h1 {
-  color: #444;
-  font-size: 2em;
-}
-.presentationpage .block-2 h2 {
-  line-height: 1.25em;
-  font-size: 1.5em;
-  background: #fff;
-  color: #444;
-}
-.presentationpage .block-3 h1:before {
-  content: "1";
-}
-.presentationpage .block-4 h1:before {
-  content: "2";
-}
-.presentationpage .block-5 h1:before {
-  content: "3";
-}
-.presentationpage .block-6 h1:before {
-  content: "4";
-}
-.presentationpage .block-7 h1:before {
-  content: "5";
-}
-.presentationpage .block-8 h1:before {
-  content: "6";
-}
-.presentationpage .block-9 h1:before {
-  content: "7";
-}
-.presentationpage .block-10 h1:before {
-  content: "8";
-}
-.presentationpage .block-11 h1:before {
-  content: "9";
-}
-.presentationpage .block-12 h1:before {
-  content: "10";
-}
-.presentationpage .block-13 h1 {
-  color: #ff0066;
-  font-size: 4em;
-}
-@media (max-width: 479px) {
-  .presentationpage .block-13 h1 {
-    font-size: 3em;
-  }
-}
-.presentationpage .block-13 h2 {
-  background: #fff;
-  color: #444;
-}
-.presentationpage .block-13 h1 {
-  padding-left: 0;
-}
-.presentationpage .block-14 {
-  background: #eee;
-  color: #444;
-}
-.presentationpage .block-14 ol > li:before {
-  background: #444;
-}
-.presentationpage .block-14 ol:nth-of-type(2) > li:before {
-  background: #ff0066;
-}
-.presentationpage .block-14 h3:nth-of-type(2) {
-  color: #ff0066;
-}
-.presentationpage .block-14 h1 {
-  color: #ff0066;
-  font-size: 4em;
-}
-@media (max-width: 479px) {
-  .presentationpage .block-14 h1 {
-    font-size: 3em;
-  }
-}
-.presentationpage .block-14 h2 {
-  padding: 0;
-}
-.presentationpage .block-14 h2 h1 {
-  color: #444;
-  font-size: 2em;
-  margin-top: 2em;
-  text-align: center;
-}
-.presentationpage .block-14 h1 {
-  padding-left: 0;
-}
-.presentationpage .block-15 {
-  text-align: center;
-  background: #ff0066;
-}
-.presentationpage .block-15 h1 {
-  color: #fff;
-  font-size: 4em;
-}
-@media (max-width: 479px) {
-  .presentationpage .block-15 h1 {
-    font-size: 3em;
-  }
-}
-.presentationpage .block-15 h2 {
+.presentationpage > div h2 {
   line-height: 1em;
-  word-wrap: break-word;
+  font-weight: 400;
+  margin-top: 3em;
 }
-.presentationpage .block-15 h2 a {
-  color: #fff;
-  font-size: 2em;
-  text-decoration: none;
-  font-weight: 200;
+.presentationpage > div h2:nth-of-type(1) {
+  margin-top: 0;
 }
-.presentationpage .block-15 h1 {
+.presentationpage > div img {
+  width: 30%;
+  float: right;
+  margin: 4em 0 1em 2em;
+}
+.presentationpage > div img:nth-of-type(2N+1) {
+  float: left;
+  margin: 4em 2em 1em 0;
+}
+.presentationpage .noaccountfooter {
   padding-left: 0;
+  padding-right: 0;
 }

@@ -112,7 +112,7 @@ namespace CM.Javascript {
                 + SR.HTML_CIVIL_MONEY_HONOUR_CODE);
 
             form.H3(" ");
-            var button = form.Div().Button(SR.LABEL_CREATE_MY_ACCOUNT);
+            var button = form.Div("button-row").Button(SR.LABEL_CREATE_MY_ACCOUNT, string.Empty, className: "green-button");
             button.Style.Display = Display.None;
             pass2.OnChange = (e) => {
                 if (pass1.Value == pass2.Value) {
@@ -126,8 +126,9 @@ namespace CM.Javascript {
             string lastCheckedID = null;
             AsyncRequest<FindAccountRequest> dupeSearch = null;
             var progress = new Feedback(Element, big: true);
-            var returnButtons = Element.Div();
             var serverStatus = Element.Div("statusvisual");
+            var returnButtons = Element.Div();
+          
             button.OnClick = (e) => {
                 if (ISO31662.GetName(region.Value) == null) {
                     _RegionFeedback.Set(Assets.SVG.Warning, FeedbackType.Error, SR.LABEL_PLEASE_SELECT_YOUR_REGION);

@@ -51,14 +51,14 @@ namespace CM.Javascript {
 
         private HTMLAnchorElement _Voting;
 
-        private bool _IsInitialPageLoad;
+        private bool _IsInitialPageLoadOrBackButton;
 
         public App() {
             Client = new Client();
             Client.PeerStateChanged += Client_PeerStateChanged;
             //Window.OnHashChange = CheckLocation;
             Window.OnPopState = CheckLocation;
-            _IsInitialPageLoad = true;
+            _IsInitialPageLoadOrBackButton = true;
 
             string lang = null;
             if (Window.LocalStorage != null)
@@ -83,7 +83,26 @@ namespace CM.Javascript {
             // }
             // Console.WriteLine(s.ToString());
         }
-
+        //private bool OnError(string message, string url, int lineNumber, int columnNumber, object error) {
+        //    try {
+        //        Client.QueryAuthoritiveServer(new AsyncRequest<Client.HttpRequest>() {
+        //            Item = new Client.HttpRequest("/api/log-error") {
+        //                Post = JSON.Stringify(new {
+        //                    Browser = Window.Navigator.UserAgent,
+        //                    Url = url,
+        //                    Message = message,
+        //                    Line = lineNumber,
+        //                    Col = columnNumber,
+        //                    Data = error,
+        //                })
+        //            },
+        //            OnComplete = (res) => {
+        //
+        //            }
+        //        });
+        //    } catch { }
+        //    return false;
+        //}
         public Page CurrentPage {
             get { return _CurrentPage; }
             set {
@@ -213,9 +232,9 @@ namespace CM.Javascript {
                 newPage.Build();
                 newPage.IsBuilt = true;
             }
-            if (!_IsInitialPageLoad)
+            if (!_IsInitialPageLoadOrBackButton)
                 Window.History.PushState(null, newPage.Title, newPage.Url);
-            _IsInitialPageLoad = false;
+            _IsInitialPageLoadOrBackButton = false;
             Window.Document.Title = newPage.Title;
             _CurrentHash = Window.Location.PathName;
             _CurrentPage = newPage;
@@ -247,6 +266,7 @@ namespace CM.Javascript {
         private void CheckLocation(Event ev) {
             if (_CurrentHash == Window.Location.PathName)
                 return;
+            _IsInitialPageLoadOrBackButton |= (ev != null);
             Navigate(Window.Location.PathName);
         }
 
@@ -261,7 +281,7 @@ namespace CM.Javascript {
                 }
             }
             _NumPeers.InnerHTML = connected.ToString() +
-                (connected > 1 ? Assets.SVG.CircleTick.ToString(10, 10, "#288600")
+                (connected > 1 ? Assets.SVG.CircleTick.ToString(10, 10, Assets.SVG.STATUS_GREEN_COLOR)
                 : Assets.SVG.Warning.ToString(10, 10, "#cc0000"));
         }
         private void CloseAllDialogs() {

@@ -22,17 +22,22 @@ if(window.Worker) {
                 worker.onmessage = function (msg) {
                     var status = JSON.parse(msg.data);
                     if(status.error) {
-                        e.completed(CM.CMResult.e_Crypto_Invalid_Password.$clone());
+                        e.Completed(CM.CMResult.E_Crypto_Invalid_Password.$clone());
                         console.log('BeginRFC2898: '+status.error);
                     } else if (status.result) {
-                        r.output = status.result;
-                        e.completed(CM.CMResult.s_OK.$clone());
+                        r.Output = status.result;
+                        e.Completed(CM.CMResult.S_OK.$clone());
                     }
                 };
-                var args =  {'command': 'aes-decrypt', key: r.key, iv: r.iV, input: r.input };
+                var args =  {'command': 'aes-decrypt', key: r.Key, iv: r.IV, input: r.Input };
                 worker.postMessage(JSON.stringify(args));
 } else {");
-            r.Output = CM.Cryptography.AES.Decrypt(r.Input, r.Key, r.IV);
+            try {
+                r.Output = CM.Cryptography.AES.Decrypt(r.Input, r.Key, r.IV);
+                e.Completed(CM.CMResult.S_OK);
+            } catch {
+                e.Completed(CM.CMResult.E_Crypto_Invalid_Password);
+            }
             Bridge.Script.Write(@"}");
         }
 
@@ -44,14 +49,14 @@ if(window.Worker) {
                 worker.onmessage = function (msg) {
                     var status = JSON.parse(msg.data);
                     if(status.error) {
-                        e.completed(CM.CMResult.e_Crypto_Invalid_Password.$clone());
+                        e.Completed(CM.CMResult.E_Crypto_Invalid_Password.$clone());
                         console.log('BeginRFC2898: '+status.error);
                     } else if (status.result) {
-                        r.output = status.result;
-                        e.completed(CM.CMResult.s_OK.$clone());
+                        r.Output = status.result;
+                        e.Completed(CM.CMResult.S_OK.$clone());
                     }
                 };
-                var args =  {'command': 'aes-encrypt', key: r.key, iv: r.iV, input: r.input };
+                var args =  {'command': 'aes-encrypt', key: r.Key, iv: r.IV, input: r.Input };
                 worker.postMessage(JSON.stringify(args));
 } else {
 ");
@@ -68,15 +73,15 @@ if(window.Worker) {
                 worker.onmessage = function (msg) {
                     var status = JSON.parse(msg.data);
                     if(status.error) {
-                        e.completed(CM.CMResult.e_Crypto_Rfc2898_General_Failure.$clone());
+                        e.Completed(CM.CMResult.E_Crypto_Rfc2898_General_Failure.$clone());
                         console.log('BeginRFC2898: '+status.error);
                     } else if (status.result) {
-                        r.outputIV = status.result.iv;
-                        r.outputKey = status.result.key;
-                        e.completed(CM.CMResult.s_OK.$clone());
+                        r.OutputIV = status.result.iv;
+                        r.OutputKey = status.result.key;
+                        e.Completed(CM.CMResult.S_OK.$clone());
                     }
                 };
-                var args =  {'command': 'rfc2898', password: r.password, salt: r.salt, iterations: r.iterations };
+                var args =  {'command': 'rfc2898', password: r.Password, salt: r.Salt, iterations: r.Iterations };
                 worker.postMessage(JSON.stringify(args));
 } else {
 ");
@@ -95,10 +100,10 @@ if (window.Worker) {
                 worker.onmessage = function (msg) {
                     var status = JSON.parse(msg.data);
                     if(status.error) {
-                        e.completed(CM.CMResult.e_Crypto_RSA_Key_Gen_Failure.$clone());
+                        e.Completed(CM.CMResult.E_Crypto_RSA_Key_Gen_Failure.$clone());
                     } else if (status.result) {
-                        r.output = status.result;
-                        e.completed(CM.CMResult.s_OK.$clone());
+                        r.Output = status.result;
+                        e.Completed(CM.CMResult.S_OK.$clone());
                     }
                 };
                 // No window.crypto in web workers, have to do it here..
@@ -129,8 +134,8 @@ if (window.Worker) {
                 var n = crunch.mul(p, q);
                 var f = crunch.mul(crunch.decrement(p), crunch.decrement(q));
                 var d = crunch.cut(crunch.inv(exp, f));
-                r.output = { d:d, modulus: n, exponent:exp };
-                e.completed(CM.CMResult.s_OK.$clone());
+                r.Output = { D: d, Modulus: n, Exponent: exp };
+                e.Completed(CM.CMResult.S_OK.$clone());
 }
             ");
         }
@@ -139,6 +144,12 @@ if (window.Worker) {
             var hashed = CM.Cryptography.SHA256.ComputeHash(e.Item.Input);
             var priv = e.Item.PrivateKey;
             var pub = e.Item.PublicKey;
+            if (priv.Length != pub.Length) {
+                // If the key lengths don't match then AES decryption padding worked by chance
+                // with the wrong outcome.
+                e.Completed(CMResult.E_Crypto_Invalid_Password);
+                return;
+            }
             var c = CM.Cryptography.RSA.EMSA_PKCS1_v1_5Encode_256(hashed, priv.Length);
             byte[] sig = null;
             Bridge.Script.Write(@"

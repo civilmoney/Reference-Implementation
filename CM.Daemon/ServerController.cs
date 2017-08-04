@@ -42,6 +42,7 @@ namespace CM.Daemon {
                     System.IO.FileMode.OpenOrCreate,
                     System.IO.FileAccess.ReadWrite,
                     System.IO.FileShare.ReadWrite));
+            _LogWriter.BaseStream.SetLength(0);
         }
 
         public async Task<bool> CheckForUpdate(CancellationToken token) {
@@ -50,7 +51,7 @@ namespace CM.Daemon {
             string versionInfo = null;
 
             try {
-                var req = System.Net.HttpWebRequest.CreateHttp("https://" + AUTHORITATIVE_DOMAIN + "/api/get-release-info/"+ NETCOREVERSION + "/server");
+                var req = System.Net.HttpWebRequest.CreateHttp("https://" + AUTHORITATIVE_DOMAIN + "/api/get-release-info/" + NETCOREVERSION + "/server");
                 var res = await req.GetResponseAsync() as System.Net.HttpWebResponse;
                 if (res.StatusCode != System.Net.HttpStatusCode.OK) {
                     Log("Update check received status code {0}", res.StatusCode);
@@ -201,26 +202,6 @@ namespace CM.Daemon {
             return s.ToString();
         }
 
-        private void FlushLog() {
-            lock (_LogWriter) {
-                int idx = _LogIndex % _LogLines.Length;
-                if (idx == _LastLogWriteIndex)
-                    return;
-                _LogWriter.BaseStream.SetLength(0);
-                for (int i = idx - 1; i >= 0; i--) {
-                    if (_LogLines[i] == null)
-                        break;
-                    _LogWriter.Write(_LogLines[i] + "\r\n");
-                }
-                for (int i = _LogLines.Length - 1; i > idx; i--) {
-                    if (_LogLines[i] == null)
-                        break;
-                    _LogWriter.Write(_LogLines[i] + "\r\n");
-                }
-                _LogWriter.Flush();
-                _LastLogWriteIndex = idx;
-            }
-        }
 
         private Version GetInstalledVersion() {
             var ar = System.IO.Directory.GetDirectories(AppContext.BaseDirectory);
@@ -259,6 +240,11 @@ namespace CM.Daemon {
             Console.WriteLine(line);
             _LogLines[_LogIndex % _LogLines.Length] = line;
             _LogIndex++;
+            try {
+                lock (_LogWriter)
+                    _LogWriter.Write(line + "\r\n");
+               
+            } catch { }
         }
 
         private async void MonitorThread(object o) {
@@ -307,7 +293,6 @@ namespace CM.Daemon {
                             SendFailureNotification(fault);
                             isAwaitingFixedBuild = true;
                         }
-                        FlushLog();
                     }
                     if (!isAwaitingFixedBuild)
                         StartServer(version);
@@ -318,13 +303,15 @@ namespace CM.Daemon {
 
                 if ((time.Elapsed - lastLogFlush).TotalSeconds > 5) {
                     lastLogFlush = time.Elapsed;
-                    FlushLog();
+                    try {
+                        lock(_LogWriter)
+                        _LogWriter.Flush();
+                    } catch { }
                 }
 
                 Thread.Sleep(1000);
             }
 
-            FlushLog();
         }
 
         private void Proc_ErrorDataReceived(object sender, System.Diagnostics.DataReceivedEventArgs e) {

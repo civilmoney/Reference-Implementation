@@ -23,6 +23,8 @@ namespace CM.Javascript {
 
         public bool IsBuilt;
 
+        private static HTMLDivElement _Encoder = new HTMLDivElement();
+
         public Page() {
             Element = new HTMLDivElement();
         }
@@ -46,7 +48,9 @@ namespace CM.Javascript {
         /// </summary>
         public static string HtmlEncode(string s) {
             if (s == null) return "";
-            return s.Replace("<", "&lt;").Replace(">", "&gt;");
+            // Javascript is a single threaded environment, so this shared element is fine.
+            _Encoder.TextContent = s;
+            return _Encoder.InnerHTML.Replace("\"", "&quot;");
         }
         /// <summary>
         /// Called when the page is being opened.

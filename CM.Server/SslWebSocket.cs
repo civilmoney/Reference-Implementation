@@ -171,6 +171,7 @@ namespace CM.Server {
             }
 
             switch (_CurrentFrame.OpCode) {
+               
                 case OpCode.Continuation:
                 case OpCode.Binary:
                 case OpCode.Text:
@@ -227,9 +228,15 @@ namespace CM.Server {
                     break;
 
                 case OpCode.Pong:
-                    // a uni-directional heartbeat;
-                    goto skipPingOrPong;
                 case OpCode.Ping: {
+                        if (_CurrentFrame.Length > 1024) {
+                            // Somebody's messsing with us.
+                            State = WebSocketState.Aborted;
+                            res.Count = 0;
+                            res.MessageType = WebSocketMessageType.Close;
+                            _CurrentFrame.Length = 0;
+                            return res;
+                        }
                         byte[] tmp = new byte[_CurrentFrame.Length];
                         int cur = 0;
                         while (cur < tmp.Length) {
@@ -238,8 +245,21 @@ namespace CM.Server {
                             if (prev == cur)
                                 break;
                         }
-                        await Write(OpCode.Pong, tmp, 0, tmp.Length, true, token);
+                        if (_CurrentFrame.OpCode == OpCode.Ping) {
+                            await Write(OpCode.Pong, tmp, 0, tmp.Length, true, token);
+                        } else {
+                            // This is a uni-directional heartbeat, no response is expected.
+                        }
+                        _CurrentFrame.Length = 0;
                         goto skipPingOrPong;
+                    }
+                default: {
+                        Debug.WriteLine($"Bad websocket opcode {_CurrentFrame.OpCode}");
+                        State = WebSocketState.Aborted;
+                        res.Count = 0;
+                        res.MessageType = WebSocketMessageType.Close;
+                        _CurrentFrame.Length = 0;
+                        return res;
                     }
             }
             return res;
@@ -311,12 +331,12 @@ namespace CM.Server {
                 }
                 State = WebSocketState.Open;
             } else {
-                s.CRLF("HTTP/1.1 101 400 Bad Request");
+                s.CRLF("HTTP/1.1 400 Bad Request");
             }
             s.CRLF("");
             try {
                 await ctx.WriteAsync(s.ToString(), token);
-                return true;
+                return State == WebSocketState.Open;
             } catch {
                 return false;
             }
@@ -379,11 +399,12 @@ namespace CM.Server {
         /// </summary>
         public static async Task<SslWebSocket> TryConnectAsync(IPEndPoint ep, string hostName, string protocol, CancellationToken token) {
             SslStream ssl;
-            var c = new TcpClient();
+            var c = new Socket(ep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             c.SendTimeout = 10000;
             const int connectTimeout = 5 * 1000;
          
             try {
+#if !FULL_CLR
                 var connectTask = c.ConnectAsync(ep.Address, ep.Port);
                 using (var waitCancel = new CancellationTokenSource()) {
                     await Task.WhenAny(connectTask, Task.Delay(connectTimeout, waitCancel.Token));
@@ -393,25 +414,28 @@ namespace CM.Server {
                     c.Dispose();
                     return null;
                 }
-                // Authoritative civil.money servers will not have a matching
-                ssl = new SslStream(c.GetStream(), false, (sender, cert, chain, errors) => {
-                    return cert.Subject.IndexOf("CN=*." + DNS.UNTRUSTED_DOMAIN + ",") > -1
-                    || cert.Subject.IndexOf("CN=*." + DNS.AUTHORITATIVE_DOMAIN + ",") > -1;
+#else
+                c.Connect(ep.Address, ep.Port);
+#endif
+                ssl = new SslStream(new NetworkStream(c), false, (sender, cert, chain, errors) => {
+                    return true; // All peers are untrusted anyway, so we don't care what their certificate says.
                 });
             } catch {
-                c.Client.Dispose();
+                c.Dispose();
                 return null;
             }
             try {
-                await ssl.AuthenticateAsClientAsync(hostName, null, System.Security.Authentication.SslProtocols.Tls
-                    | System.Security.Authentication.SslProtocols.Tls11 | System.Security.Authentication.SslProtocols.Tls12,
+                await ssl.AuthenticateAsClientAsync(hostName, null,
+                    System.Security.Authentication.SslProtocols.Tls 
+                    | System.Security.Authentication.SslProtocols.Tls11
+                    | System.Security.Authentication.SslProtocols.Tls12,
                     false);
             } catch {
                 ssl.Dispose();
-                c.Client.Dispose();
+                c.Dispose();
                 return null;
             }
-            var ctx = new SslWebContext(ssl, c, null, (IPEndPoint)c.Client.RemoteEndPoint);
+            var ctx = new SslWebContext(ssl, c, null);
             var s = new StringBuilder();
             s.CRLF("GET / HTTP/1.1");
             s.CRLF("Host: " + hostName);
@@ -529,36 +553,49 @@ namespace CM.Server {
             public bool RSV2;
             public bool RSV3;
 
+            private byte[] _Head = new byte[8];
+
             /// <exception cref="ObjectDisposedException"/>
             public async Task ReadAsync(SslWebContext ctx, System.Threading.CancellationToken token) {
-                var b = await ctx.ReadByte(token).ConfigureAwait(false);
+                int read = await ctx.ReadAsync(_Head, 0, 2, token).ConfigureAwait(false);
+                if (read != 2 && ctx.IsConnected)
+                    throw new System.Net.ProtocolViolationException("Didn't get 2 bytes from remote WebSocket.");
+                var b = _Head[0];
                 Fin = (b & 0x80) != 0;
                 RSV1 = (b & 0x40) != 0;
                 RSV2 = (b & 0x20) != 0;
                 RSV3 = (b & 0x10) != 0;
                 OpCode = (OpCode)(b & 0xF);
-                b = await ctx.ReadByte(token).ConfigureAwait(false);
+                b = _Head[1];
                 IsMasked = (b & 0x80) != 0;
                 long length = (b & 0x7f);
                 if (length == 0x7e) {
-                    length = await ctx.ReadByte(token).ConfigureAwait(false) << 8
-                        | await ctx.ReadByte(token).ConfigureAwait(false);
+                    read = await ctx.ReadAsync(_Head, 0, 2, token).ConfigureAwait(false);
+                    if (read != 2 && ctx.IsConnected)
+                        throw new System.Net.ProtocolViolationException("Didn't get 2 bytes from remote WebSocket.");
+                    length = _Head[0] << 8 | _Head[1];
                 } else if (length == 0x7f) {
-                    length = await ctx.ReadByte(token).ConfigureAwait(false) << 56
-                         | await ctx.ReadByte(token).ConfigureAwait(false) << 48
-                         | await ctx.ReadByte(token).ConfigureAwait(false) << 40
-                         | await ctx.ReadByte(token).ConfigureAwait(false) << 32
-                         | await ctx.ReadByte(token).ConfigureAwait(false) << 24
-                         | await ctx.ReadByte(token).ConfigureAwait(false) << 16
-                         | await ctx.ReadByte(token).ConfigureAwait(false) << 8
-                         | await ctx.ReadByte(token).ConfigureAwait(false);
+                    read = await ctx.ReadAsync(_Head, 0, 8, token).ConfigureAwait(false);
+                    if (read != 8 && ctx.IsConnected)
+                        throw new System.Net.ProtocolViolationException("Didn't get 8 bytes from remote WebSocket.");
+                    length = _Head[0] << 56
+                         | _Head[1] << 48
+                         | _Head[2] << 40
+                         | _Head[3] << 32
+                         | _Head[4] << 24
+                         | _Head[5] << 16
+                         | _Head[6] << 8
+                         | _Head[7];
                 }
                 Length = length;
                 if (IsMasked) {
-                    MaskingKey = await ctx.ReadByte(token).ConfigureAwait(false) << 24
-                         | await ctx.ReadByte(token).ConfigureAwait(false) << 16
-                         | await ctx.ReadByte(token).ConfigureAwait(false) << 8
-                         | await ctx.ReadByte(token).ConfigureAwait(false);
+                    read = await ctx.ReadAsync(_Head, 0, 4, token).ConfigureAwait(false);
+                    if (read != 4 && ctx.IsConnected)
+                        throw new System.Net.ProtocolViolationException("Didn't get 4 bytes from remote WebSocket.");
+                    MaskingKey = _Head[0] << 24
+                         | _Head[1] << 16
+                         | _Head[2] << 8
+                         | _Head[3];
                 } else {
                     MaskingKey = 0;
                 }
@@ -603,7 +640,7 @@ namespace CM.Server {
             }
         }
 
-        #region IDisposable Support
+#region IDisposable Support
 
         private bool _IsDisposed;
 
@@ -629,6 +666,6 @@ namespace CM.Server {
             Dispose(true);
         }
 
-        #endregion IDisposable Support
+#endregion IDisposable Support
     }
 }

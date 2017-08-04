@@ -23,7 +23,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="untrusted-server-pass12345678.pfx;..\CM.Javascript\www\webworkers.js;..\CM.Javascript\www\default.htm;..\CM.Javascript\www\CM.Min.js;..\CM.Javascript\www\cm.min.css;..\CM.Javascript\www\cmlogo.svg;..\CM.Javascript\www\change.svg;..\CM.Javascript\www\civilmoneylogos.svg;..\CM.Javascript\www\datadistribution.svg;..\CM.Javascript\www\demurrage.svg;..\CM.Javascript\www\disputes.svg;..\CM.Javascript\www\hardtimes.svg;..\CM.Javascript\www\nobanks.svg;..\CM.Javascript\www\nodebt.svg;..\CM.Javascript\www\taxation.svg;..\CM.Javascript\www\ubi.svg;..\CM.Javascript\www\valuetime.svg;..\CM.Javascript\www\voting.svg;..\CM.Javascript\www\whatif.svg;..\CM.Javascript\www\work.svg;..\CM.Javascript\www\favicon.ico" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
+    <EmbeddedResource Include="untrusted-server-pass12345678.pfx;..\CM.Javascript\www\webworkers.js;..\CM.Javascript\www\default.htm;..\CM.Javascript\www\CM.Min.js;..\CM.Javascript\www\cm.min.css;..\CM.Javascript\www\*.svg;..\CM.Javascript\www\favicon.ico" Exclude="bin\**;obj\**;**\*.xproj;packages\**;@(EmbeddedResource)" />
     <ProjectReference Include="..\CM\CM.csproj" />
   </ItemGroup>
 

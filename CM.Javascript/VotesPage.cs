@@ -55,8 +55,8 @@ namespace CM.Javascript {
             for (int i = 0; i < ar.Length; i++) {
                 var p = ar[i];
                 // these will come in as strings, even though the CLR type is DateTime
-                p.CloseUtc = Helpers.DateFromISO8601((string)(object)p.CloseUtc);
-                p.CreatedUtc = Helpers.DateFromISO8601((string)(object)p.CreatedUtc);
+                p.CloseUtc = Helpers.DateFromISO8601(p.CloseUtc.As<string>());
+                p.CreatedUtc = Helpers.DateFromISO8601(p.CreatedUtc.As<string>());
             }
         }
 
@@ -102,15 +102,15 @@ namespace CM.Javascript {
                             var forPer = (tot != 0 ? p.For / tot : 0) * 100;
                             var againstPer = (tot != 0 ? p.Against / tot : 0) * 100;
                             var ineligiblePer = ((tot + p.Ineligible) != 0 ? p.Ineligible / tot : 0) * 100;
-                            votesFor.Div(null, "<span>" + forPer + "%</span>").Style.Height = forPer + "%";
+                            votesFor.Div(null, "<span>" + forPer.ToString("N1") + "%</span>").Style.Height = forPer + "%";
                             votesFor.H3(p.For.ToString("N0") + "<br/>" + SR.LABEL_VOTE_FOR);
 
                             var votesAgainst = graph.Div("against");
-                            votesAgainst.Div(null, "<span>" + againstPer + "%</span>").Style.Height = againstPer + "%";
+                            votesAgainst.Div(null, "<span>" + againstPer.ToString("N1") + "%</span>").Style.Height = againstPer + "%";
                             votesAgainst.H3(p.Against.ToString("N0") + "<br/>" + SR.LABEL_VOTE_AGAINST);
 
                             var votesIneligible = graph.Div("ineligible");
-                            votesIneligible.Div(null, "<span>" + ineligiblePer + "%</span>").Style.Height = ineligiblePer + "%";
+                            votesIneligible.Div(null, "<span>" + ineligiblePer.ToString("N1") + "%</span>").Style.Height = ineligiblePer + "%";
                             votesIneligible.H3(p.Ineligible.ToString("N0") + "<br/>" + SR.LABEL_VOTE_INELIGIBLE);
 
                             var buttons = row.Div("button-row");
@@ -146,10 +146,13 @@ namespace CM.Javascript {
                 }
             });
         }
+        HTMLElement _Top;
 
         private void BuildVotePage() {
+            Element.ClassName = "castvotepage";
             var div = Element.Div();
-            div.H1(String.Format(SR.TITLE_PROPOSITION_NUMBER, _Proposition.ToString(NumberFormatting)));
+            _Top = div.Div("top");
+            _Top.H1(String.Format(SR.TITLE_PROPOSITION_NUMBER, _Proposition.ToString(NumberFormatting)));
 
             _MainFeedback = new Feedback(div, big: true);
             _MainFeedback.Set(Assets.SVG.Wait, FeedbackType.Default, SR.LABEL_STATUS_CONTACTING_NETWORK);
@@ -186,9 +189,11 @@ namespace CM.Javascript {
         }
         private void RenderPopositionPage(Schema.VotingProposition p) {
             var div = Element.Div();
+           
             var details = GetBestDetails(p);
-            div.H2(HtmlEncode(details.Title));
-            div.Div(null, HtmlEncode(details.Description));
+
+            _Top.H2(HtmlEncode(details.Title));
+            _Top.Div(null, HtmlEncode(details.Description));
             var row = div.Div("row");
             var left = row.Div("cell-half");
             var right = row.Div("cell-half");
@@ -224,10 +229,13 @@ namespace CM.Javascript {
 
             var rdoFor = right.RadioButton("vote", SR.LABEL_VOTE_FOR);
             var rdoAgainst = right.RadioButton("vote", SR.LABEL_VOTE_AGAINST);
-            div.H3(SR.LABEL_SECURITY);
+          //  div.H3(SR.LABEL_SECURITY);
 
-            var ch = div.Div("confirm").CheckBox(SR.HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS);
+   
             var reminder = div.Div("reminder", SR.LABEL_CIVIL_MONEY_SECURITY_REMINDER);
+            var confirm = div.Div("confirm");
+            var ch = confirm.CheckBox(SR.HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS);
+
 
             var passRow = div.Div("row");
             passRow.Style.Display = Display.None;
@@ -333,7 +341,8 @@ namespace CM.Javascript {
                     SR.LABEL_STATUS_SIGNING_INFORMATION + " ...");
 
                 account.Account.SignData(sign, JSCryptoFunctions.Identity);
-            });
+            }, className: "green-button");
+
             submit.Style.Display = Display.None;
             account.OnAccountChanged = (a) => {
                 if (a == null) {
@@ -369,6 +378,8 @@ namespace CM.Javascript {
                 passRow.Style.Display = ch.Checked ? Display.Block : Display.None;
                 submit.Style.Display = ch.Checked ? Display.Inline : Display.None;
                 reminder.Style.Display = ch.Checked ? Display.None : Display.Block;
+                confirm.Style.Display = ch.Checked ? Display.None : Display.Block;
+                pass.Focus();
             };
             pass.OnEnterKey(submit.Click);
         }

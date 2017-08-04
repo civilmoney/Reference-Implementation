@@ -39,6 +39,7 @@ namespace CM.Javascript {
 
         public override void Build() {
             Element.ClassName = "transactionpage";
+            Element.Div("top").H1(SR.TITLE_TRANSACTION_DETAILS);
             _MainFeedback = new Feedback(Element);
             _MainFeedback.Set(Assets.SVG.Wait, FeedbackType.Default, SR.LABEL_STATUS_CONTACTING_NETWORK);
             _Holder = Element.Div();

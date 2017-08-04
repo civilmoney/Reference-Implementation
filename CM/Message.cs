@@ -326,11 +326,11 @@ namespace CM {
 #endif
             var str = Find(key);
             if (String.IsNullOrWhiteSpace(str)) {
-#if JAVASCRIPT
-                // Bridge bug workaround (enumeration don't have safe defaults)
-                if(name=="CM.Schema.PayeeStatus"||name=="CM.Schema.PayerStatus")
-                 Bridge.Script.Write("return 0;");
-#endif
+//#if JAVASCRIPT
+//                // Bridge bug workaround (enumeration don't have safe defaults)
+//                if(name=="CM.Schema.PayeeStatus"||name=="CM.Schema.PayerStatus")
+//                 Bridge.Script.Write("return 0;");
+//#endif
                 return default(T);
             }
             object o = null;
@@ -394,11 +394,11 @@ namespace CM {
                         Schema.PayerStatus v;
                         if (!Enum.TryParse(str, true, out v))
                             throw new MessageValueException(key);
-                        o = v;
-                        // Bridge enumeration cast bug workaround
-#if JAVASCRIPT
-                       Bridge.Script.Write("return o;");
-#endif
+                       o = v;
+//                        // Bridge enumeration cast bug workaround
+//#if JAVASCRIPT
+//                       Bridge.Script.Write("return o;");
+//#endif
                     }
                     break;
 
@@ -407,10 +407,10 @@ namespace CM {
                         if (!Enum.TryParse(str, true, out v))
                             throw new MessageValueException(key);
                         o = v;
-                        // Bridge enumeration cast bug workaround
-#if JAVASCRIPT
-                       Bridge.Script.Write("return o;");
-#endif
+//                        // Bridge enumeration cast bug workaround
+//#if JAVASCRIPT
+//                       Bridge.Script.Write("return o;");
+//#endif
                     }
                     break;
                 default:

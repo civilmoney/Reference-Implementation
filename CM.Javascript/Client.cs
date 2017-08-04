@@ -527,12 +527,12 @@ namespace CM.Javascript {
             IStorable item = null;
             if (path.StartsWith(Constants.PATH_ACCNT, StringComparison.OrdinalIgnoreCase)) {
                 Account a = m.Cast<Account>();
-                if (!p.DesiredSubscribedIDs.Contains(a.ID))
+                if (!p.DesiredSubscribedIDs.Contains(a.ID.ToLower()))
                     return; // no longer subscribed.
                 item = a;
             } else if (path.StartsWith(Constants.PATH_TRANS, StringComparison.OrdinalIgnoreCase)) {
                 Transaction t = m.Cast<Transaction>();
-                if (!p.DesiredSubscribedIDs.Contains(t.PayeeID) && !p.DesiredSubscribedIDs.Contains(t.PayerID))
+                if (!p.DesiredSubscribedIDs.Contains(t.PayeeID.ToLower()) && !p.DesiredSubscribedIDs.Contains(t.PayerID.ToLower()))
                     return; // no longer subscribed.
                 item = t;
             }
@@ -699,8 +699,13 @@ namespace CM.Javascript {
                 // Use https://*.civil.money if available, otherwise, untrusted-server.com.
                 var domain = server.IndexOf(DNS.AUTHORITATIVE_DOMAIN) == -1 ? DNS.EndpointToUntrustedDomain(server, true) : server;
                 CurrentAuthoritativeServer = "https://" + domain;
-                r.Open("GET", "https://" + domain + url, true);
-                r.Send();
+                if (onResult.Item.Post == null) {
+                    r.Open("GET", "https://" + domain + url, true);
+                    r.Send();
+                } else {
+                    r.Open("POST", "https://" + domain + url, true);
+                    r.Send(onResult.Item.Post);
+                }
             } catch {
                 QueryAuthoritiveServerTryNextOrGiveUp(tried, r, onResult);
             }
@@ -798,7 +803,7 @@ namespace CM.Javascript {
             public int Attempts;
 
             public string Content;
-
+            public string Post;
             public string Status;
 
             public int StatusCode;

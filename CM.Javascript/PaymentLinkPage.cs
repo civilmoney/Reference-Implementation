@@ -62,7 +62,7 @@ namespace CM.Javascript {
             _Form = Element.Div();
             _POS = Element.Div("pos");
             _POS.Style.Display = Display.None;
-            _Form.H1(String.Format(SR.LABEL_LINK_FOR_PAYMENT_TO, HtmlEncode(_ID)));
+            _Form.Div("top").H1(String.Format(SR.LABEL_LINK_FOR_PAYMENT_TO, HtmlEncode(_ID)));
             var descRO = _Form.H3(SR.LABEL_MEMO).CheckBox(SR.LABEL_READONLY);
             descRO.Checked = _Link.IsMemoReadOnly = true;
             descRO.OnChange = (e) => {
@@ -116,7 +116,7 @@ namespace CM.Javascript {
             row = _Form.Div("button-row");
             _POSButton = row.Button(SR.LABEL_POINT_OF_SALE, (e) => {
                 ShowPOS();
-            });
+            }, className: "green-button");
             _POSButton.Disabled = true;
 
             row.Button(SR.LABEL_PREVIEW, (e) => {
@@ -128,6 +128,8 @@ namespace CM.Javascript {
             row.Button(SR.LABEL_CANCEL, "/" + _ID);
 
             _Href = _Form.Div("linkoutput");
+
+            _Form.Div(null).Span("<a href=\"/civilmoneylogos.svg\" target=\"_blank\">Acceptance Logos</a>");
 
             OnLinkChanged();
 
@@ -152,7 +154,7 @@ namespace CM.Javascript {
             App.Identity.Client.PeerNotifiesReceived -= Client_PeerNotifiesReceived;
         }
         private void Client_PeerNotifiesReceived(PeerNotifyArgs arg) {
-            if (_POS.Style.Display != Display.Block)
+            if (_POS.Style.Display.As<Display>() != Display.Block)
                 return;
 
             // We're looking out for new transactions having a matching tag and amount, or if

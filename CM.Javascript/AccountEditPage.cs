@@ -196,10 +196,12 @@ namespace CM.Javascript {
             var pass2 = newPassFields.Password();
             var pass2Feedback = new Feedback(newPassFields);
 
-            _Form.H3(SR.LABEL_SECURITY);
-            _Form.Div("reminder", SR.LABEL_CIVIL_MONEY_SECURITY_REMINDER);
-            var ch = _Form.Div("confirm").CheckBox(SR.HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS);
+           // _Form.H3(SR.LABEL_SECURITY);
+            var reminder = _Form.Div("reminder", SR.LABEL_CIVIL_MONEY_SECURITY_REMINDER);
+            var confirm = _Form.Div("confirm");
+            var ch = confirm.CheckBox(SR.HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS);
 
+        
             var passAndSubmit = _Form.Div("row");
             passAndSubmit.Style.Display = Display.None;
             passAndSubmit.H3(SR.LABEL_SECRET_PASS_PHRASE);
@@ -220,8 +222,7 @@ namespace CM.Javascript {
                 }
                 pass2Feedback.Hide();
 
-                Account.Iso31662Region = region.Value;
-
+              
                 atts[AccountAttributes.IncomeEligibility_Key] =
                  rdoWorking.Checked ? AccountAttributes.IncomeEligibility_Working
                  : rdoLooking.Checked ? AccountAttributes.IncomeEligibility_LookingForWork
@@ -244,8 +245,13 @@ namespace CM.Javascript {
                         atts.Append(AccountAttributes.PushNotification_Key, _Notifications[i].Value.ToString());
                 }
 
-                Account.ReplaceAttributes(atts);
-                Account.UpdatedUtc = DateTime.UtcNow;
+                // Just in case the commit doesn't work, we want to use
+                // a COPY of the account data here for signing, otherwise
+                // we can end up appending a whole bunch of key changes.
+                var newAccount = new Account(Account.ToContentString());
+                newAccount.Iso31662Region = region.Value;
+                newAccount.ReplaceAttributes(atts);
+                newAccount.UpdatedUtc = DateTime.UtcNow;
 
                 _Form.Style.Display = Display.None;
                 buttonsRow.Style.Display = Display.None;
@@ -254,7 +260,7 @@ namespace CM.Javascript {
 
                 if (changePass.Checked) {
                     // PASSWORD/PRIVATE KEY CHANGE
-                    Account.ChangePasswordAndSign(new AsyncRequest<Schema.PasswordRequest>() {
+                    newAccount.ChangePasswordAndSign(new AsyncRequest<Schema.PasswordRequest>() {
                         Item = new Schema.PasswordRequest() {
                             NewPass = pass1.Value,
                             OldPass = pass.Value
@@ -278,14 +284,14 @@ namespace CM.Javascript {
                                 prog.SetMainGlyph(Assets.SVG.Wait);
                                 prog.Show();
                                 var put = new AsyncRequest<PutRequest>() {
-                                    Item = new PutRequest(Account) { UI = prog },
+                                    Item = new PutRequest(newAccount) { UI = prog },
                                     OnComplete = (sender) => {
                                         var req = sender as AsyncRequest<PutRequest>;
                                         req.Item.UpdateUIProgress();
                                         if (req.Result == CMResult.S_OK) {
                                             _MainFeedback.Set(Assets.SVG.CircleTick, FeedbackType.Success, SR.LABEL_STATUS_ACCOUNT_UPDATED_SUCCESSFULLY);
                                             var options = _ReturnButtons.Div("button-row center");
-                                            options.Button(SR.LABEL_GO_TO_YOUR_ACCOUNT, "/" + Account.ID);
+                                            options.Button(SR.LABEL_GO_TO_YOUR_ACCOUNT, "/" + newAccount.ID);
                                             prog.SetMainGlyph(Assets.SVG.CircleTick);
                                         } else {
                                             _MainFeedback.Set(Assets.SVG.CircleError,
@@ -315,13 +321,13 @@ namespace CM.Javascript {
                     }, JSCryptoFunctions.Identity);
                 } else {
                     // BASIC RE-SIGN
-                    Account.SignData(new AsyncRequest<Schema.DataSignRequest>() {
-                        Item = new Schema.DataSignRequest(Account.GetSigningData()) {
+                    newAccount.SignData(new AsyncRequest<Schema.DataSignRequest>() {
+                        Item = new Schema.DataSignRequest(newAccount.GetSigningData()) {
                             Password = System.Text.Encoding.UTF8.GetBytes(pass.Value)
                         },
                         OnComplete = (req) => {
                             if (req.Result == CMResult.S_OK) {
-                                Account.AccountSignature = req.Item.Transforms[0].Output;
+                                newAccount.AccountSignature = req.Item.Transforms[0].Output;
 
                                 _MainFeedback.Set(Assets.SVG.Wait,
                                     FeedbackType.Default,
@@ -332,7 +338,7 @@ namespace CM.Javascript {
                                 prog.SetMainGlyph(Assets.SVG.Wait);
                                 prog.Show();
                                 var put = new AsyncRequest<PutRequest>() {
-                                    Item = new PutRequest(Account) { UI = prog },
+                                    Item = new PutRequest(newAccount) { UI = prog },
                                     OnProgress = (sender) => {
                                         (sender as AsyncRequest<PutRequest>).Item.UpdateUIProgress();
                                     },
@@ -343,7 +349,7 @@ namespace CM.Javascript {
                                                 FeedbackType.Success,
                                                 SR.LABEL_STATUS_ACCOUNT_UPDATED_SUCCESSFULLY);
                                             var options = _ReturnButtons.Div("button-row center");
-                                            options.Button(SR.LABEL_GO_TO_YOUR_ACCOUNT, "/" + Account.ID);
+                                            options.Button(SR.LABEL_GO_TO_YOUR_ACCOUNT, "/" + newAccount.ID);
                                             prog.SetMainGlyph(Assets.SVG.CircleTick);
                                         } else {
                                             _MainFeedback.Set(Assets.SVG.Warning,
@@ -366,13 +372,16 @@ namespace CM.Javascript {
                         }
                     }, JSCryptoFunctions.Identity);
                 }
-            });
+            }, className: "green-button");
             submit.Style.Display = Display.None;
 
             buttonsRow.Button(SR.LABEL_CANCEL, "/" + Account.ID);
             ch.OnChange = (e) => {
                 passAndSubmit.Style.Display = ch.Checked ? Display.Block : Display.None;
                 submit.Style.Display = ch.Checked ? Display.Inline : Display.None;
+                reminder.Style.Display = ch.Checked ? Display.None : Display.Block;
+                confirm.Style.Display = ch.Checked ? Display.None : Display.Block;
+                pass.Focus();
             };
         }
 

@@ -22,7 +22,9 @@ namespace CM.Javascript {
        
         }
 
-        HTMLDivElement _AccountInfo;
+        HTMLElement _Rating;
+        HTMLElement _Balance;
+        HTMLDivElement _AccountAttributes;
         MultiSelect _MultiSelect;
         PagedList<TransactionListResult> _TransList;
         HTMLDivElement _Top;
@@ -38,14 +40,22 @@ namespace CM.Javascript {
             }
         }
        
+
+
         public override void Build() {
             //col-sm-12 col-md-8 col-md-offset-2
             Element.ClassName = "accountpage";
+ 
             _Top = Element.Div("top");
-            _Feedback = new Feedback(_Top.Div("row margins"));
+
+            var title = _Top.Div("left").H1(HtmlEncode(_ID));
+            var repBal = _Top.Div("right");
+            _Rating = repBal.Div("rep");
+            _Balance = repBal.Div("balance");
+   
+            _Feedback = new Feedback(Element);
            
-            var title = _Top.Div("row margins").H1(HtmlEncode(_ID));
-            var prog = new ServerProgressIndicator(_Top);
+            var prog = new ServerProgressIndicator(Element);
             if (!Helpers.IsIDValid(_ID)) {
                 _Feedback.Set(
                     SVG.Warning, FeedbackType.Error,
@@ -58,7 +68,7 @@ namespace CM.Javascript {
             //       SR.LABEL_LOADING_PLEASE_WAIT);
             
 
-            if (Prefetched != null && Prefetched.ID == _ID) {
+            if (Prefetched != null && String.Equals(Prefetched.ID, _ID, StringComparison.OrdinalIgnoreCase)) {
                 _Account = Prefetched;
                 Prefetched = null;
                 OnAccountLoaded();
@@ -75,9 +85,7 @@ namespace CM.Javascript {
                 {
                     var r = sender as AsyncRequest<FindAccountRequest>;
                     _Account = r.Item.Output;
-                    _ID = _Account.ID; // Correct casing
-                    title.InnerHTML = HtmlEncode(_ID);
-
+                    
                     if (_Account == null || !_Account.Response.IsSuccessful) {
                         var res = r.Result;
                         if (res == CMResult.S_OK)
@@ -89,7 +97,9 @@ namespace CM.Javascript {
                           );
                         return;
                     }
-                  
+                    _ID = _Account.ID; // Correct casing
+                    title.InnerHTML = HtmlEncode(_ID);
+
                     prog.SetMainGlyph(SVG.CircleTick);
                     prog.Remove();
                     OnAccountLoaded();
@@ -109,7 +119,7 @@ namespace CM.Javascript {
                 Item = new DataVerifyRequest()
             };
             for (int i = 1; i < keys.Count; i++) {
-                verify.Item.DataDateUtc = keys[i].EffectiveDate.AddDays(-1);
+                verify.Item.DataDateUtc = keys[i].EffectiveDate.AddSeconds(-1);
                 verify.Item.Input = keys[i].GetModificationSigningData();
                 verify.Item.Signature = keys[i].ModificationSignature;
                 _Account.VerifySignature(verify, JSCryptoFunctions.Identity);
@@ -149,11 +159,10 @@ namespace CM.Javascript {
             }
 
             HistoryManager.Instance.AddAccountToViewHistory(_Account.ID);
-            var details = Element.Div();
-            _AccountInfo = details.Div();
+            _AccountAttributes = Element.Div();
             RenderAccountInfo();
 
-            var trans = details.Div("details").Div("row");
+            var trans = Element.Div("details").Div("row");
             trans.H2(SR.TITLE_TRANSACTION_HISTORY);
             _TransList = new PagedList<TransactionListResult>(trans, Constants.PATH_ACCNT + "/" + _ID + "/" + Constants.PATH_TRANS);
             _TransList.OnCheckedChanged = OnCheckedChange;
@@ -195,22 +204,14 @@ namespace CM.Javascript {
             };
             App.Identity.Client.TryFindAccount(req);
         }
-        
+      
         void RenderAccountInfo() {
 
-            _AccountInfo.Clear();
-
-            var bar = _AccountInfo.Div("bar"); // extend bar
-            var row = bar.Div("row margins");
-            var left = row.Div("cell-half");
-            var balance = left.Div("balance");
-            var right = row.Div("cell-half");
-            right.Div("balance").Button(SR.LABEL_MAKE_A_PAYMENT, "/" + _ID + "/pay");
-
-            row = _AccountInfo.Div("morewhite").Div("row margins");
-            left = row.Div("cell-half");
-            var rating = left.Div("rating");
-
+   
+            _AccountAttributes.Clear();
+            _Rating.Clear();
+            _Balance.Clear();
+           
 
             var calcs = _Account.AccountCalculations;
             if (calcs != null && calcs.RecentCredits != null && calcs.RecentDebits != null) {
@@ -218,26 +219,27 @@ namespace CM.Javascript {
                 RecentReputation rep;
                 Helpers.CalculateRecentReputation(calcs.RecentCredits.Value, calcs.RecentDebits.Value, out rr, out rep);
                 var amount = Helpers.CalculateAccountBalance(calcs.RecentCredits.Value, calcs.RecentDebits.Value);
-                balance.Amount(amount, prefix: Constants.Symbol, roundTo2DP: true);
-                balance.Div("equal", "USD " + (amount < 0 ? "-" : "") + " $" + Math.Abs(amount * Constants.USDExchange).ToString("N0"));
-                rating.AmountReputation(rr);
-                rating.H3("").Reputation(rep);
+                _Balance.Amount(amount, prefix: Constants.Symbol, roundTo2DP: true);
+                _Balance.Div("equal", "USD " + (amount < 0 ? "-" : "") + " $" + Math.Abs(amount * Constants.USDExchange).ToString("N0"));
+                _Rating.AmountReputation(rr);
+                _Rating.H3("").Reputation(rep);
             } else {
-                balance.Amount("//c ", "?", "**");
-                rating.Amount("", "*", "");
-                rating.H3(SVG.CircleUnknown.ToString(16, 16, "#CCCCCC") + " Unknown reputation");
+                _Balance.Amount("//c ", "?", "**");
+                _Rating.Amount("", "*", "");
+                _Rating.H3(SVG.CircleUnknown.ToString(16, 16, "#CCCCCC") + " Unknown reputation");
             }
 
-            right = row.Div("cell-half");
-            right.Div("qr", QRCode.GenerateQRCode(Constants.TrustedSite + "/" + _ID, 128, 128));
+            //right = row.Div("cell-half");
+           
+            var details = _AccountAttributes.Div("details");
+            var row = details.Div("row makepayment");
+            row.Button(SR.LABEL_MAKE_A_PAYMENT, "/" + _ID + "/pay", className: "green-button");
 
-            var details = _AccountInfo.Div("details");
             row = details.Div("row");
+            var left = row.Div("cell-twothird");
+            var right = row.Div("cell-third right");
 
-            left = row.Div("cell-twothird");
-
-            right = row.Div("cell-third right");
-            left.Div(null).H4(SR.LABEL_ACCOUNT_ATTRIBUTES);
+            left.Div(null).H2(SR.LABEL_ACCOUNT_ATTRIBUTES);
             var att = left.Div("row attr");
             att.Div("cell-half", SR.LABEL_ACCOUNT_AGE + ":");
             var age = (System.DateTime.UtcNow - _Account.CreatedUtc);
@@ -269,12 +271,15 @@ namespace CM.Javascript {
             else
                 skills = HtmlEncode(skills).Replace("\n", "<br/>");
             att.Div("cell-half", skills);
+            left.Div(null).A(SR.LABEL_EDIT_ACCOUNT, "/" + _ID + "/edit");
+            left.Div(null).A(SR.LABEL_REQUEST_A_PAYMENT, "/" + _ID + "/link");
+            //right.Div("qr", QRCode.GenerateQRCode(Constants.TrustedSite + "/" + _ID, 128, 128));
 
-            right.Div(null).H4(SR.TITLE_OWN_THIS_ACCOUNT);
-            right.Div(null).A(SR.LABEL_REQUEST_A_PAYMENT, "/" + _ID + "/link");
-            right.Div(null).Span("<a href=\"/civilmoneylogos.svg\" target=\"_blank\">Acceptance Logos</a>");
-            right.Div(null).A(SR.LABEL_EDIT_ACCOUNT, "/" + _ID + "/edit");
-            
+            //right.Div(null).H4(SR.TITLE_OWN_THIS_ACCOUNT);
+
+            //right.Div(null).Span("<a href=\"/civilmoneylogos.svg\" target=\"_blank\">Acceptance Logos</a>");
+            //right.Div(null).A(SR.LABEL_EDIT_ACCOUNT, "/" + _ID + "/edit");
+
         }
  
         
@@ -332,9 +337,9 @@ namespace CM.Javascript {
                 Element = new HTMLDivElement() { ClassName = "multiselect" };
                 _Title = Element.H2("");
                 var row = Element.Div("button-row");
-                row.Button(SR.LABEL_PAYEE_STATUS_ACCEPT_VERB,(e)=> {
+                row.Button(SR.LABEL_PAYEE_STATUS_ACCEPT_VERB, (e) => {
                     OpenAuthorisationDialog((int)Schema.PayeeStatus.Accept);
-                });
+                },  className: "green-button");
                 row.Button(SR.LABEL_PAYEE_STATUS_DECLINE_VERB, (e) => {
                     OpenAuthorisationDialog((int)Schema.PayeeStatus.Decline);
                 });

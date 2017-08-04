@@ -16,7 +16,7 @@ namespace CM.Javascript.Assets {
         }
 
         // The glyphs here in have been licensed 
-
+        public const string STATUS_GREEN_COLOR = "#00B800";
         public string ViewBox;
         public string Data;
 

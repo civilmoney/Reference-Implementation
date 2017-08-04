@@ -49,6 +49,12 @@ namespace CM.Server {
             /// Logs pertinent HTTP statistics (path, referrer, language) from users.
             /// </summary>
             public void Log(string path, string referrer, string lang) {
+
+                if (String.Equals(lang, "zh-cn", StringComparison.OrdinalIgnoreCase)) {
+                    // Ignore referrer spam
+                    return;
+                }
+
                 if (!String.IsNullOrWhiteSpace(path)) {
                     path = path.Trim();
                     int v;

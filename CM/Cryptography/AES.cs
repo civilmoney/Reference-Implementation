@@ -13,6 +13,9 @@ namespace CM.Cryptography {
     /// A highly portable Rijndael/Advanced Encryption Standard (AES) - CBC implementation
     /// based on work by Brad Conte (bradconte.com) MIT License
     /// </summary>
+#if JAVASCRIPT
+    [Bridge.External] // We compile once and move into webworkers.js
+#endif
     public class AES {
         private const int AES_128_ROUNDS = 10;
 
@@ -235,6 +238,48 @@ namespace CM.Cryptography {
         /// it is its own inverse.
         /// </summary>
         private static void AddRoundKey(byte[][] state, UInt32[] w, int idx) {
+#if JAVASCRIPT
+            Bridge.Script.Write(@"
+            var subkey = [0,0,0,0];
+
+            // Subkey 1
+            subkey[0] = ((w[idx + 0] >> 24) & 0xff);
+            subkey[1] = ((w[idx + 0] >> 16) & 0xff);
+            subkey[2] = ((w[idx + 0] >> 8) & 0xff);
+            subkey[3] = ((w[idx + 0]) & 0xff);
+            state[0][0] ^= subkey[0];
+            state[1][0] ^= subkey[1];
+            state[2][0] ^= subkey[2];
+            state[3][0] ^= subkey[3];
+            // Subkey 2
+            subkey[0] = ((w[idx + 1] >> 24) & 0xff);
+            subkey[1] = ((w[idx + 1] >> 16) & 0xff);
+            subkey[2] = ((w[idx + 1] >> 8) & 0xff);
+            subkey[3] = ((w[idx + 1]) & 0xff);
+            state[0][1] ^= subkey[0];
+            state[1][1] ^= subkey[1];
+            state[2][1] ^= subkey[2];
+            state[3][1] ^= subkey[3];
+            // Subkey 3
+            subkey[0] = ((w[idx + 2] >> 24) & 0xff);
+            subkey[1] = ((w[idx + 2] >> 16) & 0xff);
+            subkey[2] = ((w[idx + 2] >> 8) & 0xff);
+            subkey[3] = ((w[idx + 2]) & 0xff);
+            state[0][2] ^= subkey[0];
+            state[1][2] ^= subkey[1];
+            state[2][2] ^= subkey[2];
+            state[3][2] ^= subkey[3];
+            // Subkey 4
+            subkey[0] = ((w[idx + 3] >> 24) & 0xff);
+            subkey[1] = ((w[idx + 3] >> 16) & 0xff);
+            subkey[2] = ((w[idx + 3] >> 8) & 0xff);
+            subkey[3] = ((w[idx + 3]) & 0xff);
+            state[0][3] ^= subkey[0];
+            state[1][3] ^= subkey[1];
+            state[2][3] ^= subkey[2];
+            state[3][3] ^= subkey[3];
+            ");
+#else
             byte[] subkey = new byte[4];
 
             // Subkey 1
@@ -273,9 +318,81 @@ namespace CM.Cryptography {
             state[1][3] ^= subkey[1];
             state[2][3] ^= subkey[2];
             state[3][3] ^= subkey[3];
+#endif
         }
 
         private static void aes_decrypt(byte[] input, byte[] output, UInt32[] key, int keysize) {
+#if JAVASCRIPT
+            Bridge.Script.Write(@"
+            var state = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+            var AddRoundKey = CM.Cryptography.AES.AddRoundKey;
+            var InvShiftRows = CM.Cryptography.AES.InvShiftRows;
+            var InvSubBytes = CM.Cryptography.AES.InvSubBytes;
+            var InvMixColumns = CM.Cryptography.AES.InvMixColumns;
+
+            // Copy the input to the state.
+            state[0][0] = input[0];
+            state[1][0] = input[1];
+            state[2][0] = input[2];
+            state[3][0] = input[3];
+            state[0][1] = input[4];
+            state[1][1] = input[5];
+            state[2][1] = input[6];
+            state[3][1] = input[7];
+            state[0][2] = input[8];
+            state[1][2] = input[9];
+            state[2][2] = input[10];
+            state[3][2] = input[11];
+            state[0][3] = input[12];
+            state[1][3] = input[13];
+            state[2][3] = input[14];
+            state[3][3] = input[15];
+
+            // Perform the necessary number of rounds. The round key is added first.
+            // The last round does not perform the MixColumns step.
+            if (keysize > 128) {
+                if (keysize > 192) {
+                    AddRoundKey(state, key, 56);
+                    InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 52); InvMixColumns(state);
+                    InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 48); InvMixColumns(state);
+                } else {
+                    AddRoundKey(state, key, 48);
+                }
+                InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 44); InvMixColumns(state);
+                InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 40); InvMixColumns(state);
+            } else {
+                AddRoundKey(state, key, 40);
+            }
+            InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 36); InvMixColumns(state);
+            InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 32); InvMixColumns(state);
+            InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 28); InvMixColumns(state);
+            InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 24); InvMixColumns(state);
+            InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 20); InvMixColumns(state);
+            InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 16); InvMixColumns(state);
+            InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 12); InvMixColumns(state);
+            InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 8); InvMixColumns(state);
+            InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 4); InvMixColumns(state);
+            InvShiftRows(state); InvSubBytes(state); AddRoundKey(state, key, 0);
+
+            // Copy the state to the output array.
+            output[0] = state[0][0];
+            output[1] = state[1][0];
+            output[2] = state[2][0];
+            output[3] = state[3][0];
+            output[4] = state[0][1];
+            output[5] = state[1][1];
+            output[6] = state[2][1];
+            output[7] = state[3][1];
+            output[8] = state[0][2];
+            output[9] = state[1][2];
+            output[10] = state[2][2];
+            output[11] = state[3][2];
+            output[12] = state[0][3];
+            output[13] = state[1][3];
+            output[14] = state[2][3];
+            output[15] = state[3][3];
+            ");
+#else
             byte[][] state = new byte[4][] {
                 new byte[4], new byte[4], new byte[4], new byte[4]
             };
@@ -341,6 +458,7 @@ namespace CM.Cryptography {
             output[13] = state[1][3];
             output[14] = state[2][3];
             output[15] = state[3][3];
+#endif
         }
 
         private static bool aes_decrypt_cbc(byte[] input, int in_len, byte[] output, UInt32[] key, int keysize, byte[] iv) {
@@ -368,6 +486,78 @@ namespace CM.Cryptography {
         }
 
         private static void aes_encrypt(byte[] input, byte[] output, UInt32[] key, int keysize) {
+#if JAVASCRIPT
+            Bridge.Script.Write(@"
+            var state = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]];
+            var AddRoundKey = CM.Cryptography.AES.AddRoundKey;
+            var ShiftRows = CM.Cryptography.AES.ShiftRows;
+            var SubBytes = CM.Cryptography.AES.SubBytes;
+            var MixColumns = CM.Cryptography.AES.MixColumns;
+
+            state[0][0] = input[0];
+            state[1][0] = input[1];
+            state[2][0] = input[2];
+            state[3][0] = input[3];
+            state[0][1] = input[4];
+            state[1][1] = input[5];
+            state[2][1] = input[6];
+            state[3][1] = input[7];
+            state[0][2] = input[8];
+            state[1][2] = input[9];
+            state[2][2] = input[10];
+            state[3][2] = input[11];
+            state[0][3] = input[12];
+            state[1][3] = input[13];
+            state[2][3] = input[14];
+            state[3][3] = input[15];
+
+            // Perform the necessary number of rounds. The round key is added first.
+            // The last round does not perform the MixColumns step.
+            AddRoundKey(state, key, 0);
+            SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 4);
+            SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 8);
+            SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 12);
+            SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 16);
+            SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 20);
+            SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 24);
+            SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 28);
+            SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 32);
+            SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 36);
+            if (keysize != 128) {
+                SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 40);
+                SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 44);
+                if (keysize != 192) {
+                    SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 48);
+                    SubBytes(state); ShiftRows(state); MixColumns(state); AddRoundKey(state, key, 52);
+                    SubBytes(state); ShiftRows(state); AddRoundKey(state, key, 56);
+                } else {
+                    SubBytes(state); ShiftRows(state); AddRoundKey(state, key, 48);
+                }
+            } else {
+                SubBytes(state); ShiftRows(state); AddRoundKey(state, key, 40);
+            }
+
+            // Copy the state to the output array.
+            output[0] = state[0][0];
+            output[1] = state[1][0];
+            output[2] = state[2][0];
+            output[3] = state[3][0];
+            output[4] = state[0][1];
+            output[5] = state[1][1];
+            output[6] = state[2][1];
+            output[7] = state[3][1];
+            output[8] = state[0][2];
+            output[9] = state[1][2];
+            output[10] = state[2][2];
+            output[11] = state[3][2];
+            output[12] = state[0][3];
+            output[13] = state[1][3];
+            output[14] = state[2][3];
+            output[15] = state[3][3];
+            
+            ");
+
+#else
             byte[][] state = new byte[4][] {
                 new byte[4], new byte[4], new byte[4], new byte[4]
             };
@@ -437,6 +627,7 @@ namespace CM.Cryptography {
             output[13] = state[1][3];
             output[14] = state[2][3];
             output[15] = state[3][3];
+#endif
         }
 
         private static bool aes_encrypt_cbc(byte[] input, int in_len, byte[] output, UInt32[] key, int keysize, byte[] iv) {
@@ -469,6 +660,44 @@ namespace CM.Cryptography {
         /// "keysize" is the length in bits of "key", must be 128, 192, or 256.
         /// </summary>
         private static void aes_key_setup(byte[] key, UInt32[] w, int keysize) {
+
+#if JAVASCRIPT
+            Bridge.Script.Write(@"
+            var SubWord = CM.Cryptography.AES.SubWord;
+            var KE_ROTWORD = CM.Cryptography.AES.KE_ROTWORD;
+
+            var Nb = 4, Nr, Nk, idx;
+            var temp;
+            var Rcon = [
+                0x01000000,0x02000000,0x04000000,0x08000000,0x10000000,0x20000000,
+                0x40000000,0x80000000,0x1b000000,0x36000000,0x6c000000,0xd8000000,
+                0xab000000,0x4d000000,0x9a000000];
+
+            switch (keysize) {
+                case 128: Nr = 10; Nk = 4; break;
+                case 192: Nr = 12; Nk = 6; break;
+                case 256: Nr = 14; Nk = 8; break;
+                default: return;
+            }
+
+            for (idx = 0; idx < Nk; ++idx) {
+                w[idx] = (((key[4 * idx]) << 24) | ((key[4 * idx + 1]) << 16) |
+                    ((key[4 * idx + 2]) << 8) | ((key[4 * idx + 3]))) >>> 0;
+            }
+
+            for (idx = Nk; idx < Nb * (Nr + 1); ++idx) {
+                temp = w[idx - 1];
+                if ((idx % Nk) == 0)
+                    temp = SubWord(KE_ROTWORD(temp)) ^ Rcon[((idx - 1) / Nk)|0];
+                else if (Nk > 6 && (idx % Nk) == 4)
+                    temp = SubWord(temp);
+                w[idx] = w[idx - Nk] ^ temp;
+            }
+            
+            ");
+
+#else
+
             int Nb = 4, Nr, Nk, idx;
             UInt32 temp;
             var Rcon = new UInt32[]{
@@ -496,11 +725,15 @@ namespace CM.Cryptography {
                     temp = SubWord(temp);
                 w[idx] = w[idx - Nk] ^ temp;
             }
+#endif
         }
 
         private static void InvMixColumns(byte[][] state) {
-            byte[] col = new byte[4];
-
+            byte[] col;
+#if JAVASCRIPT
+            Bridge.Script.Write(@"
+            col = [0,0,0,0];
+            var gf_mul = CM.Cryptography.AES.gf_mul;
             // Column 1
             col[0] = state[0][0];
             col[1] = state[1][0];
@@ -585,14 +818,103 @@ namespace CM.Cryptography {
             state[3][3] ^= gf_mul[col[1]][4];
             state[3][3] ^= gf_mul[col[2]][2];
             state[3][3] ^= gf_mul[col[3]][5];
+            ");
+#else
+            col = new byte[4];
+            // Column 1
+            col[0] = state[0][0];
+            col[1] = state[1][0];
+            col[2] = state[2][0];
+            col[3] = state[3][0];
+            state[0][0] = gf_mul[col[0]][5];
+            state[0][0] ^= gf_mul[col[1]][3];
+            state[0][0] ^= gf_mul[col[2]][4];
+            state[0][0] ^= gf_mul[col[3]][2];
+            state[1][0] = gf_mul[col[0]][2];
+            state[1][0] ^= gf_mul[col[1]][5];
+            state[1][0] ^= gf_mul[col[2]][3];
+            state[1][0] ^= gf_mul[col[3]][4];
+            state[2][0] = gf_mul[col[0]][4];
+            state[2][0] ^= gf_mul[col[1]][2];
+            state[2][0] ^= gf_mul[col[2]][5];
+            state[2][0] ^= gf_mul[col[3]][3];
+            state[3][0] = gf_mul[col[0]][3];
+            state[3][0] ^= gf_mul[col[1]][4];
+            state[3][0] ^= gf_mul[col[2]][2];
+            state[3][0] ^= gf_mul[col[3]][5];
+            // Column 2
+            col[0] = state[0][1];
+            col[1] = state[1][1];
+            col[2] = state[2][1];
+            col[3] = state[3][1];
+            state[0][1] = gf_mul[col[0]][5];
+            state[0][1] ^= gf_mul[col[1]][3];
+            state[0][1] ^= gf_mul[col[2]][4];
+            state[0][1] ^= gf_mul[col[3]][2];
+            state[1][1] = gf_mul[col[0]][2];
+            state[1][1] ^= gf_mul[col[1]][5];
+            state[1][1] ^= gf_mul[col[2]][3];
+            state[1][1] ^= gf_mul[col[3]][4];
+            state[2][1] = gf_mul[col[0]][4];
+            state[2][1] ^= gf_mul[col[1]][2];
+            state[2][1] ^= gf_mul[col[2]][5];
+            state[2][1] ^= gf_mul[col[3]][3];
+            state[3][1] = gf_mul[col[0]][3];
+            state[3][1] ^= gf_mul[col[1]][4];
+            state[3][1] ^= gf_mul[col[2]][2];
+            state[3][1] ^= gf_mul[col[3]][5];
+            // Column 3
+            col[0] = state[0][2];
+            col[1] = state[1][2];
+            col[2] = state[2][2];
+            col[3] = state[3][2];
+            state[0][2] = gf_mul[col[0]][5];
+            state[0][2] ^= gf_mul[col[1]][3];
+            state[0][2] ^= gf_mul[col[2]][4];
+            state[0][2] ^= gf_mul[col[3]][2];
+            state[1][2] = gf_mul[col[0]][2];
+            state[1][2] ^= gf_mul[col[1]][5];
+            state[1][2] ^= gf_mul[col[2]][3];
+            state[1][2] ^= gf_mul[col[3]][4];
+            state[2][2] = gf_mul[col[0]][4];
+            state[2][2] ^= gf_mul[col[1]][2];
+            state[2][2] ^= gf_mul[col[2]][5];
+            state[2][2] ^= gf_mul[col[3]][3];
+            state[3][2] = gf_mul[col[0]][3];
+            state[3][2] ^= gf_mul[col[1]][4];
+            state[3][2] ^= gf_mul[col[2]][2];
+            state[3][2] ^= gf_mul[col[3]][5];
+            // Column 4
+            col[0] = state[0][3];
+            col[1] = state[1][3];
+            col[2] = state[2][3];
+            col[3] = state[3][3];
+            state[0][3] = gf_mul[col[0]][5];
+            state[0][3] ^= gf_mul[col[1]][3];
+            state[0][3] ^= gf_mul[col[2]][4];
+            state[0][3] ^= gf_mul[col[3]][2];
+            state[1][3] = gf_mul[col[0]][2];
+            state[1][3] ^= gf_mul[col[1]][5];
+            state[1][3] ^= gf_mul[col[2]][3];
+            state[1][3] ^= gf_mul[col[3]][4];
+            state[2][3] = gf_mul[col[0]][4];
+            state[2][3] ^= gf_mul[col[1]][2];
+            state[2][3] ^= gf_mul[col[2]][5];
+            state[2][3] ^= gf_mul[col[3]][3];
+            state[3][3] = gf_mul[col[0]][3];
+            state[3][3] ^= gf_mul[col[1]][4];
+            state[3][3] ^= gf_mul[col[2]][2];
+            state[3][3] ^= gf_mul[col[3]][5];
+            
+#endif
         }
 
         // All rows are shifted cylindrically to the right.
         private static void InvShiftRows(byte[][] state) {
-            byte t;
-
+#if JAVASCRIPT
+            Bridge.Script.Write(@"
             // Shift right by 1
-            t = state[1][3];
+            var t = state[1][3];
             state[1][3] = state[1][2];
             state[1][2] = state[1][1];
             state[1][1] = state[1][0];
@@ -610,9 +932,34 @@ namespace CM.Cryptography {
             state[3][0] = state[3][1];
             state[3][1] = state[3][2];
             state[3][2] = t;
+");
+#else
+            // Shift right by 1
+            var t = state[1][3];
+            state[1][3] = state[1][2];
+            state[1][2] = state[1][1];
+            state[1][1] = state[1][0];
+            state[1][0] = t;
+            // Shift right by 2
+            t = state[2][3];
+            state[2][3] = state[2][1];
+            state[2][1] = t;
+            t = state[2][2];
+            state[2][2] = state[2][0];
+            state[2][0] = t;
+            // Shift right by 3
+            t = state[3][3];
+            state[3][3] = state[3][0];
+            state[3][0] = state[3][1];
+            state[3][1] = state[3][2];
+            state[3][2] = t;
+#endif
         }
 
         private static void InvSubBytes(byte[][] state) {
+#if JAVASCRIPT
+            Bridge.Script.Write(@"
+            var aes_invsbox = CM.Cryptography.AES.aes_invsbox;
             state[0][0] = aes_invsbox[state[0][0] >> 4][state[0][0] & 0x0F];
             state[0][1] = aes_invsbox[state[0][1] >> 4][state[0][1] & 0x0F];
             state[0][2] = aes_invsbox[state[0][2] >> 4][state[0][2] & 0x0F];
@@ -629,6 +976,25 @@ namespace CM.Cryptography {
             state[3][1] = aes_invsbox[state[3][1] >> 4][state[3][1] & 0x0F];
             state[3][2] = aes_invsbox[state[3][2] >> 4][state[3][2] & 0x0F];
             state[3][3] = aes_invsbox[state[3][3] >> 4][state[3][3] & 0x0F];
+       ");
+#else
+            state[0][0] = aes_invsbox[state[0][0] >> 4][state[0][0] & 0x0F];
+            state[0][1] = aes_invsbox[state[0][1] >> 4][state[0][1] & 0x0F];
+            state[0][2] = aes_invsbox[state[0][2] >> 4][state[0][2] & 0x0F];
+            state[0][3] = aes_invsbox[state[0][3] >> 4][state[0][3] & 0x0F];
+            state[1][0] = aes_invsbox[state[1][0] >> 4][state[1][0] & 0x0F];
+            state[1][1] = aes_invsbox[state[1][1] >> 4][state[1][1] & 0x0F];
+            state[1][2] = aes_invsbox[state[1][2] >> 4][state[1][2] & 0x0F];
+            state[1][3] = aes_invsbox[state[1][3] >> 4][state[1][3] & 0x0F];
+            state[2][0] = aes_invsbox[state[2][0] >> 4][state[2][0] & 0x0F];
+            state[2][1] = aes_invsbox[state[2][1] >> 4][state[2][1] & 0x0F];
+            state[2][2] = aes_invsbox[state[2][2] >> 4][state[2][2] & 0x0F];
+            state[2][3] = aes_invsbox[state[2][3] >> 4][state[2][3] & 0x0F];
+            state[3][0] = aes_invsbox[state[3][0] >> 4][state[3][0] & 0x0F];
+            state[3][1] = aes_invsbox[state[3][1] >> 4][state[3][1] & 0x0F];
+            state[3][2] = aes_invsbox[state[3][2] >> 4][state[3][2] & 0x0F];
+            state[3][3] = aes_invsbox[state[3][3] >> 4][state[3][3] & 0x0F];
+#endif
         }
 
         private static uint KE_ROTWORD(uint x) {
@@ -642,8 +1008,11 @@ namespace CM.Cryptography {
         /// values will be destroyed.)
         /// </summary>
         private static void MixColumns(byte[][] state) {
-            byte[] col = new byte[4];
-
+            byte[] col;
+#if JAVASCRIPT
+            Bridge.Script.Write(@"
+            col = [0,0,0,0];
+            var gf_mul = CM.Cryptography.AES.gf_mul;
             // Column 1
             col[0] = state[0][0];
             col[1] = state[1][0];
@@ -728,6 +1097,94 @@ namespace CM.Cryptography {
             state[3][3] ^= col[1];
             state[3][3] ^= col[2];
             state[3][3] ^= gf_mul[col[3]][0];
+            ");
+#else
+            col = new byte[4];
+            // Column 1
+            col[0] = state[0][0];
+            col[1] = state[1][0];
+            col[2] = state[2][0];
+            col[3] = state[3][0];
+            state[0][0] = gf_mul[col[0]][0];
+            state[0][0] ^= gf_mul[col[1]][1];
+            state[0][0] ^= col[2];
+            state[0][0] ^= col[3];
+            state[1][0] = col[0];
+            state[1][0] ^= gf_mul[col[1]][0];
+            state[1][0] ^= gf_mul[col[2]][1];
+            state[1][0] ^= col[3];
+            state[2][0] = col[0];
+            state[2][0] ^= col[1];
+            state[2][0] ^= gf_mul[col[2]][0];
+            state[2][0] ^= gf_mul[col[3]][1];
+            state[3][0] = gf_mul[col[0]][1];
+            state[3][0] ^= col[1];
+            state[3][0] ^= col[2];
+            state[3][0] ^= gf_mul[col[3]][0];
+            // Column 2
+            col[0] = state[0][1];
+            col[1] = state[1][1];
+            col[2] = state[2][1];
+            col[3] = state[3][1];
+            state[0][1] = gf_mul[col[0]][0];
+            state[0][1] ^= gf_mul[col[1]][1];
+            state[0][1] ^= col[2];
+            state[0][1] ^= col[3];
+            state[1][1] = col[0];
+            state[1][1] ^= gf_mul[col[1]][0];
+            state[1][1] ^= gf_mul[col[2]][1];
+            state[1][1] ^= col[3];
+            state[2][1] = col[0];
+            state[2][1] ^= col[1];
+            state[2][1] ^= gf_mul[col[2]][0];
+            state[2][1] ^= gf_mul[col[3]][1];
+            state[3][1] = gf_mul[col[0]][1];
+            state[3][1] ^= col[1];
+            state[3][1] ^= col[2];
+            state[3][1] ^= gf_mul[col[3]][0];
+            // Column 3
+            col[0] = state[0][2];
+            col[1] = state[1][2];
+            col[2] = state[2][2];
+            col[3] = state[3][2];
+            state[0][2] = gf_mul[col[0]][0];
+            state[0][2] ^= gf_mul[col[1]][1];
+            state[0][2] ^= col[2];
+            state[0][2] ^= col[3];
+            state[1][2] = col[0];
+            state[1][2] ^= gf_mul[col[1]][0];
+            state[1][2] ^= gf_mul[col[2]][1];
+            state[1][2] ^= col[3];
+            state[2][2] = col[0];
+            state[2][2] ^= col[1];
+            state[2][2] ^= gf_mul[col[2]][0];
+            state[2][2] ^= gf_mul[col[3]][1];
+            state[3][2] = gf_mul[col[0]][1];
+            state[3][2] ^= col[1];
+            state[3][2] ^= col[2];
+            state[3][2] ^= gf_mul[col[3]][0];
+            // Column 4
+            col[0] = state[0][3];
+            col[1] = state[1][3];
+            col[2] = state[2][3];
+            col[3] = state[3][3];
+            state[0][3] = gf_mul[col[0]][0];
+            state[0][3] ^= gf_mul[col[1]][1];
+            state[0][3] ^= col[2];
+            state[0][3] ^= col[3];
+            state[1][3] = col[0];
+            state[1][3] ^= gf_mul[col[1]][0];
+            state[1][3] ^= gf_mul[col[2]][1];
+            state[1][3] ^= col[3];
+            state[2][3] = col[0];
+            state[2][3] ^= col[1];
+            state[2][3] ^= gf_mul[col[2]][0];
+            state[2][3] ^= gf_mul[col[3]][1];
+            state[3][3] = gf_mul[col[0]][1];
+            state[3][3] ^= col[1];
+            state[3][3] ^= col[2];
+            state[3][3] ^= gf_mul[col[3]][0];
+#endif
         }
 
         private static byte[] PKCS7Pad(byte[] input) {
@@ -759,10 +1216,10 @@ namespace CM.Cryptography {
         }
 
         private static void ShiftRows(byte[][] state) {
-            byte t;
-
+#if JAVASCRIPT
+Bridge.Script.Write(@"
             // Shift left by 1
-            t = state[1][0];
+            var  t = state[1][0];
             state[1][0] = state[1][1];
             state[1][1] = state[1][2];
             state[1][2] = state[1][3];
@@ -780,11 +1237,36 @@ namespace CM.Cryptography {
             state[3][3] = state[3][2];
             state[3][2] = state[3][1];
             state[3][1] = t;
+");
+#else
+            // Shift left by 1
+            var  t = state[1][0];
+            state[1][0] = state[1][1];
+            state[1][1] = state[1][2];
+            state[1][2] = state[1][3];
+            state[1][3] = t;
+            // Shift left by 2
+            t = state[2][0];
+            state[2][0] = state[2][2];
+            state[2][2] = t;
+            t = state[2][1];
+            state[2][1] = state[2][3];
+            state[2][3] = t;
+            // Shift left by 3
+            t = state[3][0];
+            state[3][0] = state[3][3];
+            state[3][3] = state[3][2];
+            state[3][2] = state[3][1];
+            state[3][1] = t;
+#endif
         }
 
         // Performs the SubBytes step. All bytes in the state are substituted with a
         // pre-calculated value from a lookup table.
         private static void SubBytes(byte[][] state) {
+#if JAVASCRIPT
+Bridge.Script.Write(@"
+            var aes_sbox = CM.Cryptography.AES.aes_sbox;
             state[0][0] = aes_sbox[state[0][0] >> 4][state[0][0] & 0x0F];
             state[0][1] = aes_sbox[state[0][1] >> 4][state[0][1] & 0x0F];
             state[0][2] = aes_sbox[state[0][2] >> 4][state[0][2] & 0x0F];
@@ -801,24 +1283,61 @@ namespace CM.Cryptography {
             state[3][1] = aes_sbox[state[3][1] >> 4][state[3][1] & 0x0F];
             state[3][2] = aes_sbox[state[3][2] >> 4][state[3][2] & 0x0F];
             state[3][3] = aes_sbox[state[3][3] >> 4][state[3][3] & 0x0F];
+");
+#else
+
+            state[0][0] = aes_sbox[state[0][0] >> 4][state[0][0] & 0x0F];
+            state[0][1] = aes_sbox[state[0][1] >> 4][state[0][1] & 0x0F];
+            state[0][2] = aes_sbox[state[0][2] >> 4][state[0][2] & 0x0F];
+            state[0][3] = aes_sbox[state[0][3] >> 4][state[0][3] & 0x0F];
+            state[1][0] = aes_sbox[state[1][0] >> 4][state[1][0] & 0x0F];
+            state[1][1] = aes_sbox[state[1][1] >> 4][state[1][1] & 0x0F];
+            state[1][2] = aes_sbox[state[1][2] >> 4][state[1][2] & 0x0F];
+            state[1][3] = aes_sbox[state[1][3] >> 4][state[1][3] & 0x0F];
+            state[2][0] = aes_sbox[state[2][0] >> 4][state[2][0] & 0x0F];
+            state[2][1] = aes_sbox[state[2][1] >> 4][state[2][1] & 0x0F];
+            state[2][2] = aes_sbox[state[2][2] >> 4][state[2][2] & 0x0F];
+            state[2][3] = aes_sbox[state[2][3] >> 4][state[2][3] & 0x0F];
+            state[3][0] = aes_sbox[state[3][0] >> 4][state[3][0] & 0x0F];
+            state[3][1] = aes_sbox[state[3][1] >> 4][state[3][1] & 0x0F];
+            state[3][2] = aes_sbox[state[3][2] >> 4][state[3][2] & 0x0F];
+            state[3][3] = aes_sbox[state[3][3] >> 4][state[3][3] & 0x0F];
+#endif
         }
 
         /// <summary>
         /// Substitutes a word using the AES S-Box.
         /// </summary>
         private static UInt32 SubWord(UInt32 word) {
-            UInt32 result;
+            UInt32 result = 0;
+#if JAVASCRIPT
+            Bridge.Script.Write(@"
+            var aes_sbox = CM.Cryptography.AES.aes_sbox;
+            result = aes_sbox[(((word >>> 4) & 15) >>> 0)][((word & 15) >>> 0)];
+            result = (result + (((aes_sbox[(((word >>> 12) & 0x0F) >>> 0)][(((word >>> 8) & 0x0F) >>> 0)] << 8) >>> 0))) >>> 0;
+            result = (result + (((aes_sbox[(((word >>> 20) & 0x0F) >>> 0)][(((word >>> 16) & 0x0F) >>> 0)] << 16) >>> 0))) >>> 0;
+            result = (result + (((aes_sbox[(((word >>> 28) & 0x0F) >>> 0)][(((word >>> 24) & 0x0F) >>> 0)] << 24) >>> 0))) >>> 0;
+            ");
+#else
             result = (UInt32)aes_sbox[(word >> 4) & 0x0F][word & 0x0F];
             result += (UInt32)aes_sbox[(word >> 12) & 0x0F][(word >> 8) & 0x0F] << 8;
             result += (UInt32)aes_sbox[(word >> 20) & 0x0F][(word >> 16) & 0x0F] << 16;
             result += (UInt32)aes_sbox[(word >> 28) & 0x0F][(word >> 24) & 0x0F] << 24;
+#endif
             return (result);
         }
 
         // XORs the in and out buffers, storing the result in out. Length is in bytes.
         private static void xor_buf(byte[] input, byte[] output, int len) {
+#if JAVASCRIPT
+            Bridge.Script.Write(@"
+             for (var idx = 0; idx < len; idx++)
+                output[idx] ^= input[idx];
+            ");
+#else
             for (int idx = 0; idx < len; idx++)
                 output[idx] ^= input[idx];
+#endif
         }
     }
 }

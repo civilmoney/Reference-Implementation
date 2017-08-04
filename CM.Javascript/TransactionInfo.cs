@@ -43,7 +43,7 @@ namespace CM.Javascript {
             string status = "";
             switch (t.PayerStatus) {
                 case Schema.PayerStatus.Accept:
-                    status = Assets.SVG.CircleTick.ToString(16, 16, "#288600") + " " + SR.LABEL_PAYER_STATUS_ACCEPT;
+                    status = Assets.SVG.CircleTick.ToString(16, 16, Assets.SVG.STATUS_GREEN_COLOR) + " " + SR.LABEL_PAYER_STATUS_ACCEPT;
                     break;
 
                 case Schema.PayerStatus.Cancel:
@@ -84,7 +84,7 @@ namespace CM.Javascript {
             status = "";
             switch (t.PayeeStatus) {
                 case Schema.PayeeStatus.Accept:
-                    status = Assets.SVG.CircleTick.ToString(16, 16, "#288600") + " " + SR.LABEL_PAYEE_STATUS_ACCEPT;
+                    status = Assets.SVG.CircleTick.ToString(16, 16, Assets.SVG.STATUS_GREEN_COLOR) + " " + SR.LABEL_PAYEE_STATUS_ACCEPT;
                     break;
 
                 default:

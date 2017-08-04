@@ -76,30 +76,25 @@ namespace CM {
                 (num % 1).ToString(SR.CHAR_DECIMAL + "0"));
         }
 
-        public static HTMLButtonElement Button(this Node el, string html) {
-            var e = el.AppendChild(new HTMLButtonElement() {
-                InnerHTML = html ?? String.Empty
-            }) as HTMLButtonElement;
-            return e;
-        }
-
-        public static HTMLButtonElement Button(this Node el, string html, Action<MouseEvent<HTMLButtonElement>> onClick) {
+        public static HTMLButtonElement Button(this Node el, string html, Action<MouseEvent<HTMLButtonElement>> onClick, string className = null) {
             var e = el.AppendChild(new HTMLButtonElement() {
                 InnerHTML = html ?? String.Empty,
-                OnClick = onClick
+                OnClick = onClick,
+                ClassName = className ?? ""
             }) as HTMLButtonElement;
 
             return e;
         }
 
-        public static HTMLButtonElement Button(this Node el, string html, string hashUrl) {
+        public static HTMLButtonElement Button(this Node el, string html, string hashUrl, string className = null) {
             var e = el.AppendChild(new HTMLButtonElement() {
                 InnerHTML = html ?? String.Empty,
-                OnClick = (args) => {
+                ClassName = className ?? ""
+            }) as HTMLButtonElement;
+            if (!String.IsNullOrEmpty(hashUrl))
+                e.OnClick = (args) => {
                     App.Identity.Navigate(hashUrl);
-                }
-            }) as HTMLButtonElement;
-
+                };
             return e;
         }
 
@@ -288,7 +283,7 @@ else
             var glyph = rep == RecentReputation.Good ? CM.Javascript.Assets.SVG.CircleTick
                     : rep == RecentReputation.Overspent ? CM.Javascript.Assets.SVG.CircleError
                     : CM.Javascript.Assets.SVG.Warning;
-            var colour = rep == RecentReputation.Good ? "#288600" : "#cc0000";
+            var colour = rep == RecentReputation.Good ? CM.Javascript.Assets.SVG.STATUS_GREEN_COLOR : "#cc0000";
 
             var html = "";
             if (showglyph)
@@ -488,17 +483,16 @@ namespace System.Text {
                         case 5:
                         case 6:
                         case 7:
-                            s.Append(String.FromCharCode(b[i]));
+                            s.Append(Bridge.Html5.StringPrototype.FromCharCode(b[i]));
                             break;
-
                         case 12:
                         case 13:
-                            s.Append(String.FromCharCode((b[i] & 0x1f) << 6 | b[i + 1] & 0x3f));
+                            s.Append(Bridge.Html5.StringPrototype.FromCharCode((b[i] & 0x1f) << 6 | b[i + 1] & 0x3f));
                             i++;
                             break;
 
                         case 14:
-                            s.Append(String.FromCharCode((b[i] & 0x0F) << 12 | b[i + 1] & 0x3f << 6 | b[i + 2] & 0x3f));
+                            s.Append(Bridge.Html5.StringPrototype.FromCharCode((b[i] & 0x0F) << 12 | b[i + 1] & 0x3f << 6 | b[i + 2] & 0x3f));
                             i += 2;
                             break;
                     }

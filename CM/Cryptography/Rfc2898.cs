@@ -18,6 +18,9 @@ namespace CM.Cryptography {
     /// <summary>
     /// A minimal hash-based message authentication code (HMAC) implementation
     /// </summary>
+#if JAVASCRIPT
+    [Bridge.External] // We compile once and move into webworkers.js
+#endif
     internal class HMAC {
         private byte[] _Key;
         private byte[] _InnerPadding;
@@ -83,6 +86,9 @@ namespace CM.Cryptography {
     /// <summary>
     /// An Rfc2898 (PBKDF2) implementation for derived key generation.
     /// </summary>
+#if JAVASCRIPT
+    [Bridge.External] // We compile once and move into webworkers.js
+#endif
     public class Rfc2898 {
 
         public static Rfc2898 CreateHMACSHA1(byte[] pass, byte[] salt, int iterations) {
@@ -110,22 +116,39 @@ namespace CM.Cryptography {
             _Buffer = null;
         }
 
-        private byte[] Int(int i) {
-            return new byte[] { (byte)(i >> 24), (byte)(i >> 16), (byte)(i >> 8), (byte)i };
-        }
-
         private byte[] GetNextBlock() {
-            var ar = new List<byte>();
-            ar.AddRange(_Salt);
-            ar.AddRange(Int(_Block));
-            byte[] hashValue = _Hash(ar.ToArray());
-            byte[] res = hashValue;
+            byte[] res = null;
+#if JAVASCRIPT
+           Bridge.Script.Write(@"
+
+            var ar = [];
+            ar = ar.concat(this._Salt);
+            ar = ar.concat([(this._Block >> 24)&0xFF, (this._Block >> 16)&0xFF, (this._Block >> 8)&0xFF, (this._Block)&0xFF]);
+            var hashValue = this._Hash(ar);
+            res = hashValue;
+            for (var i = 2; i <= this._Interations; i++) {
+                hashValue = this._Hash(hashValue);
+                for (var j = 0; j < res.length; j++)
+                    res[j] = (res[j] ^ hashValue[j]);
+            }
+            this._Block++;
+");
+#else
+            var ar = new byte[_Salt.Length + 4];
+            Buffer.BlockCopy(_Salt, 0, ar, 0, _Salt.Length);
+            ar[ar.Length - 4] = (byte)(_Block >> 24);
+            ar[ar.Length - 3] = (byte)(_Block >> 16);
+            ar[ar.Length - 2] = (byte)(_Block >> 8);
+            ar[ar.Length - 1] = (byte)(_Block);
+            byte[] hashValue = _Hash(ar);
+            res = hashValue;
             for (int i = 2; i <= _Interations; i++) {
                 hashValue = _Hash(hashValue);
                 for (int j = 0; j < res.Length; j++)
                     res[j] = (byte)(res[j] ^ hashValue[j]);
             }
             _Block++;
+#endif
             return res;
         }
 

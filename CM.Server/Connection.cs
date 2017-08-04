@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 
 namespace CM.Server {
 
+    internal delegate void ProcessRequestDelegate(Connection conn, Message m);
+
     /// <summary>
     /// Messaging layer for inbound or outbound WebSocket connections
     /// </summary>

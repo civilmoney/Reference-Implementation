@@ -246,8 +246,8 @@ namespace CM.Schema {
                 if (String.Compare(Values[i].Name, "PUBKEY", StringComparison.OrdinalIgnoreCase) == 0) {
                     PublicKey tmp;
                     PublicKey.TryParse(Values[i].Value, out tmp);
-                    if (tmp.EffectiveDate > dateUtc
-                        || (bestKey != null && bestKey.EffectiveDate > tmp.EffectiveDate))
+                    if (tmp.EffectiveDate > dateUtc 
+                        || (bestKey!=null && tmp.EffectiveDate < bestKey.EffectiveDate))
                         continue;
                     bestKey = tmp;
                 }

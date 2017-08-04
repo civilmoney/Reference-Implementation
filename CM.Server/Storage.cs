@@ -60,6 +60,7 @@ namespace CM.Server {
         /// <param name="conn"></param>
         /// <param name="id"></param>
         public void AddSubscription(Connection conn, string id) {
+            id = id.ToLower();
             lock (conn.SubscriptionSync) {
                 conn.ConnectionLost += RemoveSubscriptions;
                 if (conn.SubscribedIDs == null)
@@ -199,7 +200,7 @@ namespace CM.Server {
             if (item is Account) {
                 var a = item as Account;
                 List<Connection> connections;
-                if (_Subscriptions.TryGetValue(a.ID, out connections)
+                if (_Subscriptions.TryGetValue(a.ID.ToLower(), out connections)
                     && connections != null) {
                     lock (connections) {
                         for (int i = 0; i < connections.Count; i++) {
@@ -215,7 +216,7 @@ namespace CM.Server {
             } else if (item is Transaction) {
                 var t = item as Transaction;
                 List<Connection> connections;
-                if (_Subscriptions.TryGetValue(t.PayeeID, out connections) && connections != null) {
+                if (_Subscriptions.TryGetValue(t.PayeeID.ToLower(), out connections) && connections != null) {
                     lock (connections) {
                         for (int i = 0; i < connections.Count; i++) {
                             if (!connections[i].IsConnected) {
@@ -226,7 +227,7 @@ namespace CM.Server {
                         ar.AddRange(connections);
                     }
                 }
-                if (_Subscriptions.TryGetValue(t.PayerID, out connections) && connections != null) {
+                if (_Subscriptions.TryGetValue(t.PayerID.ToLower(), out connections) && connections != null) {
                     lock (connections) {
                         for (int i = 0; i < connections.Count; i++) {
                             if (!connections[i].IsConnected) {
@@ -1239,7 +1240,7 @@ namespace CM.Server {
 
                 // Make sure all ModificationSignatures are correct.
                 for (int i = 1; i < newKeys.Count; i++) {
-                    verify.Item.DataDateUtc = newKeys[i].EffectiveDate.AddDays(-1);
+                    verify.Item.DataDateUtc = newKeys[i].EffectiveDate.AddSeconds(-1);
                     verify.Item.Input = newKeys[i].GetModificationSigningData();
                     verify.Item.Signature = newKeys[i].ModificationSignature;
                     a.VerifySignature(verify, CryptoFunctions.Identity);

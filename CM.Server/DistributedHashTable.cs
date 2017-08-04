@@ -245,10 +245,16 @@ namespace CM.Server {
         }
 
         public void PerformConnectionHousekeeping() {
-            var all = Seen.Values.ToArray();
+            var all = Seen.ToArray();
             int count = 0;
             for (int i = 0; i < all.Length; i++) {
-                count += all[i].CloseIdleConnections();
+                var p = all[i].Value;
+                count += p.CloseIdleConnections();
+                if (!p.CanConnect
+                    && (Clock.Elapsed - p.FailingSince).TotalMinutes > 5) {
+                    Seen.TryRemove(all[i].Key, out p);
+                    _Log.Write(this, LogLevel.INFO, "Removed {0} from seen peers.", all[i].Key);
+                }
             }
             if (count > 0) {
                 System.Diagnostics.Debug.WriteLine("Cleaned up {0} idle connections.", count);

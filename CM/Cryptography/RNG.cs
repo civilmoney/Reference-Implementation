@@ -8,7 +8,9 @@
 using System;
 
 namespace CM.Cryptography {
-
+#if JAVASCRIPT
+    [Bridge.External] // We compile once and move into webworkers.js
+#endif
     public class RNG {
 #if JAVASCRIPT
         public static void RandomBytes(byte[] b) {

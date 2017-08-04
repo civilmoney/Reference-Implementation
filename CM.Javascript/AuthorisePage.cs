@@ -60,13 +60,7 @@ namespace CM.Javascript {
 
         public override void Build() {
             Element.ClassName = "authorisepage";
-            _MainFeedback = new Feedback(Element, big: true);
-            _ReturnButtons = Element.Div();
-            var serverStatus = Element.Div();
-
-            _Form = Element.Div();
-            _Form.Style.Display = Display.None;
-
+           
             string title1 = null;
             string title2 = null;
 
@@ -97,7 +91,15 @@ namespace CM.Javascript {
                     case Schema.PayerStatus.Cancel: title1 = "Cancel money with"; break;
                 }
             }
-            _Form.H1(title1 + " " + title2);
+            Element.Div("top").H1(title1 + " " + title2);
+
+
+            _MainFeedback = new Feedback(Element, big: true);
+            _ReturnButtons = Element.Div();
+            var serverStatus = Element.Div("statuses");
+
+            _Form = Element.Div();
+            _Form.Style.Display = Display.None;
 
             for (int i = 0; i < _ToSign.Count; i++) {
                 var row = _Form.Div("row");
@@ -154,11 +156,12 @@ namespace CM.Javascript {
             };
             App.Identity.Client.TryFindAccount(fa);
 
-            _Form.H3(SR.LABEL_SECURITY);
+            //_Form.H3(SR.LABEL_SECURITY);
 
-            var ch = _Form.Div("confirm").CheckBox(SR.HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS);
             var reminder = _Form.Div("reminder", SR.LABEL_CIVIL_MONEY_SECURITY_REMINDER);
-
+            var confirm = _Form.Div("confirm");
+            var ch = confirm.CheckBox(SR.HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS);
+         
             var passRow = _Form.Div("row");
             passRow.Style.Display = Display.None;
             passRow.H3(SR.LABEL_SECRET_PASS_PHRASE);
@@ -225,7 +228,7 @@ namespace CM.Javascript {
                     SR.LABEL_STATUS_SIGNING_INFORMATION + " ...");
 
                 _Account.SignData(sign, JSCryptoFunctions.Identity);
-            });
+            }, className: "green-button");
             submit.Style.Display = Display.None;
 
             _ButtonsRow.Button(SR.LABEL_CANCEL, (e) => {
@@ -235,8 +238,8 @@ namespace CM.Javascript {
                 passRow.Style.Display = ch.Checked ? Display.Block : Display.None;
                 submit.Style.Display = ch.Checked ? Display.Inline : Display.None;
                 reminder.Style.Display = ch.Checked ? Display.None : Display.Block;
-                if (ch.Checked)
-                    pass.Focus();
+                confirm.Style.Display = ch.Checked ? Display.None : Display.Block;
+                pass.Focus();
             };
             for (int i = 0; i < _ToSign.Count - 1; i++)
                 _ToSign[i].TagBox.OnEnterKeySetFocus(_ToSign[i + 1].TagBox);
@@ -372,7 +375,7 @@ namespace CM.Javascript {
                     }
                 };
                 ServerStatus.Clear();
-                ServerStatus.H3(ID + ":");
+                ServerStatus.H3(ID);
                 put.Item.UI = new ServerProgressIndicator(ServerStatus);
                 put.Item.UI.SetMainGlyph(Assets.SVG.Wait);
                 put.Item.UI.Show();

@@ -207,6 +207,7 @@ namespace CM.Server {
 #else
         private const int PAGINATION_SIZE = 10 * 1000;
 #endif
+        public bool VerboseSyncDebugging { get; set; } = false;
 
         public SynchronisationManager(string dataFolder, Storage s, DistributedHashTable dht, Log log) {
             _Log = log;
@@ -262,11 +263,11 @@ namespace CM.Server {
             }
         }
 
-        private static void OnSerialiseSyncState(SyncState s, BinaryWriter bw) {
+        internal static void OnSerialiseSyncState(SyncState s, BinaryWriter bw) {
             s.Serialise(bw);
         }
 
-        private static SyncState OnDeserialiseSyncState(BinaryReader br) {
+        internal static SyncState OnDeserialiseSyncState(BinaryReader br) {
             return new SyncState(br);
         }
 
@@ -312,8 +313,12 @@ namespace CM.Server {
 
                             if ((DateTime.UtcNow - state.LastAnnounceUtc) > interval
                                 && state.Status != SyncStatus.InProgress
-                                && state.Status != SyncStatus.StorageError
-                                && state.Status != SyncStatus.Enqueued) {
+                                && state.Status != SyncStatus.Enqueued
+                                && (state.Status != SyncStatus.StorageError || (DateTime.UtcNow - state.LastAnnounceUtc).TotalDays > 1)
+                                ) {
+                                // Storage repair retry. The backing file path may have been restored.
+                                if (state.Status == SyncStatus.StorageError)
+                                    state.Status = SyncStatus.None;
                                 queue.Add(kp);
                             }
                         }
@@ -465,18 +470,35 @@ namespace CM.Server {
                 bool announcedToAnyone = false;
                 var peers = new List<string>();
                 await _Store.FindResponsiblePeersForAccount(peers, accountID);
+
+                // No need to sync to yourself
+                peers.Remove(_DHT.MyEndpoint);
+
                 if (peers.Count == 0) {
                     _Log.Write(this, LogLevel.INFO, "No peers available for {0}", accountID);
                     state.Status = SyncStatus.NoPeersAvailable;
                     return false;
                 }
+
+                if (VerboseSyncDebugging) {
+                    _Log.Write(this, LogLevel.INFO, "Announcing '{0}' to {1} peers:", accountID, peers.Count);
+                }
+
                 foreach (var peer in peers) {
                     // Filter away peers we've already notified recently.
-                    if (hist.ShouldAnnounce(_Intervals, peer)) {
+                    bool shouldAnnounce = hist.ShouldAnnounce(_Intervals, peer);
+                    string status = "Skip";
+                    if (shouldAnnounce) {
                         if (await AnnounceToPeer(peer, accountID, sync)) {
+                            status = "OK";
                             hist.Increment(peer);
                             announcedToAnyone = true;
+                        } else {
+                            status = "Failed";
                         }
+                    }
+                    if (VerboseSyncDebugging) {
+                        _Log.Write(this, LogLevel.INFO, "   {0}: {1}", peer, status);
                     }
                 }
                 // _Log.Write(this, LogLevel.INFO, "Announce completed for {0}", id);
@@ -497,12 +519,12 @@ namespace CM.Server {
                 || myCopy.UpdatedUtc < peersCopy.UpdatedUtc;
         }
 
-        public async Task OnSyncAnnounceReceived(SyncAnnounce peersCopy, Connection sender) {
+        public void OnSyncAnnounceReceived(SyncAnnounce peersCopy, string senderIP) {
             // Validate the SyncAnnounce.MyEndPoint
             if (peersCopy.MyEndPoint == null
-                || !peersCopy.MyEndPoint.StartsWith(sender.RemoteEndpoint.Address.ToString() + ":")) {
+                || !peersCopy.MyEndPoint.StartsWith(senderIP + ":")) {
                 _Log.Write(this, LogLevel.WARN, "Remote IP {0} sent a bad SyncAnnounce, claiming endpoint '{1}'",
-                    sender.RemoteEndpoint.Address,
+                    senderIP,
                     peersCopy.MyEndPoint);
                 return;
             }
@@ -511,7 +533,7 @@ namespace CM.Server {
 
             if (!Helpers.IsIDValid(accountID)) {
                 _Log.Write(this, LogLevel.WARN, "Remote IP {0} sent a bad SyncAnnounce, with account ID '{1}'",
-                    sender.RemoteEndpoint.Address,
+                    senderIP,
                     accountID ?? String.Empty);
                 return;
             }
@@ -533,7 +555,7 @@ namespace CM.Server {
                 || state.Status == SyncStatus.Deferring)
                 return;
             state.Status = SyncStatus.Enqueued;
-            await PullAccount(accountID, state, peersCopy);
+            Task.Run(() => PullAccount(accountID, state, peersCopy));
         }
 
         /// <summary>
@@ -598,7 +620,7 @@ namespace CM.Server {
                                             var peerData = await conn.Connection.SendAndReceive("GET", null, Constants.PATH_ACCNT + "/" + accountID);
                                             if (peerData.Response.IsSuccessful) {
                                                 var peerAccount = peerData.Cast<Account>();
-                                                if (accountID == peerAccount.ID) {
+                                                if (String.Equals(accountID, peerAccount.ID, StringComparison.OrdinalIgnoreCase)) {
                                                     //a = peerAccount;
                                                     copies.Add(peerAccount);
                                                 } else {
@@ -614,7 +636,9 @@ namespace CM.Server {
                                 Helpers.CheckConsensus<Account>(copies, out a);
 
                                 if (a == null) {
-                                    //  _Log.Write(this, LogLevel.WARN, "Given up deferring sync of {0} after {1} tries. And the announcing peer doesn't work.", accountID, state.PullDeferalCount);
+                                    if (VerboseSyncDebugging) {
+                                        _Log.Write(this, LogLevel.WARN, "Given up deferring sync of {0} after {1} tries. And the announcing peer doesn't work.", accountID, state.PullDeferalCount);
+                                    }
                                     return true; // nothing to work from
                                 }
                             }
@@ -624,7 +648,9 @@ namespace CM.Server {
                         } else {
                             state.Status = SyncStatus.Deferring;
                             // Try again later.
-                            // _Log.Write(this, LogLevel.WARN, "Deferred sync of {0} {1} time(s).", accountID, state.PullDeferalCount);
+                            if (VerboseSyncDebugging) {
+                                _Log.Write(this, LogLevel.WARN, "Deferred sync of {0} {1} time(s).", accountID, state.PullDeferalCount);
+                            }
                             return false;
                         }
                     }
@@ -733,8 +759,8 @@ namespace CM.Server {
                     continue;
                 }
 
-                System.Diagnostics.Debug.Assert(String.Compare(toSync[i].ID, t.ID, true)==0, "Mismatched IDs should never happen.");
-              
+                System.Diagnostics.Debug.Assert(String.Compare(toSync[i].ID, t.ID, true) == 0, "Mismatched IDs should never happen.");
+
                 if (String.Compare(toSync[i].ID, t.ID, true) != 0) {
                     _Log.Write(this, LogLevel.WARN, "Transaction {0} for {1} inexplicably came in as {2}.", toSync[i].ID, accountID, t.ID);
                     continue;
@@ -1052,7 +1078,7 @@ namespace CM.Server {
             _Persisted?.Dispose();
         }
 
-        private enum SyncStatus {
+        internal enum SyncStatus {
             None = 0,
             ResponsibleForAccount,
             NotResponsibleForAccount,
@@ -1063,7 +1089,7 @@ namespace CM.Server {
             Enqueued
         }
 
-        private class SyncState {
+        internal class SyncState {
 
             /// <summary>
             /// For future changes to SyncState.
@@ -1201,4 +1227,25 @@ namespace CM.Server {
             }
         }
     }
+
+#if DEBUG
+    /// <summary>
+    /// Offline SynchronisationManager.SyncState inspection utility.
+    /// </summary>
+    public class SynchronisationUtil {
+        public static string TryExtractSyncStateInformation(string syncFile, string id) {
+            using (var dic = new LinearHashTable<string, SynchronisationManager.SyncState>(
+                syncFile, Storage.Container.OnHashKey,
+                    Storage.Container.OnSerialiseKey,
+                    Storage.Container.OnDeserialiseKey,
+                    SynchronisationManager.OnSerialiseSyncState,
+                    SynchronisationManager.OnDeserialiseSyncState)) {
+                SynchronisationManager.SyncState state;
+                dic.TryGetValue(id, out state);
+                return state != null ? Newtonsoft.Json.JsonConvert.SerializeObject(state) : "Not found";
+            }
+
+        }
+    }
+#endif
 }

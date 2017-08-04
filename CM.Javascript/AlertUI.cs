@@ -151,7 +151,7 @@ namespace CM.Javascript {
                     if (item != null) {
                         details.H2(String.Format(SR.LABEL_ALERT_ACCOUNT_BLANK_MODIFIED, Page.HtmlEncode(item.ID)));
                         details.H3((item.ConsensusCount >= Constants.MinimumNumberOfCopies ?
-                            Assets.SVG.CircleTick.ToString(16, 16, "#288600")
+                            Assets.SVG.CircleTick.ToString(16, 16, Assets.SVG.STATUS_GREEN_COLOR)
                             : Assets.SVG.Warning.ToString(16, 16, "#cccccc"))
                             + " " + item.ConsensusCount.ToString() + " " + SR.LABEL_CONFIRMATIONS);
                         _Url = "/" + item.ID;
@@ -183,7 +183,7 @@ namespace CM.Javascript {
                         }
                         details.H2(Page.HtmlEncode(title));
                         details.H3((item.ConsensusCount >= Constants.MinimumNumberOfCopies ?
-                           Assets.SVG.CircleTick.ToString(16, 16, "#288600")
+                           Assets.SVG.CircleTick.ToString(16, 16, Assets.SVG.STATUS_GREEN_COLOR)
                            : Assets.SVG.Warning.ToString(16, 16, "#cccccc"))
                            + " " + item.ConsensusCount.ToString() + " " + SR.LABEL_CONFIRMATIONS);
                         numbers.H2("").Amount(item.Amount, prefix: Constants.Symbol, roundTo2DP: false);

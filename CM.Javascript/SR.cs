@@ -374,6 +374,9 @@ namespace CM.Javascript {
         /// <summary>Transaction History</summary>
         public static string TITLE_TRANSACTION_HISTORY;
 
+        /// <summary>Transaction Details</summary>
+        public static string TITLE_TRANSACTION_DETAILS;
+
         /// <summary>Choose your language</summary>
         public static string TITLE_CHOOSE_YOUR_LANGUAGE;
 
@@ -702,6 +705,10 @@ namespace CM.Javascript {
         /// <summary>The Civil Money Honour Code</summary>
         public static string TITLE_THE_CIVIL_MONEY_HONOUR_CODE;
 
+        
+
+        /*
+
         /// <summary>Imagine if you didn't have to work</summary>
         public static string HTML_ABOUT_1_1;
 
@@ -789,12 +796,14 @@ namespace CM.Javascript {
         /// <summary>All you need is temporary access..</summary>
         public static string HTML_ABOUT_15_1;
 
+        */
+
         public static void Load(string lang, Action onReady) {
             var dic = typeof(SR);
             // Always load the reference language (English UK)
             Populate(SR.EN_GB);
             if (lang != "EN-GB") {
-                var key = BridgeCasing(lang.Replace("-", "_").ToUpper());
+                var key = lang.Replace("-", "_").ToUpper();
                 var csv = dic[key] as string;
                 if (csv != null)
                     Populate(csv);
@@ -803,16 +812,13 @@ namespace CM.Javascript {
             onReady();
         }
 
-        private static string BridgeCasing(string s) {
-            return Char.ToLower(s[0]) + s.Substring(1);
-        }
-
         private static void Populate(string csv) {
             int cursor = 0;
             string[] line;
             var dic = typeof(SR);
             while ((line = csv.NextCsvLine(ref cursor)) != null) {
-                dic[BridgeCasing(line[0])] = line[1];
+                if (line.Length > 1)
+                    dic[line[0]] = line[1];
             }
             // Validation
             var keys = Type.GetOwnPropertyNames(dic);

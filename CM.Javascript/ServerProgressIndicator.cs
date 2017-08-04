@@ -70,13 +70,13 @@ namespace CM.Javascript {
         }
 
         public void Arrange() {
-            const int width = 120; // this might change
-            const int height = 120;
-
+            const int width = 160; // this might change
+            const int height = 160;
+            const int padding = 20;
             int size = (int)Math.Min(width, height);
             int centerY = size / 2;
             int centerX = size / 2;
-            int radius = size / 2;
+            int radius = (size - padding * 2) / 2;
             for (int i = 0; i < _Peers.Count; i++) {
                 var visual = _Peers[i];
                 var peerEl = visual.Element;
