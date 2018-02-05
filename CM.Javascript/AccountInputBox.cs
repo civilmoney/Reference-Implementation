@@ -35,10 +35,11 @@ namespace CM.Javascript {
                 accountName.Placeholder = watermark??SR.LABEL_ACCOUNT_NAME;
                 accountName.AddEventListener(EventType.KeyPress, (Event e) => {
                     var ev = (KeyboardEvent)e;
-                    if ((ev.KeyCode != '-' && !char.IsLetterOrDigit((char)ev.KeyCode))) {
+                    var key = ev.GetKeyPressCode();
+                    if ((key != '-' && !char.IsLetterOrDigit(key) && !char.IsControl(key))) {
                         e.PreventDefault();
                         e.StopPropagation();
-                        if (ev.KeyCode == 13) {
+                        if (key == 13) {
                             if (Account != null
                             && goGlyph) {
                                 App.Identity.Navigate("/" + Account.ID);

@@ -244,6 +244,7 @@ body {
 }
 
 .cm {
+    color: #333;
 
     svg {
         display: inline-block;
@@ -267,7 +268,7 @@ body {
     }
 
     h1 {
-        color: @inputcolor;
+       // color: @inputcolor;
         margin-top: 0;
     }
 
@@ -375,6 +376,7 @@ body {
                 padding: 1em;
                 border-bottom: 1px dashed #ccc;
                 background: #fff;
+                font-size: 0.8em;
 
                 .transinfo {
                     padding-left: 0.5em;
@@ -608,6 +610,12 @@ body {
         }
     }
 
+    textarea {
+        width: 100%;
+        min-height: 200px;
+        margin: 0.25em 0;
+    }
+
     .readonly {
         border-bottom-color: transparent !important;
     }
@@ -662,7 +670,7 @@ body {
     .check {
         position: relative;
         box-sizing: border-box;
-
+        vertical-align: bottom; // firefox
         label:nth-child(3) {
             display: block;
             padding-left: 2em;
@@ -1462,7 +1470,8 @@ body {
     }
 
     .reminder {
-        margin-top: 1em;
+        margin: 1em 0;
+        font-style: italic;
     }
 
     .confirm {
@@ -1487,6 +1496,38 @@ body {
     .pill {
         background: #eee;
         padding: 0.25em 0.5em;
+    }
+
+    .signing-box {
+        background: #f7f7f7;
+        margin: 20px -60px 20px -60px;
+        padding: 20px 60px 20px 60px;
+        border-radius: 4px;
+
+        input[type=password] {
+            background: transparent;
+        }
+
+        h3 {
+            margin: 0 0 0.25em 0;
+        }
+
+        .signature-ok {
+            margin-top: 1em;
+            display: inline-flex;
+            padding: 0.5em 1em;
+            background: #fff;
+            border-radius: 4px;
+
+            svg {
+                margin-right: 4px;
+            }
+        }
+    }
+
+    .row-spaces {
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
     }
 }
 
@@ -1599,6 +1640,9 @@ body {
 
     li {
         padding-bottom: 1em;
+    }
+    h3 {
+        margin-top: 3em;
     }
 }
 
@@ -2174,8 +2218,12 @@ body {
         font-weight: bold;
     }
 
+    .blue-button {
+        margin-top: 1em;
+    }
+
     h3 {
-        margin-top: 2em;
+        margin-top: 3em;
     }
 }
 
@@ -2345,6 +2393,7 @@ body {
     &:extend(.margins);
     width: 100%;
     padding-bottom: @device-bottom-overlays;
+    color: #555;
 
     > div {
         // column-count: 2;
@@ -2352,23 +2401,27 @@ body {
         h1 {
             column-span: all;
             line-height: 1em;
-            font-size: 3em;
+            font-size: 4em;
+            font-weight: 200;
+            color: #333;
+
+            @media (max-width: @medium-device) {
+                font-size: 3em;
+            }
         }
 
-        > p:nth-of-type(1) {
+        > p:nth-of-type(1), > p:nth-of-type(2), > p:nth-of-type(3) {
             column-span: all;
-            font-style: italic;
             line-height: 2em;
-            margin-bottom: 3em;
         }
 
         h2 {
-            line-height: 1em;
-            font-weight: 400;
+            line-height: 1.25em;
+            font-weight: 700;
             margin-top: 3em;
 
             &:nth-of-type(1) {
-                margin-top: 0;
+                margin-top: 3em;
             }
         }
 

@@ -43,6 +43,7 @@ namespace CM {
         public const int DHTIDSize = 8;
         public const int NumberOfCopies = 5;
         public const int MinimumNumberOfCopies = 2;
+        public const int MinimumRSAKeySizeInBytes = 128;
         public static readonly char[] NewLineChars = new char[] { '\r', '\n' };
         public const decimal MinimumTransactionAmount = 0.000001m; // we'll accept up to 6dp
 
@@ -65,10 +66,10 @@ namespace CM {
 
         // For testing over a closed network with a non-loopback IP, change to something 
         // like this:
-        //public static readonly CMSeed[] Seeds = new CMSeed[] {
-        //    new CMSeed("192-168-0-88."+DNS.UNTRUSTED_DOMAIN+":8000", "192.169.0.88:8000"),
-        //    new CMSeed("192-168-0-88."+DNS.UNTRUSTED_DOMAIN+":8001", "192.169.0.88:8001")
-        //};
+        // public static readonly CMSeed[] Seeds = new CMSeed[] {
+        //     new CMSeed("192-168-0-88."+DNS.UNTRUSTED_DOMAIN+":8000", "192.169.0.88:8000"),
+        //     new CMSeed("192-168-0-88."+DNS.UNTRUSTED_DOMAIN+":8001", "192.169.0.88:8001")
+        // };
 
         /// <summary>
         /// True for debug mode only. It is useful to be able to run multiple servers 

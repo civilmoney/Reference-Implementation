@@ -59,54 +59,54 @@ namespace CM.Javascript {
             // To generate this HTML we're using:
             // http://dillinger.io/
             Element.Div("markdown", @"
-
 <p>The more servers, the stronger and more resilient the Civil Money network can become.<br>
 If you are in possession of a Windows or Ubuntu server with a permanent IP address and<br>
 reliable high bandwidth network connection, please feel free to install an instance in order to help out.</p>
 <blockquote>
 <p>We apologise that the following installation instructions are available in English only.</p>
 </blockquote>
-<h3><a id=""Ubuntu_Linux_9""></a>Ubuntu Linux</h3>
-<p>We have an apt repository to make setup fairly simple, however each Ubuntu version has a slightly different<br>
-.NET Core repository list.</p>
-<pre><code># 1. We need HTTPS and the appropriate .NET Core list from Microsoft.
-$ sudo apt-get install apt-transport-https
+<h3><a id=""Linux_9""></a>Linux</h3>
+<p>Here’s how to spin up a Civil Money server on Linux.</p>
+<ol>
+<li>
+<p>Install .NET Core 2.0 or higher<br>
+Head over to <a href=""https://www.microsoft.com/net/learn/get-started/linuxubuntu"">Microsoft’s .NET Core website</a> for getting it onto your particular linux distro.</p>
+</li>
+<li>
+<p>Download and unzip Civil Money</p>
+<pre><code>$ mkdir /var/civilmoney &amp;&amp; cd &quot;$_&quot;
+$ curl https://update.civil.money/api/get-repo/civilmoney_1.3.zip -o civilmoney_1.3.zip
+$ unzip civilmoney_1.3.zip
 </code></pre>
-<h4><a id=""164_LTS_18""></a>16.4 LTS</h4>
-<pre><code>$ sudo sh -c 'echo &quot;deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ xenial main&quot; &gt; /etc/apt/sources.list.d/dotnetdev.list'
+</li>
+<li>
+<p>Do a test run to make sure everything works</p>
+<pre><code>$ cd /var/civilmoney &amp;&amp; dotnet CM.Daemon.dll
 </code></pre>
-<h4><a id=""1610_LTS_23""></a>16.10 LTS</h4>
-<pre><code>$ sudo sh -c 'echo &quot;deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ yakkety main&quot; &gt; /etc/apt/sources.list.d/dotnetdev.list'
-</code></pre>
-<p><em>For other/future versions, check out <a href=""https://www.microsoft.com/net/core"">https://www.microsoft.com/net/core</a> for installation instructions.</em></p>
-<pre><code># 2. Add .NET Core keys from Microsoft.
-$ sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
-
-# 3. Configure Civil Money list and keys
-$ sudo echo &quot;deb [arch=amd64] https://update.civil.money/api/get-repo/ stable main&quot; | sudo tee -a /etc/apt/sources.list
-$ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 9DAB6D5065655BBC96ADA0855D7FBDB485BE2421
-
-# 4. Update and install
-$ sudo apt-get update
-$ sudo apt-get install civilmoney
-
-# 5. Start the supervisor service
-$ sudo systemctl restart supervisor
-
-# 6. Make sure the server is running OK
-$ sudo tail -f /var/log/civilmoney.out.log
-</code></pre>
+<p>If all’s gone well it should download an update and join the distributed hash table. Press Ctrl + C to stop it.</p>
 <p><strong>Please always check</strong> the log output after 1 minute to make sure you have a Predecessor (which implies that inbound connections are working through your NAT.)</p>
 <blockquote>
 <p><strong>HINT:</strong> You should be able to visit <a href=""https://127-0-0-1.untrusted-server.com:8000"">https://127-0-0-1.untrusted-server.com:8000</a> and see an instance of the Civil Money website running off of your server. Replace “127-0-0-1” with the external IP address integers of your server when testing for external connectivity.</p>
 </blockquote>
-<h4><a id=""Other_LinuxUnix_DistrosMac_OSX_52""></a>Other Linux/Unix Distros/Mac OSX</h4>
-<p>If you’re a savvy unix administrator or running something like a Mac server, you can follow Microsoft’s <a href=""https://www.microsoft.com/net/core"">.NET Core</a> setup instructions and download/extract the standard <a href=""https://update.civil.money/api/get-repo/civilmoney_1.2.zip"">Civil Money binary</a> and run <code>dotnet CM.Daemon.dll</code> directly.</p>
-<h3><a id=""Windows_55""></a>Windows</h3>
-<p>Windows setup is pretty straight forward, but you need to install the .NET Core 1.1 prerequisite.</p>
+</li>
+</ol>
+<ol start=""4"">
+<li>To install as a service under systemd under a low privelege user<pre><code>$ sudo useradd --home /var/civilmoney --gid nogroup -m --shell /bin/false civilmoney
+$ sudo chown -R civilmoney:nogroup /var/civilmoney
+$ sudo dotnet CM.Daemon.dll --install user:civilmoney
+$ sudo systemctl enable civilmoney.service
+$ sudo systemctl start civilmoney
+</code></pre>
+To view status/logs<pre><code>$ sudo systemctl status civilmoney
+$ journalctl -fu civilmoney 
+</code></pre>
+</li>
+</ol>
+<h3><a id=""Windows_48""></a>Windows</h3>
+<p>Windows setup is pretty straight forward.</p>
 <ol>
-<li>Install the <a href=""https://go.microsoft.com/fwlink/?LinkID=835014"">.NET Core SDK 1.1</a></li>
-<li>Download the <a href=""https://update.civil.money/api/get-repo/civilmoney_1.2.zip"">Civil Money binary</a> and unzip the contents into a folder location on your server.</li>
+<li>Install the <a href=""https://www.microsoft.com/net/download/windows"">.NET Core SDK 2.0</a> or higher.</li>
+<li>Download the <a href=""https://update.civil.money/api/get-repo/civilmoney_1.3.zip"">Civil Money binary</a> and unzip the contents into a folder location on your server.</li>
 <li>Open an elevated command prompt:</li>
 </ol>
 <pre><code>&gt; cd &lt;your unzipped folder location&gt;
@@ -127,7 +127,7 @@ $ sudo tail -f /var/log/civilmoney.out.log
 <blockquote>
 <p><strong>HINT:</strong> You should be able to visit <a href=""https://127-0-0-1.untrusted-server.com:8000"">https://127-0-0-1.untrusted-server.com:8000</a> and see an instance of the Civil Money website running off of your server. Replace “127-0-0-1” with the external IP address integers of your server when testing for external connectivity.</p>
 </blockquote>
-<h3><a id=""Customising_the_configuration_83""></a>Customising the configuration</h3>
+<h3><a id=""Customising_the_configuration_76""></a>Customising the configuration</h3>
 <p>All settings are in the <code>settings.json</code> file which is side-by-side the <code>CM.Daemon.dll</code>. On Linux, if installed through apt, this will be under <code>/var/civilmoney</code>.</p>
 <p>The default settings look like this:</p>
 <pre><code>{
@@ -153,7 +153,7 @@ $ sudo tail -f /var/log/civilmoney.out.log
 <tbody>
 <tr>
 <td>Port</td>
-<td>If another web server (Apache, IIS, etc) is not installed and already using port 443, you may run the service under <code>root</code> on Linux or <code>LocalSystem</code> on Windows in order to bind 443, and then change the port in the configuration to 443. For Linux you need to edit <code>/etc/supervisor/conf.d/civilmoney.conf</code>, change its user string to <code>root</code> and then <code>systemctl restart supervisor</code>. For Windows, assuming IIS has not bound the port already, simply changing the port to 443 should be all you need. You will receive start-up errors if the server is unable to bind.</td>
+<td>If another web server (Apache, IIS, etc) is not installed and already using port 443, you can do <code>sudo setcap cap_net_bind_service=ep /usr/share/dotnet/dotnet</code> to allow .NET Core to bind the port on Linux or for Windows simply simply set the service to run under <code>LocalSystem</code>, and then change the port in the configuration to 443. You will receive start-up errors if the server is unable to bind.</td>
 </tr>
 <tr>
 <td>Seeds</td>

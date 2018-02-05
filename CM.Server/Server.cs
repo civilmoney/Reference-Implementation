@@ -203,7 +203,7 @@ namespace CM.Server {
             _Listener = new SslWebServer(cert, Configuration.Port, Log, prevention);
             _Listener.DemandWebSocketProtocol = Constants.WebSocketProtocol;
             _Listener.HandleHttpRequest = _Listener_HandleHttpRequest;
-            _Listener.HandleWebSocket += _Listener_HandleWebSocket;
+            _Listener.HandleWebSocket = _Listener_HandleWebSocket;
             _Listener.Start();
             if (Configuration.EnablePort80Redirect)
                 _Listener.StartPort80Redirect();
@@ -386,23 +386,24 @@ namespace CM.Server {
                     }
 
 #if DEBUG_JS
-                    // for development testing - send files directly from disk
+                    // For development testing - send files directly from disk
                     var res = GetWWWResourceDevelopment(file);
-
 #else
+                    // For production, our resources are always embedded in the .dll
                     var res = GetWWWResource(file);
 #endif
+
                     if (res != null) {
 #if !DEBUG_JS
-                            DateTime modifiedSince;
-                            if (DateTime.TryParse(context.RequestHeaders["If-Modified-Since"] ?? String.Empty,
-                                System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AdjustToUniversal,
-                                out modifiedSince)) {
-                                if ((_ResourcesDate - modifiedSince).TotalSeconds < 1) {
-                                    await context.ReplyAsync(HttpStatusCode.NotModified).ConfigureAwait(false);
-                                    return;
-                                }
+                        DateTime modifiedSince;
+                        if (DateTime.TryParse(context.RequestHeaders["If-Modified-Since"] ?? String.Empty,
+                            System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AdjustToUniversal,
+                            out modifiedSince)) {
+                            if ((_ResourcesDate - modifiedSince).TotalSeconds < 1) {
+                                await context.ReplyAsync(HttpStatusCode.NotModified).ConfigureAwait(false);
+                                return;
                             }
+                        }
 #endif
                         var data = res.Data;
                         var headers = new Dictionary<string, string>  {
@@ -414,6 +415,9 @@ namespace CM.Server {
                             headers.Add("X-XSS-Protection", "1; mode=block");
                             headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' " + Constants.WebSocketTransport + "://*.untrusted-server.com:* " + Constants.WebSocketTransport + "://*.civil.money:* " + Constants.WebSocketTransport + "://civil.money:* https://*.civil.money:* https://civil.money:*;");
                         }
+
+                        // Shouldn't really use compression over TLS as it leaks entropy bits, but we have no 
+                        // secrets under CM and so don't care if the connection is decrypted..
                         var encoding = context.RequestHeaders["Accept-Encoding"] ?? String.Empty;
                         if (encoding.IndexOf("gzip") > -1) {
                             if (res.DataGZip == null) {
@@ -795,6 +799,20 @@ namespace CM.Server {
             }
         }
         Task _CurrentMaintenanceTask;
+
+        List<CMSeed> BuildSeedsList() {
+            var ar = new List<CMSeed>(Constants.Seeds);
+            if (!String.IsNullOrWhiteSpace(Configuration.Seeds)) {
+                var additionalSeeds = Configuration.Seeds.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var entry in additionalSeeds) {
+                    if (ar.FirstOrDefault(x => String.Equals(x.Domain, entry, StringComparison.OrdinalIgnoreCase)) == null)
+                        ar.Add(new CMSeed(entry, null));
+                }
+            }
+
+            return ar;
+        }
+
         private async void MaintenanceLoop() {
             var lastSeedCheck = TimeSpan.Zero;
             var lastPingRandomNode = TimeSpan.Zero;
@@ -809,7 +827,7 @@ namespace CM.Server {
                     if (DHT.Seen.Count == 0
                         && (lastSeedCheck == TimeSpan.Zero || (Clock.Elapsed - lastSeedCheck).TotalSeconds > 30)) {
                         lastSeedCheck = Clock.Elapsed;
-                        await ResolveInitialSeedServers().ConfigureAwait(false);
+                        await ResolveInitialSeedServers(BuildSeedsList()).ConfigureAwait(false);
                     }
 
                     _CurrentMaintenanceTask = DHT.Poll(); //await DHT.Poll().ConfigureAwait(false);
@@ -872,9 +890,8 @@ namespace CM.Server {
             Log.Write(this, LogLevel.INFO, "MaintenanceLoop stopped.");
         }
 
-        private async Task ResolveInitialSeedServers() {
-            var ar = Constants.Seeds;
-            for (int i = 0; i < ar.Length; i++) {
+        private async Task ResolveInitialSeedServers(List<CMSeed> ar) {
+            for (int i = 0; i < ar.Count; i++) {
                 var tmp = ar[i].Domain.Split(':');
                 var host = tmp[0];
                 var port = tmp.Length > 1 ? tmp[1] : (Constants.WebSocketTransport == "wss" ? "443" : "80");

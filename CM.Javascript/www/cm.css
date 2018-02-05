@@ -205,6 +205,9 @@ body {
   -webkit-animation-iteration-count: 1;
   -webkit-transform-origin: 50% 50%;
 }
+.cm {
+  color: #333;
+}
 .cm svg {
   display: inline-block;
 }
@@ -231,7 +234,6 @@ body {
   font-weight: 400;
 }
 .cm h1 {
-  color: #000;
   margin-top: 0;
 }
 .cm a {
@@ -319,6 +321,7 @@ body {
   padding: 1em;
   border-bottom: 1px dashed #ccc;
   background: #fff;
+  font-size: 0.8em;
 }
 .cm > .alerts .items .item .transinfo {
   padding-left: 0.5em;
@@ -523,6 +526,11 @@ body {
 .cm select:focus {
   border-color: #555;
 }
+.cm textarea {
+  width: 100%;
+  min-height: 200px;
+  margin: 0.25em 0;
+}
 .cm .readonly {
   border-bottom-color: transparent !important;
 }
@@ -589,6 +597,7 @@ body {
 .cm .check {
   position: relative;
   box-sizing: border-box;
+  vertical-align: bottom;
 }
 .cm .check label:nth-child(3) {
   display: block;
@@ -1194,7 +1203,8 @@ body {
   }
 }
 .cm .reminder {
-  margin-top: 1em;
+  margin: 1em 0;
+  font-style: italic;
 }
 .cm .confirm {
   clear: both;
@@ -1206,6 +1216,32 @@ body {
 .cm .pill {
   background: #eee;
   padding: 0.25em 0.5em;
+}
+.cm .signing-box {
+  background: #f7f7f7;
+  margin: 20px -60px 20px -60px;
+  padding: 20px 60px 20px 60px;
+  border-radius: 4px;
+}
+.cm .signing-box input[type=password] {
+  background: transparent;
+}
+.cm .signing-box h3 {
+  margin: 0 0 0.25em 0;
+}
+.cm .signing-box .signature-ok {
+  margin-top: 1em;
+  display: inline-flex;
+  padding: 0.5em 1em;
+  background: #fff;
+  border-radius: 4px;
+}
+.cm .signing-box .signature-ok svg {
+  margin-right: 4px;
+}
+.cm .row-spaces {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
 }
 .homepage {
   max-width: 500px;
@@ -1288,6 +1324,9 @@ body {
 }
 .registerpage li {
   padding-bottom: 1em;
+}
+.registerpage h3 {
+  margin-top: 3em;
 }
 .accountpage {
   width: 100%;
@@ -1886,8 +1925,11 @@ body {
   margin: 2em 0 1em 0;
   font-weight: bold;
 }
+.accounteditpage .blue-button {
+  margin-top: 1em;
+}
 .accounteditpage h3 {
-  margin-top: 2em;
+  margin-top: 3em;
 }
 .transactionpage {
   width: 100%;
@@ -2025,25 +2067,33 @@ body {
 .presentationpage {
   width: 100%;
   padding-bottom: 60px;
+  color: #555;
 }
 .presentationpage > div h1 {
   column-span: all;
   line-height: 1em;
-  font-size: 3em;
+  font-size: 4em;
+  font-weight: 200;
+  color: #333;
 }
-.presentationpage > div > p:nth-of-type(1) {
+@media (max-width: 539px) {
+  .presentationpage > div h1 {
+    font-size: 3em;
+  }
+}
+.presentationpage > div > p:nth-of-type(1),
+.presentationpage > div > p:nth-of-type(2),
+.presentationpage > div > p:nth-of-type(3) {
   column-span: all;
-  font-style: italic;
   line-height: 2em;
-  margin-bottom: 3em;
 }
 .presentationpage > div h2 {
-  line-height: 1em;
-  font-weight: 400;
+  line-height: 1.25em;
+  font-weight: 700;
   margin-top: 3em;
 }
 .presentationpage > div h2:nth-of-type(1) {
-  margin-top: 0;
+  margin-top: 3em;
 }
 .presentationpage > div img {
   width: 30%;

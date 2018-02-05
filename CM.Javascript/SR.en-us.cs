@@ -16,13 +16,13 @@ namespace CM.Javascript {
         private static readonly string EN_US = @"
 KEY,REFERENCE,NATIVE
 LABEL_CIVIL_MONEY_SUB_HEADING,A civilized monetary framework.,
-HTML_CIVIL_MONEY_PROVIDES,""<h3>Civil Money is free to join, accepts no personally identifying information and gives you:</h3>
+HTML_CIVIL_MONEY_PROVIDES,""<h3>Civil Money is free to use and aims to provide everybody:</h3>
 <ul>
-<li>A <b>generous</b> universal basic income</li>
+<li>A generous universal basic income</li>
 <li>Easy dispute resolution</li>
 <li>Automatic taxation/funding for your country and region</li>
-<li>Transparent transactions, honesty and accountability</li>
-<li>A more civilized cash-free society</li>
+<li>Open transactions, honesty and fairness</li>
+<li>A more civilized debt-free society</li>
 </ul>"",
 LABEL_CHOOSE_YOUR_LANGUAGE,""We apologize that not all languages are available. If you are interested in helping out, please contact us."",
 HTML_I_PROMISE_TO_FOLLOW_THE_HONOUR_CODE, ""I promise to follow the <b>Civil Money Honor Code</b>"",

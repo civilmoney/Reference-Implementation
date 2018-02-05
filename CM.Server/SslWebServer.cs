@@ -41,7 +41,7 @@ namespace CM.Server {
 
         public Func<SslWebContext,Task> HandleHttpRequest;
 
-        public event Action<SslWebSocket> HandleWebSocket;
+        public Action<SslWebSocket> HandleWebSocket;
 
         public int ConnectionCount { get { return _ConnectedClients.Count; } }
 
@@ -61,6 +61,9 @@ namespace CM.Server {
             _Listener = new TcpListener(new IPEndPoint(IPAddress.Any, _Port));
             // Workaround for linux re-bind bug
             _Listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            // Disable Nagle 
+            _Listener.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+
             _Log.Write(this, LogLevel.INFO, "HTTPS listener started.");
             _Listener.Start();
             IsListening = true;
@@ -101,6 +104,8 @@ namespace CM.Server {
             _Port80Listener = new TcpListener(new IPEndPoint(IPAddress.Any, 80));
             // Workaround for linux re-bind bug
             _Port80Listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            _Port80Listener.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+
             _Log.Write(this, LogLevel.INFO, "HTTP Port 80 redirect started.");
             _Port80Listener.Start();
             _HttpThread = new Thread(() => {

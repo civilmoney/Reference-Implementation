@@ -7,57 +7,50 @@ reliable high bandwidth network connection, please feel free to install an insta
 
 >We apologise that the following installation instructions are available in English only.
 
-### Ubuntu Linux 
+### Linux 
 
-We have an apt repository to make setup fairly simple, however each Ubuntu version has a slightly different
-.NET Core repository list.
-
-```
-# 1. We need HTTPS and the appropriate .NET Core list from Microsoft.
-$ sudo apt-get install apt-transport-https
-```
-#### 16.4 LTS
-```
-$ sudo sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ xenial main" > /etc/apt/sources.list.d/dotnetdev.list'
-```
-
-#### 16.10 LTS
-```
-$ sudo sh -c 'echo "deb [arch=amd64] https://apt-mo.trafficmanager.net/repos/dotnet-release/ yakkety main" > /etc/apt/sources.list.d/dotnetdev.list'
-```
-*For other/future versions, check out [https://www.microsoft.com/net/core](https://www.microsoft.com/net/core) for installation instructions.*
-```
-# 2. Add .NET Core keys from Microsoft. 
-$ sudo apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893
-
-# 3. Configure Civil Money list and keys
-$ sudo echo "deb [arch=amd64] https://update.civil.money/api/get-repo/ stable main" | sudo tee -a /etc/apt/sources.list
-$ sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 9DAB6D5065655BBC96ADA0855D7FBDB485BE2421
-
-# 4. Update and install
-$ sudo apt-get update
-$ sudo apt-get install civilmoney
-
-# 5. Start the supervisor service
-$ sudo systemctl restart supervisor
-
-# 6. Make sure the server is running OK
-$ sudo tail -f /var/log/civilmoney.out.log
-```
-
-**Please always check** the log output after 1 minute to make sure you have a Predecessor (which implies that inbound connections are working through your NAT.)
-
-> **HINT:** You should be able to visit https://127-0-0-1.untrusted-server.com:8000 and see an instance of the Civil Money website running off of your server. Replace "127-0-0-1" with the external IP address integers of your server when testing for external connectivity.
+Here's how to spin up a Civil Money server on Linux.
 
 
-#### Other Linux/Unix Distros/Mac OSX
-If you're a savvy unix administrator or running something like a Mac server, you can follow Microsoft's [.NET Core](https://www.microsoft.com/net/core) setup instructions and download/extract the standard [Civil Money binary](https://update.civil.money/api/get-repo/civilmoney_1.2.zip) and run `dotnet CM.Daemon.dll` directly.
+1. Install .NET Core 2.0 or higher
+Head over to [Microsoft's .NET Core website](https://www.microsoft.com/net/learn/get-started/linuxubuntu) for getting it onto your particular linux distro.
+
+2. Download and unzip Civil Money
+    ```
+    $ mkdir /var/civilmoney && cd "$_"
+    $ curl https://update.civil.money/api/get-repo/civilmoney_1.3.zip -o civilmoney_1.3.zip
+    $ unzip civilmoney_1.3.zip
+    ```
+3. Do a test run to make sure everything works
+    ```
+    $ cd /var/civilmoney && dotnet CM.Daemon.dll
+    ```
+    If all's gone well it should download an update and join the distributed hash table. Press Ctrl + C to stop it.
+
+    **Please always check** the log output after 1 minute to make sure you have a Predecessor (which implies that inbound connections are working through your NAT.)
+
+    > **HINT:** You should be able to visit https://127-0-0-1.untrusted-server.com:8000 and see an instance of the Civil Money website running off of your server. Replace "127-0-0-1" with the external IP address integers of your server when testing for external connectivity.
+
+
+4. To install as a service under systemd under a low privelege user
+    ```
+    $ sudo useradd --home /var/civilmoney --gid nogroup -m --shell /bin/false civilmoney
+    $ sudo chown -R civilmoney:nogroup /var/civilmoney
+    $ sudo dotnet CM.Daemon.dll --install user:civilmoney
+    $ sudo systemctl enable civilmoney.service
+    $ sudo systemctl start civilmoney
+    ```
+    To view status/logs
+    ```
+    $ sudo systemctl status civilmoney
+    $ journalctl -fu civilmoney 
+    ```
 
 ### Windows
-Windows setup is pretty straight forward, but you need to install the .NET Core 1.1 prerequisite.
+Windows setup is pretty straight forward.
 
-1. Install the [.NET Core SDK 1.1](https://go.microsoft.com/fwlink/?LinkID=835014)
-2. Download the [Civil Money binary](https://update.civil.money/api/get-repo/civilmoney_1.2.zip) and unzip the contents into a folder location on your server.
+1. Install the [.NET Core SDK 2.0](https://www.microsoft.com/net/download/windows) or higher.
+2. Download the [Civil Money binary](https://update.civil.money/api/get-repo/civilmoney_1.3.zip) and unzip the contents into a folder location on your server.
 3. Open an elevated command prompt:
 ```
 > cd <your unzipped folder location>
@@ -102,7 +95,7 @@ The default settings look like this:
 ```
 | Field | Description     |
 |-------|---------|
-| Port | If another web server (Apache, IIS, etc) is not installed and already using port 443, you may run the service under `root` on Linux or `LocalSystem` on Windows in order to bind 443, and then change the port in the configuration to 443. For Linux you need to edit `/etc/supervisor/conf.d/civilmoney.conf`, change its user string to `root` and then `systemctl restart supervisor`. For Windows, assuming IIS has not bound the port already, simply changing the port to 443 should be all you need. You will receive start-up errors if the server is unable to bind. |
+| Port | If another web server (Apache, IIS, etc) is not installed and already using port 443, you can do `sudo setcap cap_net_bind_service=ep /usr/share/dotnet/dotnet` to allow .NET Core to bind the port on Linux or for Windows simply simply set the service to run under `LocalSystem`, and then change the port in the configuration to 443. You will receive start-up errors if the server is unable to bind. |
 | Seeds | A comma delimited list of known well behaved peers. To eliminate a single point of failure, the Civil Money community may establish seed listings online which are based on IPs. |
 | DataFolder | A path to a suitable folder for data storage. By default data is kept in a folder beside the `CM.Daemon.dll`. |
 | AuthoritativePfxCertificate | Only used by official Civil Money seeds. |

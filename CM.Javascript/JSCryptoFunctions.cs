@@ -94,6 +94,9 @@ if(window.Worker) {
 
         public void BeginRSAKeyGen(AsyncRequest<RSAKeyRequest> e) {
             var r = e.Item;
+            int keySizeInBits = 2048;
+            int pqSizeInBytes = keySizeInBits / 8 / 2;
+
             Bridge.Script.Write(@"
 if (window.Worker) {
                 var worker = new Worker('/webworkers.js');
@@ -107,8 +110,8 @@ if (window.Worker) {
                     }
                 };
                 // No window.crypto in web workers, have to do it here..
-                var p = new Uint8Array(64);
-                var q = new Uint8Array(64);
+                var p = new Uint8Array(pqSizeInBytes);
+                var q = new Uint8Array(pqSizeInBytes);
                 (window.crypto || window.msCrypto).getRandomValues(p);
                 (window.crypto || window.msCrypto).getRandomValues(q);
                 var args =  {'command': 'generate-rsa', p: Array.prototype.slice.call(p), q: Array.prototype.slice.call(q) };
@@ -118,14 +121,14 @@ if (window.Worker) {
                 // If there's no webworker, there's probably no
                 // Uint8Array/window.crypto either.
 ");
-            byte[] tmp = new byte[64 * 2];
+            byte[] tmp = new byte[pqSizeInBytes * 2];
             CM.Cryptography.RNG.RandomBytes(tmp);
             Bridge.Script.Write(@"
                 var p = [];
                 var q = [];
-                for(var i=0;i<64;i++){
+                for(var i=0;i<pqSizeInBytes;i++){
                     p.push(tmp[i]);
-                    q.push(tmp[i+64]);
+                    q.push(tmp[i+pqSizeInBytes]);
                 }
                 var crunch = new Crunch();
                 p = crunch.nextPrime(Array.prototype.slice.call(p));
@@ -133,8 +136,13 @@ if (window.Worker) {
                 var exp = [1, 0, 1];
                 var n = crunch.mul(p, q);
                 var f = crunch.mul(crunch.decrement(p), crunch.decrement(q));
-                var d = crunch.cut(crunch.inv(exp, f));
-                r.Output = { D: d, Modulus: n, Exponent: exp };
+                var d = crunch.inv(exp, f);
+                var dp = crunch.cut(crunch.mod(d, crunch.decrement(p)));
+                var dq = crunch.cut(crunch.mod(d, crunch.decrement(q)));
+                var inverseQ = crunch.cut(crunch.exp(q, crunch.sub(p, [2]), p));
+                d = crunch.cut(d);
+
+                r.Output = { D: d, Modulus: n, Exponent: exp, P: p, Q: q, DP: dp, DQ: dq, InverseQ: inverseQ };
                 e.Completed(CM.CMResult.S_OK.$clone());
 }
             ");

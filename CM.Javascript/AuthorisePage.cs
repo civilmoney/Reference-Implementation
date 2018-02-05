@@ -116,6 +116,8 @@ namespace CM.Javascript {
                 _ToSign[i].ServerStatus = serverStatus.Div("statusvisual");
             }
 
+            var signingBox = new SigningBox(_Form);
+
             _MainFeedback.Set(Assets.SVG.Wait, FeedbackType.Default,
                 SR.LABEL_STATUS_CONTACTING_NETWORK);
             var fa = new AsyncRequest<FindAccountRequest>() {
@@ -123,6 +125,7 @@ namespace CM.Javascript {
                 OnComplete = (a) => {
                     if (a.Result.Success) {
                         _Account = a.Item.Output;
+                        signingBox.Signer = _Account;
                         // Load all signing transactions
                         int loaded = 0;
                         for (int i = 0; i < _ToSign.Count; i++) {
@@ -156,16 +159,8 @@ namespace CM.Javascript {
             };
             App.Identity.Client.TryFindAccount(fa);
 
-            //_Form.H3(SR.LABEL_SECURITY);
-
-            var reminder = _Form.Div("reminder", SR.LABEL_CIVIL_MONEY_SECURITY_REMINDER);
-            var confirm = _Form.Div("confirm");
-            var ch = confirm.CheckBox(SR.HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS);
-         
-            var passRow = _Form.Div("row");
-            passRow.Style.Display = Display.None;
-            passRow.H3(SR.LABEL_SECRET_PASS_PHRASE);
-            var pass = passRow.Password();
+           
+          
             _ButtonsRow = Element.Div("button-row");
             var submit = _ButtonsRow.Button(SR.LABEL_CONTINUE, (e) => {
                 _Form.Style.Display = Display.None;
@@ -195,7 +190,7 @@ namespace CM.Javascript {
                     }
                     sign.Item.Transforms.Add(item.Transform);
                 }
-                sign.Item.Password = System.Text.Encoding.UTF8.GetBytes(pass.Value);
+                sign.Item.PasswordOrRSAPrivateKey = signingBox.PasswordOrPrivateKey;
                 sign.OnComplete = (req) => {
                     if (req.Result == CMResult.S_OK) {
                         _MainFeedback.Set(Assets.SVG.Wait,
@@ -234,17 +229,14 @@ namespace CM.Javascript {
             _ButtonsRow.Button(SR.LABEL_CANCEL, (e) => {
                 App.Identity.CurrentPage = _Previous;
             });
-            ch.OnChange = (e) => {
-                passRow.Style.Display = ch.Checked ? Display.Block : Display.None;
-                submit.Style.Display = ch.Checked ? Display.Inline : Display.None;
-                reminder.Style.Display = ch.Checked ? Display.None : Display.Block;
-                confirm.Style.Display = ch.Checked ? Display.None : Display.Block;
-                pass.Focus();
+
+            signingBox.OnPasswordReadyStateChanged = (isChecked) => {
+                submit.Style.Display = isChecked ? Display.Inline : Display.None;
             };
+            signingBox.OnPasswordEnterKey = submit.Click;
             for (int i = 0; i < _ToSign.Count - 1; i++)
                 _ToSign[i].TagBox.OnEnterKeySetFocus(_ToSign[i + 1].TagBox);
-            //_ToSign[_ToSign.Count - 1].TagBox.OnEnterKeySetFocus(ch);
-            pass.OnEnterKey(submit.Click);
+    
         }
 
         public override void OnRemoved() {

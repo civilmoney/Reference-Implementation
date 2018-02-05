@@ -753,7 +753,8 @@ namespace CM.Javascript {
                 var bytes = Encoding.UTF8.GetBytes(plainText);
                 if (utf8BOM) {
                     codeBytes = new byte[bytes.Length + 3];
-                    Array.Copy(Encoding.UTF8.GetPreamble(), codeBytes, 3);
+                    var utf8Preamble = new byte[] { 239, 187, 191 };
+                    Array.Copy(utf8Preamble, codeBytes, 3);
                     Array.Copy(bytes, 0, codeBytes, 3, bytes.Length);
                 } else {
                     codeBytes = bytes;

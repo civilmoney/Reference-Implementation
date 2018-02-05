@@ -229,18 +229,11 @@ namespace CM.Javascript {
 
             var rdoFor = right.RadioButton("vote", SR.LABEL_VOTE_FOR);
             var rdoAgainst = right.RadioButton("vote", SR.LABEL_VOTE_AGAINST);
-          //  div.H3(SR.LABEL_SECURITY);
-
-   
-            var reminder = div.Div("reminder", SR.LABEL_CIVIL_MONEY_SECURITY_REMINDER);
-            var confirm = div.Div("confirm");
-            var ch = confirm.CheckBox(SR.HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS);
-
+       
+            var signingBox = new SigningBox(div);
 
             var passRow = div.Div("row");
-            passRow.Style.Display = Display.None;
-            passRow.H3(SR.LABEL_SECRET_PASS_PHRASE);
-            var pass = passRow.Password();
+  
             var returnButtons = Element.Div();
             var serverStatus = Element.Div("statusvisual");
             var submit = passRow.Div("button-row").Button(SR.LABEL_CONTINUE, (e) => {
@@ -277,7 +270,7 @@ namespace CM.Javascript {
                 var sign = new AsyncRequest<Schema.DataSignRequest>();
                 sign.Item = new Schema.DataSignRequest();
                 sign.Item.Transforms.Add(new Schema.DataSignRequest.Transform(vote.GetSigningData()));
-                sign.Item.Password = System.Text.Encoding.UTF8.GetBytes(pass.Value);
+                sign.Item.PasswordOrRSAPrivateKey = signingBox.PasswordOrPrivateKey;
                 sign.OnComplete = (signRes) => {
                     if (signRes.Result == CMResult.S_OK) {
                         vote.Signature = signRes.Item.Transforms[0].Output;
@@ -345,10 +338,14 @@ namespace CM.Javascript {
 
             submit.Style.Display = Display.None;
             account.OnAccountChanged = (a) => {
+
+                signingBox.Signer = a;
+
                 if (a == null) {
                     _ExistingVote = null;
                     return;
                 }
+              
                 feedback.Set(Assets.SVG.Wait, FeedbackType.Default, SR.LABEL_STATUS_CONTACTING_NETWORK);
                 App.Identity.Client.TryFindVote(new AsyncRequest<FindVoteRequest>() {
                     Item = new FindVoteRequest(a.ID, _Proposition),
@@ -374,14 +371,10 @@ namespace CM.Javascript {
                     }
                 });
             };
-            ch.OnChange = (e) => {
-                passRow.Style.Display = ch.Checked ? Display.Block : Display.None;
-                submit.Style.Display = ch.Checked ? Display.Inline : Display.None;
-                reminder.Style.Display = ch.Checked ? Display.None : Display.Block;
-                confirm.Style.Display = ch.Checked ? Display.None : Display.Block;
-                pass.Focus();
+            signingBox.OnPasswordReadyStateChanged = (isChecked) => {
+                submit.Style.Display = isChecked ? Display.Inline : Display.None;
             };
-            pass.OnEnterKey(submit.Click);
+            signingBox.OnPasswordEnterKey = submit.Click;
         }
     }
 }

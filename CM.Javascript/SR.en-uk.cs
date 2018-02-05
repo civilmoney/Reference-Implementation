@@ -22,13 +22,13 @@ TITLE_CIVIL_MONEY,Civil Money,Civil Money
 LABEL_CIVIL_MONEY_SUB_HEADING,A civilised monetary framework.,
 LABEL_ACCOUNT_NAME,Account Name,
 LABEL_GO,Go,
-HTML_CIVIL_MONEY_PROVIDES,""<h3>Civil Money is free to join, accepts no personally identifying information and gives you:</h3>
+HTML_CIVIL_MONEY_PROVIDES,""<h3>Civil Money is free to use and aims to provide everybody:</h3>
 <ul>
-<li>A <b>generous</b> universal basic income</li>
+<li>A generous universal basic income</li>
 <li>Easy dispute resolution</li>
 <li>Automatic taxation/funding for your country and region</li>
-<li>Transparent transactions, honesty and accountability</li>
-<li>A more civilised cash-free society</li>
+<li>Open transactions, honesty and fairness</li>
+<li>A more civilised debt-free society</li>
 </ul>"",
 LABEL_CREATE_MY_ACCOUNT,Create my account,
 TITLE_PEERS,Peers,
@@ -100,8 +100,8 @@ LABEL_ACCOUNT_BLANK_IS_ALREADY_TAKEN,Account name '{0}' is already taken.,
 LABEL_ACCOUNT_BLANK_LOOKS_OK,Account name '{0}' looks OK!,
 LABEL_STATUS_CHECKING_ACCOUNT_NAME,Checking account name,
 LABEL_STATUS_PROBLEM_REACHING_A_SERVER,Unfortunately we can't reach a server right now.,
-LABEL_CIVIL_MONEY_SECURITY_REMINDER,""If your web browser's address bar is not visible or its URL does not begin withhttps://civil.money/ or if in the future you don't receive this reminder, pleasedo not type in your pass phrase, as the page you are on might be trying to harvest your secret pass phrase."",
-HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS,I've checked my web browser's address and it definitely begins with <b>https://civil.money/</b>,
+LABEL_CIVIL_MONEY_SECURITY_REMINDER,""If your web browser address bar is not visible or its URL does not begin withhttps://civil.money/ or if in the future you don't receive this reminder, pleasedon't enter a pass phrase or private key, as the page you are on might be trying to steal your account."",
+HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS,I've checked my web browser's address bar and it definitely begins with <b>https://civil.money/</b>,
 LABEL_A_VALID_PAYEE_ACCOUNT_NAME_IS_REQUIRED,A valid payee account name is required.,
 LABEL_YOUR_ACCOUNT_NAME_IS_REQUIRED,Your account name is required.,
 LABEL_THE_AMOUNT_IS_INVALID,The amount is invalid.,
@@ -185,6 +185,7 @@ LABEL_PUSH_NOTIFICATIONS,Push Notifications,
 LABEL_PUSH_NOTIFICATIONS_INTRO,""Specify one or more HTTP end-points to receive push notifications
 any time your account is changed or a transaction is updated."",
 LABEL_CHANGE_MY_PASS_PHRASE,Change my secret pass phrase,
+LABEL_CHANGE_MY_PRIVATE_KEY,Change my private key,
 LABEL_CONTINUE,Continue,
 LABEL_ENTER_SKILL_OR_SERVICE,Skill or service,
 LABEL_LABEL,Label,
@@ -232,10 +233,21 @@ LABEL_ALERT_ACCOUNT_BLANK_MODIFIED,Account {0} has been modified,
 LABEL_DISMISS_ALL,Dismiss All,
 LABEL_CLEAR,Clear,
 TITLE_PLEASE_PAY,Please pay,
+LABEL_WITHHELD_PRIVATE_KEY,Withheld private key,
+LABEL_SELECT_MY_KEY_FILE,Select my RSA private key file,
+LABEL_PASTE_FROM_TEXT_INSTEAD,Paste from text instead,
+LABEL_ENTER_A_NEW_PASS_PHRASE,Enter a new pass phrase,
 LABEL_MATCHING_TRANSACTION_RECEIVED_FROM,Matching transaction received from,
 LABEL_POINT_OF_SALE,Point of Sale,
+LABEL_PLEASE_ENTER_YOUR_ACCOUNT_NAME,Please enter your account name in the field above.,
+LABEL_SIGNING_KEY_LOOKS_OK,Signing key looks good!,
+LABEL_USE_AN_OFFLINE_PRIVATE_KEY,Use an offline private key instead of a pass phrase.,
+LABEL_INVALID_RSA_KEY_TEXT_BLOB,The text entered does not seem to contain a private key text blob.,
+LABEL_GENERATE_A_NEW_KEY,Generate a new key,
+LABEL_STATUS_GENERATING_NEW_KEY,Generating a new key, please wait... this can take a minute on slower devices.,
+LABEL_STATUS_NEW_KEY_GENERATED_OK,""Your new RSA private key has been generated. Copy & Paste this blob of text into a safe offline location as a *.key text file. You may then select your *.key text file for signing future transactions."",
 TITLE_THE_CIVIL_MONEY_HONOUR_CODE,The Civil Money Honour Code,
-HTML_ABOUT,""<h1>A society built on a minted currency is a toxic one.</h1><p>People are killing one another, working multiple jobs and neglecting their children. All because of nothing more than imaginary computer data sitting on bank servers. For many people their entire life's existence revolves around undoing database entries that were created each time they needed a loan in order to buy a house, car, or even food. Let's fix it.</p><img src=/ubi.svg><h2>Every human whether retired, studying, disabled or working receives a generous basic income.</h2><p>Roughly equivalent to USD $60,000 /yr. The idea is that <b>if</b> you work, it is gravy. Work on something because you're passionate about it, not because you have to. Raise your kids properly. Go to school. Do something amazing. If the people and local businesses that you rely on for day-to-day living all choose to accept payment in Civil Money, the decision will be up to you.</p>
+HTML_ABOUT,""<h1>A society built on a minted currency is toxic.</h1><p><b>People are working multiple jobs, neglecting their children, even killing one another, all because of nothing more than imaginary computer data sitting on bank servers that we like to call money.</b></p><p>For most of us, every waking hour revolves around doing <em>something</em> in order to undo a mortgage or credit database entry. Money that banks literally create out of thin air and inject into the economy, forcing the majority into a position of slavery for fear of repossession. </p><p>Civil Money is a <a href=""""https://github.com/civilmoney/Reference-Implementation/blob/master/API.md"""" target=""""_blank"""">protocol</a> designed for people who wish to no longer waste their lives working to the benefit of a minority. A global effort to rebuild communities, given the past 200 years of economic adolescence leading current civilisation astray. Here's how it works...</p><img src=/ubi.svg><h2>Every person whether retired, studying, disabled or working receives a generous basic income.</h2><p>Roughly equivalent to USD $60,000 /yr. The idea is that <b>if</b> you work, it is gravy. Work on something because you're actually passionate about it, not because you have to. Stay home and raise your kids properly. Go to school. Do something amazing. If the people and local businesses that you rely on for day-to-day living all chose to accept payment in Civil Money (//c) the decision would be up to you.</p>
 <img src=/taxation.svg>
 <h2>An automatic, inverted taxation system generates money for regions based on their actual contribution to humanity.</h2>
 <p>Tax evasion is impossible, we don't subtract money out of pocket and there is never any tax filing. In other words - <b>tax is dead.</b></p>
@@ -243,22 +255,22 @@ HTML_ABOUT,""<h1>A society built on a minted currency is a toxic one.</h1><p>P
 
 <img src=/datadistribution.svg>
 <h2>All account and transaction information is public and distributed around the world.</h2>
-<p>Data is stored on random untrusted computers and authenticity is established through a consensus model and well-established cryptographic signing techniques.</p>
+<p>Data is stored on random untrusted computers and authenticity is established through a simple consensus.</p>
 <p>There is nothing novel or unique about Civil Money's technology.</p>
-<p>Because all data is public, it cannot be used for crime. Not that crime need exist in the first place, given the generous basic income. Predatory or deceitful users should be declined, ignored and politely reminded of the Civil Money Honour Code.</p>
+<p>Because all data is public, it cannot be used for crime. Not that crimes of desperation need exist in the first place given a generous basic income. Blatantly predatory or deceitful users should be declined, ignored and politely reminded of the Civil Money Honour Code.</p>
 
 <img src=/nobanks.svg>
 <h2>There are no more banks, foreign exchange rates or financial speculation markets.</h2>
-<p>Every user of Civil Money is a money lender. You will get paid no matter what by simply clicking 'accept' on any payment, but the question you should ask yourself is, <em>&quot;should I?&quot;</em> <b>You are a bank</b>, and a willingness to cooperate and support an exciting sounding business venture, or the level of compassion toward a person's unfortunate life circumstance is up to each individual seller. </p>
-<p>The ultimate aim of Civil Money is to gradually repair broken relationships and guide everybody into behaving openly and honestly with one another, at the same time empowering people to cooperate more easily by completely removing our counter-productive and toxic notion of debt and artificial scarcity from our social fabric. It aims to supplant the traditional economics <em>""""it's every man for himself""""</em> way of thinking, which is the root cause of most of the world's maladies.</p>
+<p>Every user of Civil Money is a money lender. You get paid no matter what by simply clicking 'accept' on any payment, but the question you should ask yourself is, <em>&quot;should I?&quot;</em></p>
+<p><b>Everybody is a bank</b> under Civil Money, so the willingness to support an exciting sounding business venture, or the level of compassion toward a customer's unfortunate life circumstance is up to each individual business or seller. There is no incentive either way to decline a customer. </p>
+<p>Traditionally a bank's role in society is to do nothing more than protect people from thieves and charlatans. Since Civil Money is a public ledger for verifying any participant's credit score or transaction history, a banking and investment sector is unnecessary.</p>
 
 <img src=/valuetime.svg>
 <h2>The value of one Civil Money is always equal to one hour of a person's time, but also 50 bucks.</h2>
-<p>The mathematical constant of time can help somewhat to prevent inflation, however goods and services must be priced appropriately. Civil Money only works if we spend wisely and scrutinise the fair value of items and services that we're purchasing (labour + materials + a reasonable margin) to stop things getting out of hand.</p>
-<p>A reasonable exchange rate in traditional currency is <b>//c 1.00 = USD $50</b>. This is based on an upper-middle class USD$ 80,000/yr income over an 8hr work day, 200 days a year (excludes 165 days of weekends/personal/sick/vacation time.)</p>
+<p>To transition away from the old economy, a fixed and reasonable exchange rate is set at <b>//c 1.00 = USD $50</b>. This is based on an upper-middle class USD$ 80,000/yr income over an 8hr work day, 200 days a year (excludes 165 days of weekends/personal/sick/vacation time.)</p>
 <blockquote>USD$ 80,000 / 1600hrs = $50/hr.<br />
-Since 1hr = //p 1.00 it follows that //p 1.00 = USD$50</blockquote>
-<p>This means that a person making designer T-shirts in Bangladesh, which might take a few hours, can no longer be expected to sell their time for a pittance or be compelled to work for a slave wage. Provided that they have access to materials and a personal website, that person can now sell their shirts directly to anybody in the world for a fair value of //p 3.00, equivalent to USD$150, or about what a retail chain might charge in western countries today.</p>
+Since 1hr = //c 1.00 it follows that //c 1.00 = USD$50</blockquote>
+<p>This means that a person making designer T-shirts in Bangladesh, which might take a few hours, can no longer be expected to sell their time for a pittance or be compelled to work for a slave wage. Provided that they have access to materials and a personal website, that person can now sell their shirts directly to anybody in the world for a fair value of //c 3.00, equivalent to USD$150, or about what a retail chain might charge in western countries today.</p>
 
 <img src=/disputes.svg>
 <h2>Dispute resolution is built-in.</h2>
@@ -268,11 +280,11 @@ Since 1hr = //p 1.00 it follows that //p 1.00 = USD$50</blockquote>
 
 <img src=/demurrage.svg>
 <h2>Payments start to depreciate after 12 months.</h2>
-<p>This is difficult to grasp at first, and people are going to baulk at the idea. But it's super important and ultimately a non-issue once you've discarded your traditional understanding of money and savings.</p>
+<p>This is difficult to grasp at first, but it benefits the majority in profound ways and is ultimately a non-issue once you've discarded your traditional understanding of money and savings.</p>
 <p><b>You never need to save, there is no debt, and investment and interest do not exist because every individual is a bank.</b></p>
-<p>A fundamental problem with money today is that those who have some of it, can make more of it, simply by moving it.</p>
-<p>Under Civil Money it is impossible for a minority to hoard cash or use it as a tool to make more money. Instead, everyone is encouraged to spend their money soon, which ensures the <b>distribution</b> of wealth and a happy and healthy global economy. Accounts that ping-pong money in order to circumvent depreciation can be openly identified and declined.</p>
-<p><b>Capitalism is not prohibited.</b> But your capital must no longer be held onto long-term in the form of money. Instead it must be converted into physical assets and property. You know... real things.</p>
+<p>After 12 months, every transaction slowly depreciates down to 0.00 over the following 12 months. So by 2 years a buyer is always forgiven of their debt and the seller's earnings are removed from the economy.</p>
+<p>Apart from preventing inflation, it makes it impossible for a minority to hoard cash or to use it as a mechanism to enslave others. One of the flaws in the traditional monetary system is that if you have a bunch of money, you can make more of it by not actually doing anything yourself, but instead gambling it on an abstract investment market driven by little more than a fleeting consensus of value which is being egged on by a herd of onlookers. Under Civil Money everybody is encouraged to spend their money soon and in exchange for real tangible goods or services, which ensures the distribution of wealth and a happy and healthy global economy. </p>
+<p>Accounts that ping-pong money in order to circumvent depreciation can be openly identified and declined. Capitalism is not prohibited, but your capital can no longer be held onto long-term in the form of money. Instead it must be converted into physical assets and property. You know... real stuff.</p>
 
 <img src=/hardtimes.svg>
 <h2>Because payments depreciate, your credit score automatically restores itself if you fall on hard times.</h2>
@@ -287,10 +299,12 @@ Since 1hr = //p 1.00 it follows that //p 1.00 = USD$50</blockquote>
 <p>People can digitally sign votes in the same manner as regular transactions. A two-thirds majority is needed for any proposition to pass, meaning a significant winning margin is required before any changes are introduced. No vote counts more than another, however the minimum requirement for voting is a good standing and at least one settled transaction for every 30 day period, for the past year. This is simply to deter casual vote stuffing.</p>
 <p>Because Civil Money is a completely transparent system, researchers are encouraged to collect, validate and calculate results independently and report their findings. Voting outcomes are a scientific process and not locked in stone until a consensus with a reasonably low margin of error is established.</p>
 
+
 <h2>Identity verification is not a feature of Civil Money.</h2>
-<p><b>The value and authenticity of your account only exists through pre-established relationships with people and companies that you choose to associate with.</b></p>
+<p><b>The value and authenticity of your account exists only through pre-established relationships with people and companies that you choose to associate with.</b></p>
+<img src=/ripmoney.svg>
 <p>Any idiot can make a bunch of fake accounts and send themselves money -- however it's a worthless pursuit and they're just wasting their time. The Civil Money design is such that illegitimate transactions and accounts are deemed worthless by the community at large, who may easily run a credit report in order to trace a corroborated money trail and determine a customer's legitimacy.</p>
-<p>At the end of the day money doesn't matter any more, only real relationships. Let's build people homes and sell people cars based on what they're truly contributing to society, by putting everyone on an even playing field and taking the imaginary value of cash out of existence.</p>
+<p>Let's provide essential goods and services to everybody, and sell people homes or cars based on their contributions to society, whilst simultaneously guiding people to become honest and civilised and repair humanity which has been broken apart by greed, secrecy and mistrust. All it takes is for people to accept payment in //c.</p>
 "",
 
 ";

@@ -24,6 +24,8 @@ namespace CM.Javascript {
         private string _Payee;
         private HTMLInputElement _Tag;
         private AccountInputBox _To;
+       
+        private SigningBox _SigningBox;
 
         public PaymentPage(string to, string config) {
             _Payee = to;
@@ -127,24 +129,15 @@ namespace CM.Javascript {
             _From = new AccountInputBox(right, watermark: SR.LABEL_YOUR_ACCOUNT_NAME);
             _From.OnAccountChanged = (a) => {
                 OnShowAmountHint();
+                _SigningBox.Signer = a;
             };
 
-           
-            row = form.Div("row");
-            // row.H3(SR.LABEL_SECURITY);
-
-            var reminder = row.Div("reminder", SR.LABEL_CIVIL_MONEY_SECURITY_REMINDER);
-            var confirm = row.Div("confirm");
-            var ch = confirm.CheckBox(SR.HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS);
-          
             if (!String.IsNullOrWhiteSpace(_Link.Amount)) {
                 OnShowAmountHint();
             }
 
-            var passAndSubmit = form.Div("row");
-            passAndSubmit.Style.Display = Display.None;
-            passAndSubmit.H3(SR.LABEL_SECRET_PASS_PHRASE);
-            var pass = passAndSubmit.Password();
+            _SigningBox = new SigningBox(form);
+
             var buttonsRow = form.Div("button-row");
             var submit = buttonsRow.Button(SR.LABEL_CONTINUE, (e) => {
                 var amount = GetAmount();
@@ -188,7 +181,7 @@ namespace CM.Javascript {
 
                 _From.Account.SignData(new AsyncRequest<Schema.DataSignRequest>() {
                     Item = new Schema.DataSignRequest(t.GetPayerSigningData()) {
-                        Password = System.Text.Encoding.UTF8.GetBytes(pass.Value)
+                        PasswordOrRSAPrivateKey = _SigningBox.PasswordOrPrivateKey
                     },
                     OnComplete = (req) => {
                         if (req.Result == CMResult.S_OK) {
@@ -246,13 +239,11 @@ namespace CM.Javascript {
             submit.Style.Display = Display.None;
 
             buttonsRow.Button(SR.LABEL_CANCEL, "/" + _Payee);
-            ch.OnChange = (e) => {
-                passAndSubmit.Style.Display = ch.Checked ? Display.Block : Display.None;
-                submit.Style.Display = ch.Checked ? Display.Inline : Display.None;
-                reminder.Style.Display = ch.Checked ? Display.None : Display.Block;
-                confirm.Style.Display = ch.Checked ? Display.None : Display.Block;
-                pass.Focus();
+            _SigningBox.OnPasswordReadyStateChanged = (isPasswordSet) => {
+                submit.Style.Display = isPasswordSet ? Display.Inline : Display.None;
             };
+            _SigningBox.OnPasswordEnterKey = submit.Click;
+
             if (_Description.ReadOnly) {
                 _Amount.OnEnterKeySetFocus(_From.Input);
             } else {
@@ -260,12 +251,7 @@ namespace CM.Javascript {
                 _Description.OnEnterKeySetFocus(_From.Input);
             }
             _From.Input.OnEnterKeySetFocus(_Tag);
-            // _Tag.OnEnterKeySetFocus(ch);
-            pass.OnEnterKey(submit.Click);
 
-         
-
-            // right = row.Div("cell-half");
             noAccount.H1(SR.LABEL_DONT_HAVE_AN_ACCOUNT);
             noAccount.Div(null, SR.HTML_CIVIL_MONEY_PROVIDES);
             var buttons = noAccount.Div("buttons");
@@ -280,6 +266,7 @@ namespace CM.Javascript {
             });
 
         }
+       
 
         private decimal? GetAmount() {
             var str = _Amount.Value.Replace(SR.CHAR_THOUSAND_SEPERATOR, "");
@@ -303,14 +290,15 @@ namespace CM.Javascript {
                 var feedback = String.Format(SR.LABEL_AMOUNT_HINT,
                      System.Math.Round(amount * 50, 2).ToString("N2"),
                     System.Math.Round(amount / 1, 2).ToString("N2"));
-                if (_From.Account != null
-                    && _From.Account.AccountCalculations != null
-                    && _From.Account.AccountCalculations.RecentCredits != null
-                    && _From.Account.AccountCalculations.RecentDebits != null) {
+                var a = _From.Account;
+                if (a != null
+                    && a.AccountCalculations != null
+                    && a.AccountCalculations.RecentCredits != null
+                    && a.AccountCalculations.RecentDebits != null) {
                     //_AmountFeedback
                     decimal rep;
                     RecentReputation name;
-                    var calcs = _From.Account.AccountCalculations;
+                    var calcs = a.AccountCalculations;
                     Helpers.CalculateRecentReputation(calcs.RecentCredits.Value,
                         calcs.RecentDebits.Value + amount,
                         out rep, out name);

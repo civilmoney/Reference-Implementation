@@ -10,7 +10,16 @@ using System;
 namespace CM.Schema {
 
     public enum PrivateKeySchemeID {
+        /// <summary>
+        /// The RSA private key is AES encrypted using an RFC2898 password derivation 
+        /// scheme with 10,000 iterations.
+        /// </summary>
         AES_CBC_PKCS7_RFC2898_HMACSHA1_10000 = 0,
+        /// <summary>
+        /// The RSA private key is not encrypted on the network under a secret pass 
+        /// phrase, but rather managed by a user application or key fob.
+        /// </summary>
+        KeyWithheld = 1,
     }
 
     public class PrivateKey {
@@ -19,12 +28,16 @@ namespace CM.Schema {
         public byte[] Encrypted;
 
         /// <summary>
-        /// Returns a CM Message formatted PRI-KEY representation - {scheme-id},{salt},{encrypted}
+        /// Returns a CM Message formatted PRI-KEY representation - {scheme-id},{salt},{encrypted} 
+        /// or simply "1" if PrivateKeySchemeID is KeyWithheld.
         /// </summary>
         public override string ToString() {
-            return (int)SchemeID
-                + "," + Convert.ToBase64String(Salt ?? new Byte[0])
-                + "," + Convert.ToBase64String(Encrypted ?? new Byte[0]);
+            if (SchemeID == PrivateKeySchemeID.KeyWithheld)
+                return ((int)SchemeID).ToString();
+            else
+                return (int)SchemeID
+                    + "," + Convert.ToBase64String(Salt ?? new Byte[0])
+                    + "," + Convert.ToBase64String(Encrypted ?? new Byte[0]);
         }
 
         /// <summary>
@@ -41,8 +54,8 @@ namespace CM.Schema {
             string scheme = delimitedData.NextCsvValue(ref cursor);
             string salt = delimitedData.NextCsvValue(ref cursor);
             string priv = delimitedData.NextCsvValue(ref cursor);
-            byte[] privBytes = Convert.FromBase64String(priv);
-            byte[] saltBytes = Convert.FromBase64String(salt);
+            byte[] privBytes = Convert.FromBase64String(priv ?? String.Empty);
+            byte[] saltBytes = Convert.FromBase64String(salt ?? String.Empty);
             uint schemeID;
             if (!uint.TryParse(scheme, out schemeID))
                 return false;

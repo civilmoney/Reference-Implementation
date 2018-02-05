@@ -400,6 +400,7 @@ namespace CM.Server {
         public static async Task<SslWebSocket> TryConnectAsync(IPEndPoint ep, string hostName, string protocol, CancellationToken token) {
             SslStream ssl;
             var c = new Socket(ep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            c.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
             c.SendTimeout = 10000;
             const int connectTimeout = 5 * 1000;
          

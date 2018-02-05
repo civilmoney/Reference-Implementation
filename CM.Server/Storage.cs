@@ -684,7 +684,7 @@ namespace CM.Server {
                 if (Helpers.IsIDValid(parts[2]))
                     await FindResponsiblePeersForAccount(peers, parts[2]);
             } else {
-                throw new ArgumentException("Invalid path for DHT searching");
+                throw new ArgumentException($"Invalid path for DHT searching '{path}'");
             }
         }
 

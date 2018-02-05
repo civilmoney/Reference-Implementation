@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace CM.Server {
 
-   
+
 
     /// <summary>
     /// Encapsulates all server message processing logic
@@ -43,13 +43,18 @@ namespace CM.Server {
             };
         }
 
-      
+
         public async void ProcessRequest(Connection conn, Message m) {
-            ProcessRequestDelegate del;
-            if (_Actions.TryGetValue(m.Request.Action, out del))
-                del(conn, m);
-            else {
-                await conn.Reply(m, CMResult.E_Invalid_Action);
+            try {
+                ProcessRequestDelegate del;
+                if (_Actions.TryGetValue(m.Request.Action, out del))
+                    del(conn, m);
+                else {
+                    await conn.Reply(m, CMResult.E_Invalid_Action);
+                }
+            } catch (Exception ex) {
+                _Server.Log.Write(this, LogLevel.FAULT, "ProcessRequest failed {0}. Details in debug.txt", ex.Message);
+                Server.DebugDump("ProcessRequest", ex.ToString() + "\r\n----------- MESSAGE -----------\r\n" + m.RawContent + "\r\n\r\n");
             }
         }
 
@@ -72,8 +77,8 @@ namespace CM.Server {
             NamedValueList query = null;
             int querIdx = path.IndexOf('?');
             if (querIdx > -1) {
-               query = SslWebContext.ParseQuery(path);
-               path = path.Substring(0, querIdx);
+                query = SslWebContext.ParseQuery(path);
+                path = path.Substring(0, querIdx);
             }
             IStorable item;
             var status = _Server.Storage.Get(path, out item);

@@ -617,7 +617,7 @@ The Account object schema is:
 | ID  | Scheme |
 |-------|---------|
 |0|Encrypted using AES CBC mode and PKCS7 padding, with 16 byte IV and 32 byte Key. The IV and Key are derived using RFC2898 HMACSHA1 with 10,000 iterations.|
-
+|1|Key withheld. An encrypted private key is not stored on the network. Instead it resides on a key fob or kept in a safe place by the account's owner, to be provided at time of signing. |
 
 \*\* The modification signature is necessary only when changing the private key after initial account creation. Clients and peers must select the public key with a suitable *effective date* according to an objects `UPD-UTC` timestamp.
 
@@ -873,6 +873,9 @@ Status codes are 32-bit hexadecimal integers. Negative signed integers are error
 |0x80001003|E_Crypto_RSA_Signing_General_Failure|Unable to sign the data using RSA.|
 |0x80001004|E_Crypto_RSA_Verify_General_Failure|Unable to verify the data using RSA.|
 |0x80001005|E_Crypto_RSA_Key_Gen_Failure|Unable to generate an RSA key.|
+|0x80001006|E_Crypto_Invalid_RSA_PrivateKey_TooWeak|The provided private key is too weak. It should be at least 1024 bits.
+|0x80001007|E_Crypto_Invalid_RSA_PrivateKey_Invalid|The provided private key data or file is invalid.|
+|0x80001008|E_Crypto_Invalid_RSA_PrivateKey_Mismatch|The provided private key data or file doesn't match the account's current public key.|
 |0x80002000|E_Account_Missing_Public_Key|No valid public key was found on the account for the specified time.|
 |0x80002001|E_Account_ID_Invalid|The account ID is invalid.|
 |0x80002002|E_Account_IDs_Are_Readonly|Account IDs are read-only.|
@@ -889,6 +892,7 @@ Status codes are 32-bit hexadecimal integers. Negative signed integers are error
 |0x8000200D|E_Account_Signature_Error|The account RSA signature is invalid.|
 |0x8000200E|E_Account_Invalid_Region|Invalid account region specified.|
 |0x8000200F|E_Account_Governing_Authority_Attribute_Required|Account names that are equal to an ISO3166-2 subdivision code require a valid governing authority attribute.|
+|0x80002010|E_Account_Withheld_Private_Key_Required|The account uses a withheld private key which has not been provided for signing purposes.|
 |0x80003000|E_Transaction_Payee_Not_Found|The payee could not be found on the network.|
 |0x80003001|E_Transaction_Payer_Not_Found|The payer could not be found on the network.|
 |0x80003002|E_Transaction_Invalid_Payee_Signature|Invalid payee signature.|

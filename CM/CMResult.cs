@@ -153,6 +153,18 @@ namespace CM {
         /// Unable to generate an RSA key.
         /// </summary>
         public readonly static CMResult E_Crypto_RSA_Key_Gen_Failure = new CMResult(ERROR + CRYPTO + 5, "Unable to generate an RSA key.");
+        /// <summary>
+        /// The provided private key is too weak. It should be at least 1024 bits.
+        /// </summary>
+        public readonly static CMResult E_Crypto_Invalid_RSA_PrivateKey_TooWeak = new CMResult(ERROR + CRYPTO + 6, "The provided private key is too weak. It should be at least 1024 bits.");
+        /// <summary>
+        /// The provided private key data or file is invalid.
+        /// </summary>
+        public readonly static CMResult E_Crypto_Invalid_RSA_PrivateKey_Invalid = new CMResult(ERROR + CRYPTO + 7, "The provided private key data or file is invalid.");
+        /// <summary>
+        /// The provided private key data or file doesn't match the account's current public key.
+        /// </summary>
+        public readonly static CMResult E_Crypto_Invalid_RSA_PrivateKey_Mismatch = new CMResult(ERROR + CRYPTO + 8, "The provided private key data or file doesn't match the account's current public key.");
 
         #endregion
 
@@ -221,6 +233,10 @@ namespace CM {
         /// Account names that are equal to an ISO3166-2 subdivision code require a valid governing authority attribute.
         /// </summary>
         public readonly static CMResult E_Account_Governing_Authority_Attribute_Required = new CMResult(ERROR + ACCOUNT + 15, "Account names that are equal to an ISO3166-2 subdivision code require a valid governing authority attribute.");
+        /// <summary>
+        /// The account uses a withheld private key which has not been provided for signing purposes.
+        /// </summary>
+        public readonly static CMResult E_Account_Withheld_Private_Key_Required = new CMResult(ERROR + ACCOUNT + 16, "The account uses a withheld private key which has not been provided for signing purposes.");
 
         #endregion
 

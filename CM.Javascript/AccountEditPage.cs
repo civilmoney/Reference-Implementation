@@ -27,6 +27,9 @@ namespace CM.Javascript {
         private HTMLDivElement _ServerStatus;
         private List<SkillEditor> _Skills;
         private Account Account;
+        private PrivateKeySchemeID _CurrentPrivateKeySchemeID;
+        private PrivateKeySchemeID _NewPrivateKeySchemeID;
+
 
         public AccountEditPage(string id) {
             _ID = id;
@@ -66,6 +69,7 @@ namespace CM.Javascript {
                 if (req.Result == CMResult.S_OK) {
                     var a = req.Item.Output.Cast<Schema.Account>();
                     Account = a;
+                    _CurrentPrivateKeySchemeID = a.PrivateKey.SchemeID;
                     BuildForm();
                     _MainFeedback.Hide();
                 } else if (req.Result == CMResult.E_Item_Not_Found) {
@@ -185,27 +189,101 @@ namespace CM.Javascript {
                 _Notifications.Add(new NotifyEditor(notifyHolder, new AccountAttributes.PushNotificationCsv()));
             }
 
+            Feedback pass2Feedback = null;
+            HTMLInputElement pass1 = null;
+            HTMLInputElement pass2 = null;
+            HTMLTextAreaElement newKeyBase64 = null;
+            RSAParameters newRSAKey = null;
+
+            _Form.H3(SR.LABEL_SECURITY);
+
+            // Change password or private key
             var changePass = _Form.Div("changepass").CheckBox(SR.LABEL_CHANGE_MY_PASS_PHRASE);
             var newPassFields = _Form.Div();
             newPassFields.Style.Display = Display.None;
             changePass.OnChange = (e) => {
                 newPassFields.Style.Display = changePass.Checked ? Display.Block : Display.None;
             };
-            var pass1 = newPassFields.Password();
-            newPassFields.H3(SR.LABEL_REENTER_PASS_PHRASE);
-            var pass2 = newPassFields.Password();
-            var pass2Feedback = new Feedback(newPassFields);
 
-           // _Form.H3(SR.LABEL_SECURITY);
-            var reminder = _Form.Div("reminder", SR.LABEL_CIVIL_MONEY_SECURITY_REMINDER);
-            var confirm = _Form.Div("confirm");
-            var ch = confirm.CheckBox(SR.HTML_IVE_CHECKED_MY_WEB_BROWSER_ADDRESS);
 
-        
-            var passAndSubmit = _Form.Div("row");
-            passAndSubmit.Style.Display = Display.None;
-            passAndSubmit.H3(SR.LABEL_SECRET_PASS_PHRASE);
-            var pass = passAndSubmit.Password();
+            // Change password
+            var newpass = newPassFields.H3(SR.LABEL_ENTER_A_NEW_PASS_PHRASE);
+            pass1 = newPassFields.Password();
+            var reenter = newPassFields.H3(SR.LABEL_REENTER_PASS_PHRASE);
+            pass2 = newPassFields.Password();
+
+            newPassFields.H3(""); // spacing
+            var useKeyWithheld = newPassFields.CheckBox(SR.LABEL_USE_AN_OFFLINE_PRIVATE_KEY);
+            useKeyWithheld.Checked = _CurrentPrivateKeySchemeID == PrivateKeySchemeID.KeyWithheld;
+
+
+            pass2Feedback = new Feedback(newPassFields);
+
+            // Change private key
+            var withheldTitle = newPassFields.H3(SR.LABEL_WITHHELD_PRIVATE_KEY);
+            newKeyBase64 = new HTMLTextAreaElement();
+            newKeyBase64.Placeholder = "---------BEGIN RSA PRIVATE KEY-----------\r\n...  PKCS#8 or PKCS#1 base64 ...\r\n---------END RSA PRIVATE KEY-----------";
+            newKeyBase64.OnChange = (e) => {
+                try {
+                    var bytes = CM.Cryptography.ASN.Base64BlobStringToBytes(newKeyBase64.Value);
+                    var asn = new CM.Cryptography.ASN(bytes);
+                    var key = asn.ToRSAParameters();
+
+                    if (key == null || key.D == null)
+                        throw new Exception(CMResult.E_Crypto_Invalid_RSA_PrivateKey_Invalid.GetLocalisedDescription());
+
+                    if (key.D.Length < Constants.MinimumRSAKeySizeInBytes)
+                        throw new Exception(CMResult.E_Crypto_Invalid_RSA_PrivateKey_TooWeak.GetLocalisedDescription());
+
+                    newRSAKey = key;
+                    pass2Feedback.Hide();
+                } catch (Exception ex) {
+                    newRSAKey = null;
+                    pass2Feedback.Set(Assets.SVG.Warning, FeedbackType.Error, SR.LABEL_INVALID_RSA_KEY_TEXT_BLOB+ " " +ex.Message);
+                }
+            };
+            newPassFields.AppendChild(newKeyBase64);
+            var rsaKeyFeedback = new Feedback(newPassFields);
+            var newKeyButton = newPassFields.Button(SR.LABEL_GENERATE_A_NEW_KEY, (e) => {
+                rsaKeyFeedback.Set(Assets.SVG.Wait, FeedbackType.Default, SR.LABEL_STATUS_GENERATING_NEW_KEY);
+                JSCryptoFunctions.Identity.BeginRSAKeyGen(new AsyncRequest<RSAKeyRequest>() {
+                    Item = new RSAKeyRequest(),
+                    OnComplete = (newKey) => {
+                     
+                       newRSAKey = newKey.Item.Output;
+                        var pkcs1 = CM.Cryptography.ASN.ToPKCS1(CM.Cryptography.ASN.FromRSAParameters(newRSAKey));
+                        // PKCS#8
+                        newKeyBase64.Value = CM.Cryptography.ASN.BytesToBase64Blob("RSA PRIVATE KEY",
+                            pkcs1.GetBytes(true));
+                        if (newKey.Result == CMResult.S_OK) {
+                            rsaKeyFeedback.Set(Assets.SVG.CircleTick, FeedbackType.Success, SR.LABEL_STATUS_NEW_KEY_GENERATED_OK);
+                        } else {
+                            rsaKeyFeedback.Set(Assets.SVG.Warning, FeedbackType.Error, newKey.Result.GetLocalisedDescription());
+                        }
+                    }
+                });
+
+            }, "blue-button");
+
+            var refreshNewPassFields = new Action(()=> {
+                withheldTitle.Style.Display = useKeyWithheld.Checked ? Display.Block : Display.None;
+                newKeyBase64.Style.Display = useKeyWithheld.Checked ? Display.Block : Display.None;
+                newKeyButton.Style.Display = useKeyWithheld.Checked ? Display.Block : Display.None;
+                rsaKeyFeedback.Hide();
+                pass1.Style.Display = !useKeyWithheld.Checked ? Display.Block : Display.None;
+                pass2.Style.Display = !useKeyWithheld.Checked ? Display.Block : Display.None;
+                reenter.Style.Display = !useKeyWithheld.Checked ? Display.Block : Display.None;
+                newpass.Style.Display = !useKeyWithheld.Checked ? Display.Block : Display.None;
+                pass2Feedback.Hide();
+            });
+
+            useKeyWithheld.OnChange = (e) => { refreshNewPassFields(); };
+            refreshNewPassFields();
+            
+
+            var signingBox = new SigningBox(_Form);
+            signingBox.Signer = Account;
+
             var buttonsRow = _Form.Div("button-row");
             var submit = buttonsRow.Button(SR.LABEL_CONTINUE, (e) => {
                 // validate
@@ -215,14 +293,23 @@ namespace CM.Javascript {
                     return;
                 }
                 if (changePass.Checked) {
-                    if (pass1.Value != pass2.Value) {
-                        pass2Feedback.Set(Assets.SVG.Warning, FeedbackType.Error, SR.LABEL_PASSWORD_REENTRY_MISMATCH);
-                        return;
+                    if (useKeyWithheld.Checked) {
+                        if (newRSAKey == null) {
+                            rsaKeyFeedback.Set(Assets.SVG.Warning, FeedbackType.Error, SR.LABEL_INVALID_RSA_KEY_TEXT_BLOB);
+                            return;
+                        }
+                        _NewPrivateKeySchemeID = PrivateKeySchemeID.KeyWithheld;
+                    } else {
+                        if (pass1.Value != pass2.Value) {
+                            pass2Feedback.Set(Assets.SVG.Warning, FeedbackType.Error, SR.LABEL_PASSWORD_REENTRY_MISMATCH);
+                            return;
+                        }
+                        _NewPrivateKeySchemeID = PrivateKeySchemeID.AES_CBC_PKCS7_RFC2898_HMACSHA1_10000;
                     }
                 }
                 pass2Feedback.Hide();
 
-              
+
                 atts[AccountAttributes.IncomeEligibility_Key] =
                  rdoWorking.Checked ? AccountAttributes.IncomeEligibility_Working
                  : rdoLooking.Checked ? AccountAttributes.IncomeEligibility_LookingForWork
@@ -259,12 +346,28 @@ namespace CM.Javascript {
                 _MainFeedback.Set(Assets.SVG.Wait, FeedbackType.Default, SR.LABEL_STATUS_SIGNING_INFORMATION + " ...");
 
                 if (changePass.Checked) {
+
                     // PASSWORD/PRIVATE KEY CHANGE
+
+                    var changePassRequest = new Schema.PasswordRequest();
+                    changePassRequest.OldSchemeID = _CurrentPrivateKeySchemeID;
+                    changePassRequest.NewSchemeID = _NewPrivateKeySchemeID;
+
+                    if (changePassRequest.OldSchemeID == PrivateKeySchemeID.KeyWithheld) {
+                        changePassRequest.OldRSAPrivateKey = signingBox.PasswordOrPrivateKey;
+                    } else {
+                        changePassRequest.OldPass = System.Text.Encoding.UTF8.GetString(signingBox.PasswordOrPrivateKey);
+                    }
+
+                    if (changePassRequest.NewSchemeID == PrivateKeySchemeID.KeyWithheld) {
+                        changePassRequest.NewRSAPrivateKey = newRSAKey.D;
+                        changePassRequest.NewRSAPublicKey = newRSAKey.Modulus;
+                    } else {
+                        changePassRequest.NewPass = pass1.Value;
+                    }
+
                     newAccount.ChangePasswordAndSign(new AsyncRequest<Schema.PasswordRequest>() {
-                        Item = new Schema.PasswordRequest() {
-                            NewPass = pass1.Value,
-                            OldPass = pass.Value
-                        },
+                        Item = changePassRequest,
                         OnProgress = (sender) => {
                             var res = sender as AsyncRequest<Schema.PasswordRequest>;
                             var msg = SR.LABEL_PLEASE_WAIT;
@@ -319,11 +422,13 @@ namespace CM.Javascript {
                             }
                         }
                     }, JSCryptoFunctions.Identity);
+
                 } else {
+
                     // BASIC RE-SIGN
                     newAccount.SignData(new AsyncRequest<Schema.DataSignRequest>() {
                         Item = new Schema.DataSignRequest(newAccount.GetSigningData()) {
-                            Password = System.Text.Encoding.UTF8.GetBytes(pass.Value)
+                            PasswordOrRSAPrivateKey = signingBox.PasswordOrPrivateKey
                         },
                         OnComplete = (req) => {
                             if (req.Result == CMResult.S_OK) {
@@ -375,14 +480,13 @@ namespace CM.Javascript {
             }, className: "green-button");
             submit.Style.Display = Display.None;
 
-            buttonsRow.Button(SR.LABEL_CANCEL, "/" + Account.ID);
-            ch.OnChange = (e) => {
-                passAndSubmit.Style.Display = ch.Checked ? Display.Block : Display.None;
-                submit.Style.Display = ch.Checked ? Display.Inline : Display.None;
-                reminder.Style.Display = ch.Checked ? Display.None : Display.Block;
-                confirm.Style.Display = ch.Checked ? Display.None : Display.Block;
-                pass.Focus();
+            signingBox.OnPasswordReadyStateChanged = (ischecked) => {
+                submit.Style.Display = ischecked ? Display.Inline : Display.None;
             };
+            signingBox.OnPasswordEnterKey = submit.Click;
+
+            buttonsRow.Button(SR.LABEL_CANCEL, "/" + Account.ID);
+
         }
 
         private class NotifyEditor {

@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace CM.Javascript {
 
-    #pragma warning disable CS0649
+#pragma warning disable CS0649
 
     /// <summary>
     /// String resources. All actual text is stored in a *.CSV format dictionary for easy translation
@@ -34,7 +34,7 @@ namespace CM.Javascript {
             { "EN-US", "English (US)" }
         };
 
-    
+
 
         public static string CurrentLanguage = "EN-UK";
 
@@ -77,6 +77,15 @@ namespace CM.Javascript {
 
         /// <summary>Secret pass phrase</summary>
         public static string LABEL_SECRET_PASS_PHRASE;
+
+        /// <summary>Withheld RSA Private Key</summary>
+        public static string LABEL_WITHHELD_PRIVATE_KEY;
+
+        /// <summary>Select my RSA private key file</summary>
+        public static string LABEL_SELECT_MY_KEY_FILE;
+
+        /// <summary>Paste from text instead</summary>
+        public static string LABEL_PASTE_FROM_TEXT_INSTEAD;
 
         /// <summary>A more civilised fiat alternative.</summary>
         public static string LABEL_CIVIL_MONEY_SUB_HEADING;
@@ -206,6 +215,30 @@ namespace CM.Javascript {
 
         /// <summary>OK</summary>
         public static string LABEL_STATUS_OK;
+
+        /// <summary>Please enter your account name in the field above.</summary>
+        public static string LABEL_PLEASE_ENTER_YOUR_ACCOUNT_NAME;
+
+        /// <summary>Enter a new pass phrase</summary>
+        public static string LABEL_ENTER_A_NEW_PASS_PHRASE;
+
+        /// <summary>Signing key looks good!</summary>
+        public static string LABEL_SIGNING_KEY_LOOKS_OK;
+
+        /// <summary>The text entered does not seem to contain a private key text blob.</summary>
+        public static string LABEL_INVALID_RSA_KEY_TEXT_BLOB;
+
+        /// <summary>Use an offline private key instead of a pass phrase.</summary>
+        public static string LABEL_USE_AN_OFFLINE_PRIVATE_KEY;
+
+        /// <summary>Generate a new key</summary>
+        public static string LABEL_GENERATE_A_NEW_KEY;
+
+        /// <summary>Generating a new key, please wait</summary>
+        public static string LABEL_STATUS_GENERATING_NEW_KEY;
+
+        /// <summary>Your new RSA private key has been generated...</summary>
+        public static string LABEL_STATUS_NEW_KEY_GENERATED_OK;
 
         /// <summary>Go to your account</summary>
         public static string LABEL_GO_TO_YOUR_ACCOUNT;
@@ -580,6 +613,11 @@ namespace CM.Javascript {
         public static string LABEL_CHANGE_MY_PASS_PHRASE;
 
         /// <summary>
+        /// Change my private key
+        /// </summary>
+        public static string LABEL_CHANGE_MY_PRIVATE_KEY;
+
+        /// <summary>
         /// Continue
         /// </summary>
         public static string LABEL_CONTINUE;
@@ -705,7 +743,7 @@ namespace CM.Javascript {
         /// <summary>The Civil Money Honour Code</summary>
         public static string TITLE_THE_CIVIL_MONEY_HONOUR_CODE;
 
-        
+
 
         /*
 
@@ -827,8 +865,8 @@ namespace CM.Javascript {
                 if (key.IndexOf('_') == -1) continue;
                 if (dic[key] == null) {
                     missing += key + " ";
-                } else if ((key.StartsWith("LABEL_", StringComparison.OrdinalIgnoreCase) 
-                    || key.StartsWith("TITLE_", StringComparison.OrdinalIgnoreCase)) 
+                } else if ((key.StartsWith("LABEL_", StringComparison.OrdinalIgnoreCase)
+                    || key.StartsWith("TITLE_", StringComparison.OrdinalIgnoreCase))
                     && dic[key].ToString().IndexOf('<') > -1) {
                     throw new Exception("BUG! DISALLOWED HTML on Key " + key);
                 }

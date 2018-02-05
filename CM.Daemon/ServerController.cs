@@ -18,12 +18,11 @@ namespace CM.Daemon {
     /// Starts/Stops/Monitors the CM.Server process.
     /// </summary>
     public class ServerController {
-        private const string NETCOREVERSION = "netcoreapp1.1";
+        private const string NETCOREVERSION = "netcoreapp2.0";
         private const string AUTHORITATIVE_DOMAIN = "update.civil.money";//"192-168-0-88-8000.untrusted-server.com:8000";
         private bool _HasCrashed;
         private bool _IsExpectingExit;
         private bool _IsRunning;
-        private int _LastLogWriteIndex;
         private int _LogIndex;
         private string[] _LogLines = new string[1024];
         private System.IO.StreamWriter _LogWriter;

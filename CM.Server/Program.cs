@@ -27,7 +27,7 @@ namespace CM.Server
             var dir = new System.IO.DirectoryInfo(AppContext.BaseDirectory);
             BaseDirectory = dir.Parent.FullName;
         }
-
+        
 #if TEST
         const int NumberOfTestServers = 20;
 

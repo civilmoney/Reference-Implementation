@@ -52,7 +52,8 @@ namespace CM.Javascript {
 
             accountName.AddEventListener(EventType.KeyPress, (Event e) => {
                 var ev = (KeyboardEvent)e;
-                if ((ev.KeyCode != '-' && ev.KeyCode != '.' && !char.IsLetterOrDigit((char)ev.KeyCode))) {
+                var key = ev.GetKeyPressCode();
+                if ((key != '-' && key != '.' && !char.IsLetterOrDigit(key) && !char.IsControl(key))) {
                     e.PreventDefault();
                     e.StopPropagation();
                 }

@@ -47,7 +47,12 @@ namespace CM {
                 el.ClassName = cur + " " + name;
             }
         }
-
+        /// <summary>
+        /// Gets event.which (firefox) || event.keyCode (everyone else)
+        /// </summary>
+        public static char GetKeyPressCode(this KeyboardEvent e) {
+            return (e.Which.As<object>() ?? e.KeyCode.As<object>()).As<char>();
+        }
         public static HTMLElement Amount(this Node el, decimal num, string prefix = "", bool roundTo2DP = false) {
             var amount = Math.Abs(num);
             var neg = num < 0 ? " - " : "";
@@ -112,7 +117,8 @@ namespace CM {
                     if (e.Target != styled)
                         return;
                     var ev = (KeyboardEvent)e;
-                    if (ev.KeyCode == 13 || ev.KeyCode == 32) {
+                    var key = ev.GetKeyPressCode();
+                    if (key == 13 || key == 32) {
                         e.PreventDefault();
                         e.StopPropagation();
                         ch.Checked = !ch.Checked;
@@ -183,7 +189,8 @@ namespace CM {
                 if (e.Target != el)
                     return;
                 var ev = (KeyboardEvent)e;
-                if (ev.KeyCode == 13) {
+                var key = ev.GetKeyPressCode();
+                if (key == 13) {
                     e.PreventDefault();
                     e.StopPropagation();
                     a();
@@ -197,7 +204,8 @@ namespace CM {
                 if (e.Target != el)
                     return;
                 var ev = (KeyboardEvent)e;
-                if (ev.KeyCode == 13) {
+                var key = ev.GetKeyPressCode();
+                if (key == 13) {
                     e.PreventDefault();
                     e.StopPropagation();
                     if (target["check-styled"] != null) {
@@ -242,7 +250,8 @@ namespace CM {
             styled.AddEventListener(EventType.KeyPress,
                 (e) => {
                     var ev = (KeyboardEvent)e;
-                    if (ev.KeyCode == 13 || ev.KeyCode == 32) {
+                    var key = ev.GetKeyPressCode();
+                    if (key == 13 || key == 32) {
                         e.PreventDefault();
                         e.StopPropagation();
                         ch.Checked = !ch.Checked;
@@ -442,6 +451,7 @@ namespace CM.Schema {
         }
     }
 }
+#if Deprecated // Bridge.NET includes this nowadays
 namespace System.Text {
 
     public static class Encoding {
@@ -502,3 +512,4 @@ namespace System.Text {
         }
     }
 }
+#endif

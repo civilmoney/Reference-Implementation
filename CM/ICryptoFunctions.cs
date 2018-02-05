@@ -90,5 +90,15 @@ namespace CM {
         /// </summary>
         public byte[] Modulus;
 
+        /// <summary>Unnecessary for RSA signing but needed for ASN storage compatibility.</summary>
+        public byte[] P;
+        /// <summary>Unnecessary for RSA signing but needed for ASN storage compatibility.</summary>
+        public byte[] Q;
+        /// <summary>Unnecessary for RSA signing but needed for ASN storage compatibility.</summary>
+        public byte[] DP;
+        /// <summary>Unnecessary for RSA signing but needed for ASN storage compatibility.</summary>
+        public byte[] DQ;
+        /// <summary>Unnecessary for RSA signing but needed for ASN storage compatibility.</summary>
+        public byte[] InverseQ;
     }
 }

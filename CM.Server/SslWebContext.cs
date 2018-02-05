@@ -201,7 +201,8 @@ namespace CM.Server {
             ReadPos = 0;
             ReadLength = 0;
             try {
-                ReadLength = await Stream.ReadAsync(ReadBuffer, 0, ReadBuffer.Length, token).ConfigureAwait(false);
+                if (Stream != null)
+                    ReadLength = await Stream.ReadAsync(ReadBuffer, 0, ReadBuffer.Length, token).ConfigureAwait(false);
             } catch { }
             if (ReadLength == 0) {// This should never happen unless there's a problem.
                 Close();
