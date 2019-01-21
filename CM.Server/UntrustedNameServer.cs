@@ -394,22 +394,25 @@ namespace CM.Server {
             var b = System.Buffers.ArrayPool<byte>.Shared.Rent(4096);
             try {
                 using (var s = new NetworkStream(sock)) {
+
                     while (sock.Connected) {
-                        int read = await s.ReadAsync(b, 0, b.Length);
+                        int read = await s.ReadAsync(b, 0, 2);
                         if (read == 0)
                             break;
-                        int cur = 0;
-                        while (cur < read) {
-                            int len = b[cur] << 8 | b[cur + 1];
-                            cur += 2;
-                            var res = await Process(new ArraySegment<byte>(b, cur, len), isUDP: false);
-                            cur += len;
-                            var tmp = new byte[res.Length + 2];
-                            tmp[0] = (byte)(res.Length >> 8);
-                            tmp[1] = (byte)(res.Length & 0xff);
-                            Buffer.BlockCopy(res, 0, tmp, 2, res.Length);
-                            await s.WriteAsync(tmp, 0, tmp.Length);
+                        int len = b[0] << 8 | b[1];
+                        if (len > b.Length) {
+                            // No DNS query will be even 512 bytes let alone 4096 for this
+                            // echo server. Just close the client.
+                            break;
                         }
+                        read = await s.ReadAsync(b, 0, len);
+                        if (read == 0)
+                            break;
+                        var res = await Process(new ArraySegment<byte>(b, 0, len), isUDP: false);
+                        b[0] = (byte)(res.Length >> 8);
+                        b[1] = (byte)(res.Length & 0xff);
+                        Buffer.BlockCopy(res, 0, b, 2, res.Length);
+                        await s.WriteAsync(b, 0, res.Length + 2);
                     }
                 }
             } catch { } finally {
@@ -486,7 +489,7 @@ namespace CM.Server {
                                 others.Add(opt);
                                 if (q.OPT.Version != 0) {
                                     m.ReturnCode = ReturnCode.BadVersion;
-                                } else if(q.OPT.ExtendedRCode != 0) {
+                                } else if (q.OPT.ExtendedRCode != 0) {
                                     m.ReturnCode = ReturnCode.NotImplemented;
                                 }
                             }

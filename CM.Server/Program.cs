@@ -6,7 +6,7 @@
 #endregion
 
 #if DEBUG
-#define TESTx
+#define TEST
 #endif
 using System;
 using System.Collections.Generic;
