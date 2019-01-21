@@ -50,5 +50,17 @@ namespace CM.Server {
         /// for the CM.Daemon to verify using the well known Civil Money public key. 
         /// </summary>
         public string UpdateServerPrivateKey { get; set; }
+        /// <summary>
+        /// Used by civil.money servers to automate LetsEncrypt renewal.
+        /// </summary>
+        public CertificateRenewSettings CertificateRenew { get; set; }
+    }
+    /// <summary>
+    /// Used by civil.money servers to automate LetsEncrypt renewal.
+    /// </summary>
+    public class CertificateRenewSettings {
+        public string Server { get; set; }
+        public string Domain { get; set; }
+        public string Secret { get; set; }
     }
 }

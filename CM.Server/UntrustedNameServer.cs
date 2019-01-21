@@ -8,6 +8,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -48,7 +49,7 @@ namespace CM.Server {
         }
 
         public enum DnsType {
-            None = 0, ANAME = 1, NS = 2, CNAME = 5, SOA = 6, MX = 15, TXT = 16
+            None = 0, ANAME = 1, NS = 2, CNAME = 5, SOA = 6, PTR = 12, MX = 15, TXT = 16, OPT = 41, DNSKEY = 48, SPF = 99
         }
 
         public enum OpCode : byte {
@@ -77,39 +78,81 @@ namespace CM.Server {
             NameError = 3,
             NotImplemented = 4,
             Refused = 5,
-            Other = 6
+            Other = 6,
+            /// <summary>
+            /// requires OPT
+            /// </summary>
+            BadVersion = 16
         }
 
+
         /// <summary>
-        /// Test is a test method.
+        /// This is a test method.
         /// </summary>
         public static Message Query(string serverIP, string domain, DnsType dnsType, DnsClass dnsClass, int maxRetries, int timeOutMs) {
-            var q = new Message();
-            q.ID = 0;
-            q.IsRecursionDesired = true;
-            q.Opcode = OpCode.StandardQuery;
-            q.Questions = new Data[] {
+            var q = new Message {
+                ID = 0,
+                IsRecursionDesired = true,
+                Opcode = OpCode.StandardQuery,
+                Questions = new Data[] {
                 new Data() {
                      IsQuestion = true,
                      Domain = domain,
                      Type =dnsType,
                      Class = dnsClass
                 }
+            }
             };
             var b = q.ToBytes();
-            var res = UdpQuery(new IPEndPoint(IPAddress.Parse(serverIP), DNS_PORT), b, maxRetries, timeOutMs);
+            var ep = new IPEndPoint(IPAddress.Parse(serverIP), DNS_PORT);
+            var res = UdpQuery(ep, b, maxRetries, timeOutMs);
             if (res == null)
                 return null;
             var m = new Message(res);
+            if (m.IsTruncated) {
+                using (var tcp = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)) {
+                    tcp.NoDelay = true;
+                    tcp.Connect(ep);
+                    var b2 = new byte[b.Length + 2];
+                    b2[0] = (byte)((b.Length >> 8) & 0xff);
+                    b2[1] = (byte)((b.Length) & 0xff);
+                    Buffer.BlockCopy(b, 0, b2, 2, b.Length);
+
+                    tcp.Send(b2, 0, b2.Length, SocketFlags.None);
+                    res = new byte[4096];
+                    int len = tcp.Receive(res);
+                    if (len != 0) {
+                        int reportedLen = res[0] << 8 | res[1];
+                        m = new Message(new ArraySegment<byte>(res, 2, reportedLen));
+                    }
+                }
+
+            }
             return m;
         }
 
         /// <summary>
         /// Starts the DNS server.
         /// </summary>
-        public void Start() {
+        public async void Start() {
+
+            NameserverIPs.Clear();
+            try {
+                for (int i = 0; i < CM.DNS.Nameservers.Length; i++) {
+                    var server = CM.DNS.Nameservers[i];
+                    if (!NameserverIPs.TryGetValue(server, out var ip)) {
+                        var addresses = await Dns.GetHostAddressesAsync(server);
+                        var first = addresses.FirstOrDefault();
+                        if (first != null)
+                            NameserverIPs[server] = first.ToString();
+                    }
+                }
+            } catch (Exception ex) {
+                _Log.Write(this, LogLevel.FAULT, "Unable to start the nameserver - no SOA name servers were resolvable.");
+            }
             _IsRunning = true;
-            Task.Run(new Action(Loop));
+            Task.Run(new Action(LoopUDP));
+            Task.Run(new Action(LoopTCP));
         }
 
         private static int ReadAt(System.IO.Stream ms, long index) {
@@ -120,7 +163,7 @@ namespace CM.Server {
             return b;
         }
 
-        private static int ReadInt(byte[] p, int maxBits, ref int cursor, int bits) {
+        private static int ReadInt(ArraySegment<byte> p, int maxBits, ref int cursor, int bits) {
             if (cursor + bits > maxBits || cursor < 0)
                 throw new IndexOutOfRangeException();
             var byteIndex = (cursor >> 3);
@@ -128,7 +171,7 @@ namespace CM.Server {
             int pp = 0;
             int shift = 24;
             while (shift >= 0) {
-                if (byteIndex < p.Length)
+                if (byteIndex < p.Count)
                     pp |= p[byteIndex++] << shift;
                 shift -= 8;
             }
@@ -137,13 +180,22 @@ namespace CM.Server {
             return value;
         }
 
-        private static string ReadString(byte[] p, int maxBits, ref int cursor) {
+        private static string ReadString(ArraySegment<byte> p, int maxBits, ref int cursor) {
             var s = new StringBuilder();
             ReadString(s, p, maxBits, ref cursor);
             return s.ToString();
         }
+        private static string ReadAscii(ArraySegment<byte> p, int maxBits, ref int cursor) {
+            var length = ReadInt(p, maxBits, ref cursor, 8);
+            var s = new StringBuilder();
+            for (int i = cursor >> 3; s.Length < length; i++) {
+                s.Append((char)p[i]);
+            }
+            cursor += length << 3;
+            return s.ToString();
+        }
 
-        private static void ReadString(StringBuilder domain, byte[] p, int maxBits, ref int cursor) {
+        private static void ReadString(StringBuilder domain, ArraySegment<byte> p, int maxBits, ref int cursor) {
             if (cursor >= maxBits)
                 return;
             int length = 0;
@@ -190,7 +242,7 @@ namespace CM.Server {
                 socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, timeOutMs);
                 socket.SendTo(msg, msg.Length, SocketFlags.None, server);
 
-                var b = new byte[512];
+                var b = new byte[4096];
 
                 try {
                     socket.Receive(b);
@@ -307,9 +359,69 @@ namespace CM.Server {
             ms.WriteByte(0); cursor += 8;
         }
 
-        private void Loop() {
+        private async void LoopTCP() {
+            TcpListener listener = null;
             try {
-                _Log.Write(this, LogLevel.INFO, "DNS Starting");
+                _Log.Write(this, LogLevel.INFO, "DNS TCP Starting");
+                listener = new TcpListener(IPAddress.Any, DNS_PORT);
+                listener.Server.SendBufferSize = 4096;
+                listener.Server.ReceiveBufferSize = 4096;
+                try {
+                    listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+                    //listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+                    //listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, true);
+                } catch {
+
+                }
+                listener.Start();
+
+                while (_IsRunning) {
+                    try {
+                        var sock = await listener.Server.AcceptAsync();
+                        ProcessTCP(sock);
+                    } catch (Exception ex) {
+                        Debug.WriteLine(ex);
+                    }
+                }
+            } catch (Exception ex) {
+                _Log.Write(this, LogLevel.FAULT, ex.ToString());
+            } finally {
+                listener.Stop();
+            }
+        }
+
+        private async void ProcessTCP(Socket sock) {
+            var b = System.Buffers.ArrayPool<byte>.Shared.Rent(4096);
+            try {
+                using (var s = new NetworkStream(sock)) {
+                    while (sock.Connected) {
+                        int read = await s.ReadAsync(b, 0, b.Length);
+                        if (read == 0)
+                            break;
+                        int cur = 0;
+                        while (cur < read) {
+                            int len = b[cur] << 8 | b[cur + 1];
+                            cur += 2;
+                            var res = await Process(new ArraySegment<byte>(b, cur, len), isUDP: false);
+                            cur += len;
+                            var tmp = new byte[res.Length + 2];
+                            tmp[0] = (byte)(res.Length >> 8);
+                            tmp[1] = (byte)(res.Length & 0xff);
+                            Buffer.BlockCopy(res, 0, tmp, 2, res.Length);
+                            await s.WriteAsync(tmp, 0, tmp.Length);
+                        }
+                    }
+                }
+            } catch { } finally {
+                System.Buffers.ArrayPool<byte>.Shared.Return(b);
+                sock.Close();
+            }
+
+        }
+
+        private void LoopUDP() {
+            try {
+                _Log.Write(this, LogLevel.INFO, "DNS UDP Starting");
                 var sock = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 try {
                     sock.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
@@ -321,9 +433,9 @@ namespace CM.Server {
                 while (_IsRunning) {
                     try {
                         EndPoint sender = new IPEndPoint(IPAddress.Any, 0);
-                        byte[] b = new byte[512];
+                        var b = System.Buffers.ArrayPool<byte>.Shared.Rent(4096);
                         int len = sock.ReceiveFrom(b, ref sender);
-                        Task.Run(() => { Process(sock, b, len, sender as IPEndPoint); });
+                        ProcessUDP(sock, b, len, sender);
                     } catch (Exception ex) {
                         Debug.WriteLine(ex);
                     }
@@ -333,151 +445,239 @@ namespace CM.Server {
             }
         }
 
-        private async void Process(Socket sock, byte[] b, int len, IPEndPoint sender) {
+        private async void ProcessUDP(Socket sock, byte[] b, int len, EndPoint sender) {
             try {
-                var m = new Message(b, len);
-                //_Log.Write(this, LogLevel.INFO, "[" + sender.Address + "] " + m);
+                var res = await Process(new ArraySegment<byte>(b, 0, len), isUDP: true);
+                sock.SendTo(res, sender);
+            } catch { } finally {
+                System.Buffers.ArrayPool<byte>.Shared.Return(b);
+            }
+        }
+
+        Dictionary<string, string> NameserverIPs = new Dictionary<string, string>();
+
+        private async Task<byte[]> Process(ArraySegment<byte> b, bool isUDP) {
+            try {
+
+
+                var m = new Message(b, b.Count);
+                //_Log.Write(this, LogLevel.INFO, "[DNS  IN] " + m);
+
+                var answers = new List<Data>();
+                var others = new List<Data>();
+                var nameservers = new List<Data>();
+
+                m.ReturnCode = ReturnCode.NameError;
                 m.IsResponse = true;
                 m.IsRecursionAvailable = false;
                 m.IsAuthoritativeAnswer = false;
                 m.IsTruncated = false;
-                m.Other = null;
-                m.Answers = null;
-                m.NameServers = null;
-                m.ReturnCode = ReturnCode.NameError;
 
-                for (int qi = 0; qi < m.Questions.Length; qi++) {
-                    var q = m.Questions[qi];
+                for (int qi = 0; qi < m.Other.Length; qi++) {
+                    var q = m.Other[qi];
+                    switch (q.Type) {
+                        case DnsType.OPT: {
+                                var opt = new Data() {
+                                    Type = DnsType.OPT
+                                };
+                                opt.OPT = new Data.OPTInfo(opt);
+                                opt.OPT.RequestorPayloadSize = isUDP ? (ushort)512 : (ushort)Math.Max(512, Math.Min((int)q.OPT.RequestorPayloadSize, 4096));
+                                opt.OPT.DO = q.OPT.DO;
+                                others.Add(opt);
+                                if (q.OPT.Version != 0) {
+                                    m.ReturnCode = ReturnCode.BadVersion;
+                                } else if(q.OPT.ExtendedRCode != 0) {
+                                    m.ReturnCode = ReturnCode.NotImplemented;
+                                }
+                            }
+                            break;
+                        default:
+                            m.ReturnCode = ReturnCode.FormatError;
+                            break;
+                    }
 
-                    try {
-                        // This is going to purposefully throw for anything other than an *.untrusted-server.com host name.
-                        var ep = CM.DNS.UntrustedDomainToEndpoint(q.Domain);
-                        switch (q.Type) {
-                            case DnsType.ANAME:
-                                var ipOrHostName = ep.Substring(0, ep.IndexOf(':')).ToLower();
-                                List<IPAddress> ips = new List<IPAddress>();
-                                if (ipOrHostName.EndsWith(DNS.UNTRUSTED_DOMAIN)) {
-                                    // Basically anybody querying
-                                    // untrusted-server-com.untrusted-server.com is being silly
-                                    // so return 0.0.0.0 to avoid a potential recursive loop.
-                                    //ips.Add(IPAddress.Any);
-                                    m.NameServers = new Data[1];
-                                    for (int i = 0; i < m.NameServers.Length; i++) {
-                                        m.NameServers[i] = new Data() {
+                }
+
+                if (m.ReturnCode == ReturnCode.NameError) {
+                    for (int qi = 0; qi < m.Questions.Length; qi++) {
+                        var q = m.Questions[qi];
+
+                        try {
+                            // This is going to purposefully throw for anything other than an *.untrusted-server.com host name.
+
+                            switch (q.Type) {
+                                case DnsType.SOA:
+                                case DnsType.ANAME:
+
+                                    if (String.Equals(q.Domain, DNS.UNTRUSTED_DOMAIN, StringComparison.OrdinalIgnoreCase)) {
+                                        // SOA or no subdomain
+                                        m.IsAuthoritativeAnswer = true;
+
+                                        var tmp = NameserverIPs.ToArray();
+
+                                        for (int i = 0; i < tmp.Length; i++) {
+                                            var server = tmp[i].Key;
+                                            var ip = tmp[i].Value;
+                                            nameservers.Add(new Data() {
+                                                Class = DnsClass.IN,
+                                                Domain = q.Domain,
+                                                TTL = 180 - 1,
+                                                Type = DnsType.NS,
+                                                Values = {
+                                                    { "Domain", server},
+                                                }
+                                            });
+                                            others.Add(new Data() {
+                                                Class = DnsClass.IN,
+                                                Domain = server,
+                                                TTL = 600 - 1,
+                                                Type = DnsType.ANAME,
+                                                Values = { { "IP", ip } }
+                                            });
+                                        }
+                                        // SOA answer
+                                        answers.Add(new Data() {
                                             Class = DnsClass.IN,
                                             Domain = q.Domain,
                                             TTL = 180 - 1,
                                             Type = DnsType.SOA,
                                             Values = {
-                                            { "PrimaryNameServer", CM.DNS.Nameservers[0] },
-                                            { "ResponsibleMailAddress", "hello@civil.money" },
-                                            { "Serial",  "2016062201" },
-                                            { "Refresh",  "43200" },
-                                            { "Retry",  "3600" },
-                                            { "Expire",  "1209600" },
-                                            { "DefaultTtl",  "180" },
+                                                { "PrimaryNameServer", CM.DNS.Nameservers[0] },
+                                                { "ResponsibleMailAddress", "hello@civil.money" },
+                                                { "Serial",  "2016062201" },
+                                                { "Refresh",  "43200" },
+                                                { "Retry",  "3600" },
+                                                { "Expire",  "1209600" },
+                                                { "DefaultTtl",  "180" },
+                                            }
+                                        });
+                                    } else if (q.Domain.EndsWith("." + DNS.UNTRUSTED_DOMAIN, StringComparison.OrdinalIgnoreCase)) {
+
+                                        m.IsAuthoritativeAnswer = true;
+
+                                        List<IPAddress> ips = new List<IPAddress>();
+                                        var ep = CM.DNS.UntrustedDomainToEndpoint(q.Domain);
+                                        var ipOrHostName = ep.Substring(0, ep.IndexOf(':')).ToLower();
+                                        if (ipOrHostName.EndsWith(DNS.UNTRUSTED_DOMAIN)) {
+                                            // Anybody querying untrusted-server.com.untrusted-server.com is being silly.
+                                        } else {
+                                            switch (ipOrHostName) {
+                                                case "something":
+                                                    // If we wanted something.untrusted-server.com it would go here.
+                                                    break;
+
+                                                default:
+                                                    var addresses = await Dns.GetHostAddressesAsync(ipOrHostName);
+                                                    ips.AddRange(addresses);
+                                                    ips.RemoveAll(x => x.AddressFamily != AddressFamily.InterNetwork || x.ToString() == "0.0.0.0");
+                                                    break;
+                                            }
                                         }
-                                        };
+                                        for (int i = 0; i < ips.Count; i++) {
+                                            answers.Add(new Data() {
+                                                Class = DnsClass.IN,
+                                                Domain = q.Domain,
+                                                TTL = 600 - 1,
+                                                Type = DnsType.ANAME,
+                                                Values = { { "IP", ips[i].ToString() } }
+                                            });
+                                        }
                                     }
-                                } else {
-                                    switch (ipOrHostName) {
-                                        case "something":
-                                            // If we wanted something.untrusted-server.com it would go here.
-                                            break;
+                                    if (m.ReturnCode == ReturnCode.NameError)
+                                        m.ReturnCode = ReturnCode.Success;
+                                    break;
 
-                                        default:
-                                            var addresses = await Dns.GetHostAddressesAsync(ipOrHostName);
-                                            ips.AddRange(addresses);
-                                            ips.RemoveAll(x => x.AddressFamily != AddressFamily.InterNetwork || x.ToString() == "0.0.0.0");
-                                            break;
-                                    }
-                                }
-                                m.Answers = new Data[ips.Count];
-                                for (int i = 0; i < m.Answers.Length; i++) {
-                                    m.Answers[i] = new Data() {
-                                        Class = DnsClass.IN,
-                                        Domain = q.Domain,
-                                        TTL = 600 - 1,
-                                        Type = DnsType.ANAME,
-                                        Values = { { "IP", ips[i].ToString() } }
-                                    };
-                                }
-                                m.ReturnCode = ReturnCode.Success;
-                                break;
-
-                            case DnsType.NS:
-                                m.Answers = new Data[CM.DNS.Nameservers.Length];
-                                for (int i = 0; i < m.Answers.Length; i++) {
-                                    m.Answers[i] = new Data() {
-                                        Class = DnsClass.IN,
-                                        Domain = q.Domain,
-                                        TTL = 600 - 1,
-                                        Type = DnsType.NS,
-                                        Values = { { "Domain", CM.DNS.Nameservers[i] } }
-                                    };
-                                }
-                                m.ReturnCode = ReturnCode.Success;
-                                break;
-
-                            case DnsType.TXT: {
-                                    m.Answers = new Data[TXT.Length];
-                                    for (int x = 0; x < TXT.Length; x++) {
-                                        m.Answers[x] = new Data() {
+                                case DnsType.NS:
+                                    for (int i = 0; i < CM.DNS.Nameservers.Length; i++) {
+                                        answers.Add(new Data() {
                                             Class = DnsClass.IN,
                                             Domain = q.Domain,
-                                            TTL = 1800 - 1,
-                                            Type = DnsType.TXT,
-                                            Values = {
+                                            TTL = 600 - 1,
+                                            Type = DnsType.NS,
+                                            Values = { { "Domain", CM.DNS.Nameservers[i] } }
+                                        });
+                                    }
+                                    if (m.ReturnCode == ReturnCode.NameError)
+                                        m.ReturnCode = ReturnCode.Success;
+                                    break;
+
+                                case DnsType.TXT: {
+
+                                        for (int x = 0; x < TXT.Length; x++) {
+                                            answers.Add(new Data() {
+                                                Class = DnsClass.IN,
+                                                Domain = q.Domain,
+                                                TTL = 1800 - 1,
+                                                Type = DnsType.TXT,
+                                                Values = {
                                             { "TXT", TXT[x] }
                                         }
-                                        };
+                                            });
+                                        }
+                                        if (m.ReturnCode == ReturnCode.NameError)
+                                            m.ReturnCode = ReturnCode.Success;
                                     }
-                                    m.ReturnCode = ReturnCode.Success;
-                                }
-                                break;
+                                    break;
 
-                            case DnsType.MX: {
-                                    m.Answers = new Data[MXes.Length];
-                                    for (int x = 0; x < m.Answers.Length; x++) {
-                                        m.Answers[x] = new Data() {
-                                            Class = DnsClass.IN,
-                                            Domain = q.Domain,
-                                            TTL = 1800 - 1,
-                                            Type = DnsType.MX,
-                                            Values = {
+                                case DnsType.MX: {
+                                        for (int x = 0; x < MXes.Length; x++) {
+                                            answers.Add(new Data() {
+                                                Class = DnsClass.IN,
+                                                Domain = q.Domain,
+                                                TTL = 1800 - 1,
+                                                Type = DnsType.MX,
+                                                Values = {
                                             { "Preference", MXes[x].level.ToString() },
                                             { "Domain", MXes[x].host }
                                         }
-                                        };
+                                            });
+                                        }
+                                        if (m.ReturnCode == ReturnCode.NameError)
+                                            m.ReturnCode = ReturnCode.Success;
                                     }
-                                    m.ReturnCode = ReturnCode.Success;
-                                }
-                                break;
+                                    break;
 
-                            case DnsType.CNAME:
-                                break;
-
-                            case DnsType.SOA:
-                                break;
+                                case DnsType.CNAME:
+                                    break;
+                                case DnsType.DNSKEY:
+                                    //https://tools.ietf.org/html/rfc4034
+                                    if (String.Equals(q.Domain, DNS.UNTRUSTED_DOMAIN, StringComparison.OrdinalIgnoreCase)) {
+                                        m.IsAuthoritativeAnswer = true;
+                                        if (m.ReturnCode == ReturnCode.NameError)
+                                            m.ReturnCode = ReturnCode.Success;
+                                    }
+                                    break;
+                                default:
+                                    if (m.ReturnCode == ReturnCode.NameError)
+                                        m.ReturnCode = ReturnCode.FormatError;
+                                    break;
+                            }
+                        } catch {
+                            // Somebody has queried us for something other than *.untrusted-server.com.
+                            // _Log.Write(this, LogLevel.INFO, "Unrecognised query for " + q.Domain + " from " + sender);
                         }
-                    } catch {
-                        // Somebody has queried us for something other than *.untrusted-server.com.
-                        // _Log.Write(this, LogLevel.INFO, "Unrecognised query for " + q.Domain + " from " + sender);
                     }
+                } else {
+                    m.Questions = null;
                 }
+                m.Other = others != null ? others.ToArray() : null;
+                m.Answers = answers != null ? answers.ToArray() : null;
+                m.NameServers = nameservers != null ? nameservers.ToArray() : null;
 
-                sock.SendTo(m.ToBytes(), sender);
-                //_Log.Write(this, LogLevel.INFO, " " + sender.Address + " -> " + m);
+
+                //_Log.Write(this, LogLevel.INFO, "[DNS OUT] " + m);
+                return m.ToBytes();
             } catch (NotSupportedException) {
                 // Ignore extended label queries
                 // Example payload: "qYABAAABAAAAAAAAA3d3dwViYWlkdWUDY29tAAABAAE="
             }
 #if DEBUG
-            catch (IndexOutOfRangeException ex) { _Log.Write(this, LogLevel.INFO, " Message crash " + ex.ToString() + " \r\nSRC: " + Convert.ToBase64String(b, 0, len)); } 
+            catch (IndexOutOfRangeException ex) { _Log.Write(this, LogLevel.INFO, " Message crash " + ex.ToString() + " \r\nSRC: " + Convert.ToBase64String(b.Array, b.Offset, b.Count)); } 
 #endif
             catch {
                 // Ignore any other malformed issues
             }
+            return null;
         }
 
         private struct MX {
@@ -495,22 +695,53 @@ namespace CM.Server {
             public DnsClass Class;
             public string Domain;
             public bool IsQuestion;
-            public int TTL;
+            public uint TTL;
             public DnsType Type;
             public byte[] Unknown;
             public Dictionary<string, string> Values = new Dictionary<string, string>();
 
+            public OPTInfo OPT;
+            public class OPTInfo {
+                //https://tools.ietf.org/html/rfc6891
+
+                public UInt16 RequestorPayloadSize { get => (UInt16)_Owner.Class; set { _Owner.Class = (DnsClass)value; } }
+                // 0-7
+                public byte ExtendedRCode {
+                    get => (byte)(_Owner.TTL >> 24);
+                    set { _Owner.TTL = (((uint)value << 24) | (_Owner.TTL & 0x00ffffff)); }
+                }
+                // 8-15
+                public byte Version {
+                    get => (byte)((_Owner.TTL >> 16) & 0xff);
+                    set { _Owner.TTL = (((uint)value << 16) | (_Owner.TTL & 0xff00ffff)); }
+                }
+                /// <summary>
+                /// DNSSEC OK
+                /// </summary>
+                public bool DO {
+                    get => (_Owner.TTL & 0x8000) != 0;
+                    set { _Owner.TTL = (((uint)(value ? 1 : 0) << 15) | (_Owner.TTL & 0xFFFF7FFF)); }
+                }
+                public UInt16 Z {
+                    get => (UInt16)(_Owner.TTL & 0x7FFF);
+                    set { _Owner.TTL = ((value) | (_Owner.TTL & 0xFFFF8000)); }
+                }
+                Data _Owner;
+                public OPTInfo(Data d) {
+                    _Owner = d;
+                }
+            }
             public Data() {
             }
 
-            internal Data(byte[] p, int maxBits, ref int cursor, bool isQuestion) {
+            internal Data(ArraySegment<byte> p, int maxBits, ref int cursor, bool isQuestion) {
                 IsQuestion = isQuestion;
                 Domain = ReadString(p, maxBits, ref cursor);
                 Type = (DnsType)ReadInt(p, maxBits, ref cursor, 16);
                 Class = (DnsClass)ReadInt(p, maxBits, ref cursor, 16);
                 if (isQuestion)
                     return;
-                TTL = ReadInt(p, maxBits, ref cursor, 32);
+                TTL = (uint)ReadInt(p, maxBits, ref cursor, 32);
                 int recordLength = (int)ReadInt(p, maxBits, ref cursor, 16);
                 int subMax = Math.Min(maxBits, cursor + (recordLength * 8));
                 switch (Type) {
@@ -531,12 +762,19 @@ namespace CM.Server {
                         Values["Domain"] = ReadString(p, subMax, ref cursor);
                         break;
 
+                    case DnsType.PTR:
+                    case DnsType.CNAME:
                     case DnsType.NS:
                         Values["Domain"] = ReadString(p, subMax, ref cursor);
                         break;
 
+                    case DnsType.SPF:
                     case DnsType.TXT:
-                        Values["TXT"] = ReadString(p, subMax, ref cursor);
+                        var txt = "";
+                        while (cursor < subMax) {
+                            txt += ReadAscii(p, subMax, ref cursor);
+                        }
+                        Values["TXT"] = txt;
                         break;
 
                     case DnsType.SOA:
@@ -548,10 +786,13 @@ namespace CM.Server {
                         Values["Expire"] = ReadInt(p, maxBits, ref cursor, 32).ToString();
                         Values["DefaultTtl"] = ReadInt(p, maxBits, ref cursor, 32).ToString();
                         break;
-
+                    case DnsType.OPT:
+                        OPT = new OPTInfo(this);
+                        Unknown = p.Slice(cursor >> 3, recordLength).ToArray();
+                        cursor += recordLength * 8;
+                        break;
                     default:
-                        Unknown = new byte[recordLength];
-                        Buffer.BlockCopy(p, cursor >> 3, Unknown, 0, recordLength);
+                        Unknown = p.Slice(cursor >> 3, recordLength).ToArray();
                         cursor += recordLength * 8;
                         break;
                 }
@@ -579,7 +820,7 @@ namespace CM.Server {
                 if (IsQuestion)
                     return;
 
-                WriteInt(s, ref cur, 32, TTL);
+                WriteInt(s, ref cur, 32, (int)TTL);
 
                 int lengthPosition = cur;
                 WriteInt(s, ref cur, 16, 0);
@@ -595,15 +836,21 @@ namespace CM.Server {
                         WriteString(s, ref cur, Values["Domain"]);
                         break;
 
+                    case DnsType.PTR:
+                    case DnsType.CNAME:
                     case DnsType.NS:
                         WriteString(s, ref cur, Values["Domain"]);
                         break;
 
+                    case DnsType.SPF:
                     case DnsType.TXT: {
                             var b = Encoding.UTF8.GetBytes(Values["TXT"]);
-                            WriteInt(s, ref cur, 8, b.Length);
-                            s.Write(b, 0, b.Length);
-                            cur += (b.Length) * 8; // needs to be null terminated
+                            for (int i = 0; i < b.Length;) {
+                                int toWrite = Math.Min(255, b.Length - i);
+                                WriteInt(s, ref cur, 8, toWrite);
+                                s.Write(b, i, toWrite);
+                                i += toWrite;
+                            }
                         }
                         break;
 
@@ -645,12 +892,14 @@ namespace CM.Server {
             public byte Reserved;
             public ReturnCode ReturnCode;
 
+            public int Length;
+
             public Message() {
             }
 
-            public Message(byte[] p, int len = -1) {
+            public Message(ArraySegment<byte> p, int len = -1) {
                 if (len == -1)
-                    len = p.Length;
+                    len = p.Count;
                 int max = len << 3;
                 int cur = 0;
                 ID = (ushort)ReadInt(p, max, ref cur, 16);
@@ -676,6 +925,9 @@ namespace CM.Server {
                     NameServers[i] = new Data(p, max, ref cur, false);
                 for (int i = 0; i < Other.Length; i++)
                     Other[i] = new Data(p, max, ref cur, false);
+
+                Debug.Assert((cur & 7) == 0, "Bits shouldn't be left over.");
+                Length = cur >> 3;
             }
 
             public byte[] ToBytes() {
@@ -692,6 +944,14 @@ namespace CM.Server {
 
                 WriteInt(ms, ref cur, 3, Reserved);
                 WriteInt(ms, ref cur, 4, (int)ReturnCode);
+                if ((int)ReturnCode > 15) {
+                    // Extended OPT return code. There will always already be
+                    // an OPT item in the collection during this scenario.
+                    var edns = Other.FirstOrDefault(x => x.Type == DnsType.OPT);
+                    if (edns != null) {
+                        edns.OPT.ExtendedRCode = (byte)((int)ReturnCode >> 4);
+                    }
+                }
 
                 WriteInt(ms, ref cur, 16, Questions != null ? Questions.Length : 0);
                 WriteInt(ms, ref cur, 16, Answers != null ? Answers.Length : 0);
@@ -718,21 +978,31 @@ namespace CM.Server {
 
             public override string ToString() {
                 var s = new StringBuilder();
-
-                if (Answers == null || Answers.Length == 0) {
-                    s.Append("Opcode " + Opcode);
-                    s.Append("ID " + ID + " ");
-                    s.Append("IsRecursionDesired " + IsRecursionDesired + " ");
-                    s.Append("IsTruncated " + IsTruncated + " ");
+                if (IsResponse)
+                    s.Append("RES " + ReturnCode);
+                else
+                    s.Append("REQ " + Opcode);
+                s.Append(" ID " + ID + " ");
+                if (Questions != null && Questions.Length > 0) {
+                    s.Append(" IsRecursionDesired " + IsRecursionDesired + " ");
+                    s.Append(" IsTruncated " + IsTruncated + " ");
                     for (int i = 0; i < Questions.Length; i++) {
-                        s.Append("Q" + i + ": ");
+                        s.Append(" Q" + i + ": ");
                         s.Append(Questions[i] + " ");
                     }
-                } else {
+                }
+                if (Answers != null && Answers.Length > 0) {
+                    s.Append("Answers: ");
                     for (int i = 0; i < Answers.Length; i++) {
-                        s.Append("\r\n    ");
-                        s.Append("A" + i + ": ");
+                        s.Append(i + ": ");
                         s.Append(Answers[i] + " ");
+                    }
+                }
+                if (Other != null && Other.Length > 0) {
+                    s.Append("Others: ");
+                    for (int i = 0; i < Other.Length; i++) {
+                        s.Append(i + ": ");
+                        s.Append(Other[i] + " ");
                     }
                 }
                 return s.ToString();

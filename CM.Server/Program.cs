@@ -6,7 +6,7 @@
 #endregion
 
 #if DEBUG
-#define TEST
+#define TESTx
 #endif
 using System;
 using System.Collections.Generic;
@@ -29,7 +29,7 @@ namespace CM.Server
         }
         
 #if TEST
-        const int NumberOfTestServers = 20;
+        const int NumberOfTestServers = 3;
 
         public static void Main(string[] args) {
            

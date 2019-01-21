@@ -426,11 +426,18 @@ namespace CM.Server {
                 return null;
             }
             try {
-                await ssl.AuthenticateAsClientAsync(hostName, null,
+                var authenticateTask = ssl.AuthenticateAsClientAsync(hostName, null,
                     System.Security.Authentication.SslProtocols.Tls 
                     | System.Security.Authentication.SslProtocols.Tls11
                     | System.Security.Authentication.SslProtocols.Tls12,
                     false);
+                using (var waitCancel = new CancellationTokenSource()) {
+                    await Task.WhenAny(authenticateTask, Task.Delay(connectTimeout, waitCancel.Token));
+                    waitCancel.Cancel();
+                }
+                if (!authenticateTask.IsCompletedSuccessfully) {
+                    throw new TimeoutException("TLS authenticate timed out.");
+                }
             } catch {
                 ssl.Dispose();
                 c.Dispose();

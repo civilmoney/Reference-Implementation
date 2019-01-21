@@ -30,7 +30,7 @@ namespace CM.Server {
         public BigInteger? SuccessorID;
         private static readonly BigInteger MaxValue;
 
-        private TimeSpan _LastStabliseTime;
+        private TimeSpan _LastStabiliseTime;
         private Log _Log;
         private int _ScanIndex;
 
@@ -53,14 +53,14 @@ namespace CM.Server {
         }
 
         /// <summary>
-        /// The amount of since we last got a working Predecessor
+        /// The amount of time since we last got a working Predecessor
         /// and Successor.
         /// </summary>
-        public TimeSpan StablisedDuration {
+        public TimeSpan StabilisedDuration {
             get {
                 if (Predecessor == null || Successor == null || MyDHT_ID == null || !ArePeersFullyPopulated)
                     return TimeSpan.Zero;
-                return Clock.Elapsed - _LastStabliseTime;
+                return Clock.Elapsed - _LastStabiliseTime;
             }
         }
 
@@ -251,7 +251,7 @@ namespace CM.Server {
                 var p = all[i].Value;
                 count += p.CloseIdleConnections();
                 if (!p.CanConnect
-                    && (Clock.Elapsed - p.FailingSince).TotalMinutes > 5) {
+                    && (Clock.Elapsed - p.FailingSince).TotalMinutes > 60) {
                     Seen.TryRemove(all[i].Key, out p);
                     _Log.Write(this, LogLevel.INFO, "Removed {0} from seen peers.", all[i].Key);
                 }
@@ -284,7 +284,7 @@ namespace CM.Server {
                 if (toPing != null) {
                     toPing.HasTriedRandomlyPinging = true;
                     toPing.LastRandomPing = Clock.Elapsed;
-                    using (var succ = await Connect(toPing.EndPoint.ToString())) {
+                    using (var succ = await Connect(toPing.EndPoint.ToString(), forceRetry: true)) {
                         if (succ.IsValid) {
                             var res = await succ.Connection.SendAndReceive("PING", new PingRequest() {
                                 EndPoint = MyEndpoint
@@ -390,7 +390,7 @@ namespace CM.Server {
                                         Successor = pred;
                                         SuccessorID = predID;
                                         successorChanged = true;
-                                        _LastStabliseTime = Clock.Elapsed;
+                                        _LastStabiliseTime = Clock.Elapsed;
                                         _Log.Write(this, LogLevel.INFO, "New successor {0}", Successor);
                                     }
                                 }
@@ -532,7 +532,7 @@ namespace CM.Server {
                             PredecessorID = id;
                             Predecessor = endpoint;
                             _Log.Write(this, LogLevel.INFO, "New predecessor {0}", Predecessor);
-                            _LastStabliseTime = Clock.Elapsed;
+                            _LastStabiliseTime = Clock.Elapsed;
                         }
                     }
                 }
@@ -637,8 +637,12 @@ namespace CM.Server {
 
             public bool CanConnect {
                 get {
-                    return FailureCount == 0
-                        || (Clock.Elapsed - FailingSince).TotalSeconds > 60;
+                    return FailureCount == 0 || (
+                        // Begin a retry window 1 minute after any failures ...
+                        (Clock.Elapsed - FailingSince).TotalSeconds > 60 
+                        // ... up to a max of 4 minutes.
+                        && (Clock.Elapsed - FailingSince).TotalMinutes < 5
+                        );
                 }
             }
 

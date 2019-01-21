@@ -299,7 +299,7 @@ namespace CM.Server {
                     bool didSomething = false;
 
                     // Only sync once we're stable within the DHT network.
-                    if (_DHT.StablisedDuration > _Intervals.MinimumDHTStablisedDuration) {
+                    if (_DHT.StabilisedDuration > _Intervals.MinimumDHTStablisedDuration) {
                         queue.Clear();
                         foreach (var kp in _MemCached) {
                             var state = kp.Value;

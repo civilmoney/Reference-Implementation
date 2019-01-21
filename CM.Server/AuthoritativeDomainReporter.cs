@@ -116,8 +116,15 @@ namespace CM.Server {
                         if (!_IsTransactionPollInProgress) {
                             _IsTransactionPollInProgress = true;
                             CollectTransactionsAsync(token);
-                        } else // Anticipating that intervals will need tweaked. This tells us when.
-                            _Log.Write(this, LogLevel.WARN, "Transaction poll is taking {0}", (Clock.Elapsed - _LastTransactionPoll));
+                        } else {
+                            // Anticipating that intervals will need tweaked. This tells us when.
+                            var runTime = (Clock.Elapsed - _LastTransactionPoll);
+                            _Log.Write(this, LogLevel.WARN, "Transaction poll is taking {0}", runTime);
+                            if (runTime.TotalDays > 1) {
+                                // Recover from inexplicable CollectTransactionsAsync finaliser never running.
+                                _IsTransactionPollInProgress = false;
+                            }
+                        }
                     }
 
                     // COMPILE TRANSACTIONS

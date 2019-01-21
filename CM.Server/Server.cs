@@ -60,6 +60,19 @@ namespace CM.Server {
             get { return Clock.Elapsed - _LastMaintenanceLoopTime; }
         }
 
+        internal X509Certificate2 CurrentCertificate {
+            get => _Listener?.Certificate;
+            set {
+                if (_Listener != null) {
+                    _Listener.Certificate = value;
+                } else {
+                    // This node may have started without a certificate,
+                    // try launch it.
+                    RestartWebServer();
+                }
+            }
+        }
+
         System.Security.Cryptography.RSAParameters _UpdateServerSigningKey;
         static readonly byte[] _UpdateServerPublicKey = Convert.FromBase64String("tSF5e4oN9Iks8D33utBCxH1zy9mE1FWQ6s0BS0AOG/qPWXNFg2leYVWyxpbHCOP9h95vqc7p4U1B8XDnly1J8MvyZShPZ9cK7+H5tfBsmePY2NhUpNrkEM1l36bHeLIIJCr2ZfyzA7efEhH2y+z2bOhmZIbX3AwmOGDxx54IzJEn05LFvY+TVKBLy0IFpFfuoUSpoorykeZcZ9lB3RCW76WNCXJEfIVA2xcT5YxTRVZjVufDBhMxWHvXr2hVB+bXuyN08SeGfAvT6ZdJtdFUQ+bqS3Il1DwaGjxK8MDbXRFbdtz5yG6F0Z0pRGd2IMa7XmfzrQAhssQoedf2keVBOQ==");
 
@@ -131,27 +144,6 @@ namespace CM.Server {
                 throw new ArgumentException("Invalid server port specified.");
             }
 
-            System.Security.Cryptography.X509Certificates.X509Certificate2 cert;
-            if (String.IsNullOrEmpty(Configuration.AuthoritativePfxCertificate)) {
-                cert = new System.Security.Cryptography.X509Certificates.X509Certificate2(
-                   GetUntrustedCertificate(), UNTRUSTED_PASSWORD);
-            } else {
-                var file = Configuration.AuthoritativePfxCertificate;
-                if (file.IndexOf('/') == -1 && file.IndexOf('\\') == -1)
-                    file = System.IO.Path.Combine(Program.BaseDirectory, file);
-                cert = new System.Security.Cryptography.X509Certificates.X509Certificate2(
-                   file, Configuration.AuthoritativePfxPassword);
-            }
-
-#if !DESKTOPCLR
-            using (var chain = new X509Chain()) {
-                bool chainRes = chain.Build(cert);
-                Debug.WriteLine("Certificate chain: {0}, OK: {1}", chain.ChainElements.Count, chainRes);
-                for (int i = 0; i < chain.ChainElements.Count; i++)
-                    Debug.WriteLine("{0}: {1}", i, chain.ChainElements[i].Certificate?.Subject);
-            }
-#endif
-
             if (!String.IsNullOrWhiteSpace(Configuration.UpdateServerPrivateKey)) {
                 _UpdateServerSigningKey = CryptoFunctions.RSAParametersFromKey(_UpdateServerPublicKey,
                     Convert.FromBase64String(Configuration.UpdateServerPrivateKey));
@@ -175,6 +167,45 @@ namespace CM.Server {
                 }
                 Reporter = new AuthoritativeDomainReporter(localFolder, DHT, Storage, Log);
             }
+
+            _IsRunning = true;
+            RestartWebServer();
+            MaintenanceLoop();
+            WatchdogLoop();
+            SyncManager.Start();
+            Log.Write(this, LogLevel.INFO, "Running.");
+        }
+
+        private void RestartWebServer() {
+
+            _Listener?.Stop();
+            _Listener = null;
+
+            X509Certificate2 cert = null;
+            if (String.IsNullOrEmpty(Configuration.AuthoritativePfxCertificate)) {
+                cert = new X509Certificate2(GetUntrustedCertificate(), UNTRUSTED_PASSWORD);
+            } else {
+                var file = Configuration.AuthoritativePfxCertificate;
+                if (file.IndexOf('/') == -1 && file.IndexOf('\\') == -1)
+                    file = System.IO.Path.Combine(Program.BaseDirectory, file);
+                if (File.Exists(file))
+                    cert = new X509Certificate2(file, Configuration.AuthoritativePfxPassword);
+            }
+
+            if (cert != null) {
+#if !DESKTOPCLR
+                using (var chain = new X509Chain()) {
+                    bool chainRes = chain.Build(cert);
+                    Debug.WriteLine("Certificate chain: {0}, OK: {1}", chain.ChainElements.Count, chainRes);
+                    for (int i = 0; i < chain.ChainElements.Count; i++)
+                        Debug.WriteLine("{0}: {1}", i, chain.ChainElements[i].Certificate?.Subject);
+                }
+#endif
+            } else {
+                Log.Write(this, LogLevel.WARN, "No certificate present. Server cannot start.");
+                return;
+            }
+
             var prevention = new AttackMitigation();
             prevention.Log = Log;
 #if DEBUG
@@ -207,14 +238,7 @@ namespace CM.Server {
             _Listener.Start();
             if (Configuration.EnablePort80Redirect)
                 _Listener.StartPort80Redirect();
-            _IsRunning = true;
-            MaintenanceLoop();
-            WatchdogLoop();
-            SyncManager.Start();
-            Log.Write(this, LogLevel.INFO, "Running.");
         }
-
-
 
         public void Stop() {
             _IsRunning = false;
@@ -786,6 +810,9 @@ namespace CM.Server {
         async void WatchdogLoop() {
             bool hasWarnedOfNoPredecessor = false;
             while (_IsRunning) {
+
+                CertificateRenew.TryUpdate(this);
+
                 if (LastMaintenanceLoop.TotalMinutes > 60) {
                     Log.Write(this, LogLevel.WARN, "MaintenanceLoop has been stalled for {0}.", LastMaintenanceLoop);
                 }

@@ -6,6 +6,11 @@
     "AuthoritativePfxCertificate": "",
     "AuthoritativePfxPassword": "",
     "EnableAuthoritativeDomainFeatures": false,
-    "EnablePort80Redirect": false
+    "EnablePort80Redirect": false,
+    "CertificateRenew": {
+      "Server": "",
+      "Domain": "",
+      "Secret": ""
+    }
   }
 }

@@ -28,20 +28,21 @@ namespace CM.Server {
         private TcpListener _Port80Listener;
         private Log _Log;
         private int _Port;
-        private X509Certificate2 _ServerCert;
         private AttackMitigation _AttackPrevention;
 
         public SslWebServer(X509Certificate2 sslCertificate, int port, Log log, AttackMitigation prevention) {
             _Port = port;
             _Log = log;
             _ConnectedClients = new ConcurrentDictionary<SslWebContext, string>();
-            _ServerCert = sslCertificate;
+            Certificate = sslCertificate;
             _AttackPrevention = prevention;
         }
 
         public Func<SslWebContext,Task> HandleHttpRequest;
 
         public Action<SslWebSocket> HandleWebSocket;
+
+        public X509Certificate2 Certificate { get; set; }
 
         public int ConnectionCount { get { return _ConnectedClients.Count; } }
 
@@ -244,7 +245,7 @@ namespace CM.Server {
                    OnLocalCertificateValidation,
                    EncryptionPolicy.RequireEncryption);
                 
-                await ssl.AuthenticateAsServerAsync(_ServerCert, false,
+                await ssl.AuthenticateAsServerAsync(Certificate, false,
                                                     System.Security.Authentication.SslProtocols.Tls
                                                     | System.Security.Authentication.SslProtocols.Tls11
                                                     | System.Security.Authentication.SslProtocols.Tls12,

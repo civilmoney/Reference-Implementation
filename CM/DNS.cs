@@ -39,12 +39,12 @@ namespace CM {
         /// Converts a *.untrusted.civil.com domain back into its original IP/host:port form.
         /// </summary>
         public static string UntrustedDomainToEndpoint(string domainName) {
-            if (domainName == UNTRUSTED_DOMAIN)
+            if (String.Equals(domainName, UNTRUSTED_DOMAIN, StringComparison.OrdinalIgnoreCase))
                 return UNTRUSTED_DOMAIN + ":" + DEFAULT_PORT;
             var dotted = "." + UNTRUSTED_DOMAIN;
-            if (!domainName.EndsWith(dotted))
+            if (!domainName.EndsWith(dotted, StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentException("Invalid untrusted domain name.");
-            domainName = domainName.Replace(dotted, "");
+            domainName = domainName.ToLower().Replace(dotted, "");
             // aaa-bbb-ccc-ddd-port -> aaa.bbb.ccc.ddd:port
             var parts = domainName.Split('-');
             byte b0, b1, b2, b3;

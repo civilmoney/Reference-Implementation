@@ -138,7 +138,8 @@ namespace CM.Server {
                     s.Flush();
                     s.Dispose();
                 }
-
+                // Inexplicably, this finaliser code sometimes doesn't run
+                // even though no async tasks can deadlock or await indefinitely.
                 _IsTransactionPollInProgress = false;
             }
         }
