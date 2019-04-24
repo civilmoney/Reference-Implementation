@@ -17,7 +17,7 @@ namespace CM.AttackClient {
         }
 
         public async Task<bool> ConnectAsync() {
-            var sock = await CM.Server.SslWebSocket.TryConnectAsync(_Endpoint,
+            var sock = await CM.Server.SslWebSocket.TryConnectAsync(System.Net.IPAddress.Any, _Endpoint,
                  DNS.EndpointToUntrustedDomain(_Endpoint.ToString(), false),
                     Constants.WebSocketProtocol, CancellationToken.None);
             if (sock != null) {

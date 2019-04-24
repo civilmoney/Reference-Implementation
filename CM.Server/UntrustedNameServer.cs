@@ -39,9 +39,10 @@ namespace CM.Server {
 
         private bool _IsRunning;
         private Log _Log;
-
-        public UntrustedNameServer(Log log) {
+        private IPAddress _IP;
+        public UntrustedNameServer(Log log, IPAddress ip) {
             _Log = log;
+            _IP = ip;
         }
 
         public enum DnsClass {
@@ -363,7 +364,7 @@ namespace CM.Server {
             TcpListener listener = null;
             try {
                 _Log.Write(this, LogLevel.INFO, "DNS TCP Starting");
-                listener = new TcpListener(IPAddress.Any, DNS_PORT);
+                listener = new TcpListener(_IP, DNS_PORT);
                 listener.Server.SendBufferSize = 4096;
                 listener.Server.ReceiveBufferSize = 4096;
                 try {
@@ -432,7 +433,7 @@ namespace CM.Server {
                 } catch {
                     // linux crashes on either of these
                 }
-                sock.Bind(new IPEndPoint(IPAddress.Any, DNS_PORT));
+                sock.Bind(new IPEndPoint(_IP, DNS_PORT));
                 while (_IsRunning) {
                     try {
                         EndPoint sender = new IPEndPoint(IPAddress.Any, 0);
@@ -539,6 +540,7 @@ namespace CM.Server {
                                             });
                                         }
                                         // SOA answer
+
                                         answers.Add(new Data() {
                                             Class = DnsClass.IN,
                                             Domain = q.Domain,
@@ -546,8 +548,8 @@ namespace CM.Server {
                                             Type = DnsType.SOA,
                                             Values = {
                                                 { "PrimaryNameServer", CM.DNS.Nameservers[0] },
-                                                { "ResponsibleMailAddress", "hello@civil.money" },
-                                                { "Serial",  "2016062201" },
+                                                { "ResponsibleMailAddress", "civil.money" },
+                                                { "Serial",  "2019022700" },
                                                 { "Refresh",  "43200" },
                                                 { "Retry",  "3600" },
                                                 { "Expire",  "1209600" },
@@ -583,6 +585,23 @@ namespace CM.Server {
                                                 TTL = 600 - 1,
                                                 Type = DnsType.ANAME,
                                                 Values = { { "IP", ips[i].ToString() } }
+                                            });
+                                        }
+                                        if (q.Type == DnsType.SOA) {
+                                            answers.Add(new Data() {
+                                                Class = DnsClass.IN,
+                                                Domain = q.Domain,
+                                                TTL = 180 - 1,
+                                                Type = DnsType.SOA,
+                                                Values = {
+                                                { "PrimaryNameServer", CM.DNS.Nameservers[0] },
+                                                { "ResponsibleMailAddress", "civil.money" },
+                                                { "Serial",  "2019022700" },
+                                                { "Refresh",  "43200" },
+                                                { "Retry",  "3600" },
+                                                { "Expire",  "1209600" },
+                                                { "DefaultTtl",  "180" },
+                                            }
                                             });
                                         }
                                     }

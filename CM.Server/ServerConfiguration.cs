@@ -41,6 +41,7 @@ namespace CM.Server {
         public bool EnableAuthoritativeDomainFeatures { get; set; }
 
         public int Port { get; set; }
+        public string IP { get; set; }
         /// <summary>
         /// Typically set on civil.money domain servers.
         /// </summary>

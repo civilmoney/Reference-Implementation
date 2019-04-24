@@ -149,11 +149,14 @@ namespace CM.Server {
                     Convert.FromBase64String(Configuration.UpdateServerPrivateKey));
                 Log.Write(this, LogLevel.INFO, "Update server signing key applied.");
             }
+            IPAddress ip;
+            IPAddress.TryParse(Configuration.IP ?? "0.0.0.0", out ip);
 
             DHT = new DistributedHashTable(Log);
             DHT.ServicePort = Configuration.Port;
+            DHT.ServiceIP = ip;
 
-            var localFolder = Configuration.DataFolder;
+             var localFolder = Configuration.DataFolder;
             if (localFolder.IndexOf(":") == -1
                 && !localFolder.StartsWith("/"))
                 localFolder = System.IO.Path.Combine(Program.BaseDirectory, localFolder);
@@ -162,7 +165,8 @@ namespace CM.Server {
             SyncManager = new SynchronisationManager(localFolder, Storage, DHT, Log);
             if (Configuration.EnableAuthoritativeDomainFeatures) {
                 if (DNSServer == null) {
-                    DNSServer = new UntrustedNameServer(Log);
+                   
+                    DNSServer = new UntrustedNameServer(Log, ip);
                     DNSServer.Start();
                 }
                 Reporter = new AuthoritativeDomainReporter(localFolder, DHT, Storage, Log);
@@ -231,7 +235,9 @@ namespace CM.Server {
             // Mono's implementation turned out to be less than stable and missing
             // critical SSL and secure WebSocket capabilities. And then anyway I
             // changed to .NET Core runtime instead of mono in the end.
-            _Listener = new SslWebServer(cert, Configuration.Port, Log, prevention);
+            IPAddress ip;
+            IPAddress.TryParse(Configuration.IP ?? "0.0.0.0", out ip);
+            _Listener = new SslWebServer(cert, ip, Configuration.Port, Log, prevention);
             _Listener.DemandWebSocketProtocol = Constants.WebSocketProtocol;
             _Listener.HandleHttpRequest = _Listener_HandleHttpRequest;
             _Listener.HandleWebSocket = _Listener_HandleWebSocket;

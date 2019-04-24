@@ -18,8 +18,8 @@ Head over to [Microsoft's .NET Core website](https://www.microsoft.com/net/learn
 2. Download and unzip Civil Money
     ```
     $ mkdir /var/civilmoney && cd "$_"
-    $ curl https://update.civil.money/api/get-repo/civilmoney_1.3.zip -o civilmoney_1.3.zip
-    $ unzip civilmoney_1.3.zip
+    $ curl https://update.civil.money/api/get-repo/civilmoney_1.4.zip -o civilmoney_1.4.zip
+    $ unzip civilmoney_1.4.zip
     ```
 3. Do a test run to make sure everything works
     ```
@@ -50,7 +50,7 @@ Head over to [Microsoft's .NET Core website](https://www.microsoft.com/net/learn
 Windows setup is pretty straight forward.
 
 1. Install the [.NET Core SDK 2.0](https://www.microsoft.com/net/download/windows) or higher.
-2. Download the [Civil Money binary](https://update.civil.money/api/get-repo/civilmoney_1.3.zip) and unzip the contents into a folder location on your server.
+2. Download the [Civil Money binary](https://update.civil.money/api/get-repo/civilmoney_1.4.zip) and unzip the contents into a folder location on your server.
 3. Open an elevated command prompt:
 ```
 > cd <your unzipped folder location>
@@ -83,7 +83,8 @@ The default settings look like this:
 {
   "Settings": {
     "Port": 8000,
-    "Seeds": "seed1.civil.money,seed2.civil.money,seed3.civil.money,seed4.civil.money",
+	"IP": "0.0.0.0",
+    "Seeds": "seed1.civil.money,seed2.civil.money",
     "DataFolder": "cm-data",
     "AuthoritativePfxCertificate": "",
     "AuthoritativePfxPassword": "",
@@ -96,6 +97,7 @@ The default settings look like this:
 | Field | Description     |
 |-------|---------|
 | Port | If another web server (Apache, IIS, etc) is not installed and already using port 443, you can do `sudo setcap cap_net_bind_service=ep /usr/share/dotnet/dotnet` to allow .NET Core to bind the port on Linux or for Windows simply simply set the service to run under `LocalSystem`, and then change the port in the configuration to 443. You will receive start-up errors if the server is unable to bind. |
+| IP | Bind to a specific IP. Or 0.0.0.0 for any/all. |
 | Seeds | A comma delimited list of known well behaved peers. To eliminate a single point of failure, the Civil Money community may establish seed listings online which are based on IPs. |
 | DataFolder | A path to a suitable folder for data storage. By default data is kept in a folder beside the `CM.Daemon.dll`. |
 | AuthoritativePfxCertificate | Only used by official Civil Money seeds. |

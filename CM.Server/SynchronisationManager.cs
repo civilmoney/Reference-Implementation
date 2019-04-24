@@ -538,6 +538,8 @@ namespace CM.Server {
                 return;
             }
 
+            accountID = accountID.ToLowerInvariant();
+
             SyncState state;
             if (!_MemCached.TryGetValue(accountID, out state)) {
                 // check disk
@@ -931,6 +933,7 @@ namespace CM.Server {
         /// <param name="sync">Pointer to receive the SyncAnnounce.</param>
         /// <returns>True if the account exists locally, otherwise false.</returns>
         private bool GenerateSyncAnnounce(string id, out SyncAnnounce sync) {
+
             sync = null;
             IStorable item;
             _Store.Get(Constants.PATH_ACCNT + "/" + id, out item);
@@ -1042,6 +1045,7 @@ namespace CM.Server {
         }
 
         private void EnsureAccountState(string id, bool invalidate) {
+            id = id.ToLowerInvariant();
             SyncState sync;
             if (!_MemCached.TryGetValue(id, out sync)) {
                 // try load our disk-persisted state

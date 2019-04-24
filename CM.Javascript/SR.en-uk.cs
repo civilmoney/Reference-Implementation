@@ -266,11 +266,12 @@ HTML_ABOUT,""<h1>A society built on a minted currency is toxic.</h1><p><b>Peop
 <p>Traditionally a bank's role in society is to do nothing more than protect people from thieves and charlatans. Since Civil Money is a public ledger for verifying any participant's credit score or transaction history, a banking and investment sector is unnecessary.</p>
 
 <img src=/valuetime.svg>
-<h2>The value of one Civil Money is always equal to one hour of a person's time, but also 50 bucks.</h2>
+<h2>The value of one Civil Money is equal to at least one hour of a person's time, or 50 bucks.</h2>
 <p>To transition away from the old economy, a fixed and reasonable exchange rate is set at <b>//c 1.00 = USD $50</b>. This is based on an upper-middle class USD$ 80,000/yr income over an 8hr work day, 200 days a year (excludes 165 days of weekends/personal/sick/vacation time.)</p>
 <blockquote>USD$ 80,000 / 1600hrs = $50/hr.<br />
 Since 1hr = //c 1.00 it follows that //c 1.00 = USD$50</blockquote>
 <p>This means that a person making designer T-shirts in Bangladesh, which might take a few hours, can no longer be expected to sell their time for a pittance or be compelled to work for a slave wage. Provided that they have access to materials and a personal website, that person can now sell their shirts directly to anybody in the world for a fair value of //c 3.00, equivalent to USD$150, or about what a retail chain might charge in western countries today.</p>
+<p>Additionally, 1hr = //c 1.00 is not a fixed rule but rather a generally acceptable minimum wage. For seasonal workers or people in high demand, there is no restriction on how much they can charge for their time.</p>
 
 <img src=/disputes.svg>
 <h2>Dispute resolution is built-in.</h2>

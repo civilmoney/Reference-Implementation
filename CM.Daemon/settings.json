@@ -1,7 +1,8 @@
 ﻿{
   "Settings": {
-    "Port": 8001,
-    "Seeds": "seed1.civil.money,seed2.civil.money,seed3.civil.money,seed4.civil.money",
+    "Port": 8000,
+    "IP": "0.0.0.0",
+    "Seeds": "seed1.civil.money,seed2.civil.money",
     "DataFolder": "cm-data",
     "AuthoritativePfxCertificate": "",
     "AuthoritativePfxPassword": "",

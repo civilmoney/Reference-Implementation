@@ -75,7 +75,7 @@ Head over to <a href=""https://www.microsoft.com/net/learn/get-started/linuxubun
 <li>
 <p>Download and unzip Civil Money</p>
 <pre><code>$ mkdir /var/civilmoney &amp;&amp; cd &quot;$_&quot;
-$ curl https://update.civil.money/api/get-repo/civilmoney_1.3.zip -o civilmoney_1.3.zip
+$ curl https://update.civil.money/api/get-repo/civilmoney_1.4.zip -o civilmoney_1.4.zip
 $ unzip civilmoney_1.3.zip
 </code></pre>
 </li>
@@ -106,7 +106,7 @@ $ journalctl -fu civilmoney
 <p>Windows setup is pretty straight forward.</p>
 <ol>
 <li>Install the <a href=""https://www.microsoft.com/net/download/windows"">.NET Core SDK 2.0</a> or higher.</li>
-<li>Download the <a href=""https://update.civil.money/api/get-repo/civilmoney_1.3.zip"">Civil Money binary</a> and unzip the contents into a folder location on your server.</li>
+<li>Download the <a href=""https://update.civil.money/api/get-repo/civilmoney_1.4.zip"">Civil Money binary</a> and unzip the contents into a folder location on your server.</li>
 <li>Open an elevated command prompt:</li>
 </ol>
 <pre><code>&gt; cd &lt;your unzipped folder location&gt;
@@ -133,7 +133,7 @@ $ journalctl -fu civilmoney
 <pre><code>{
   &quot;Settings&quot;: {
     &quot;Port&quot;: 8000,
-    &quot;Seeds&quot;: &quot;seed1.civil.money,seed2.civil.money,seed3.civil.money,seed4.civil.money&quot;,
+    &quot;Seeds&quot;: &quot;seed1.civil.money,seed2.civil.money&quot;,
     &quot;DataFolder&quot;: &quot;cm-data&quot;,
     &quot;AuthoritativePfxCertificate&quot;: &quot;&quot;,
     &quot;AuthoritativePfxPassword&quot;: &quot;&quot;,

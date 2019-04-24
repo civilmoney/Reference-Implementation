@@ -82,12 +82,8 @@ namespace CM {
         // The reason for the IPs is that the client and design is primarily an IP-based
         // protocol, however we need the domain names for web browser SSL to work.
         public static readonly CMSeed[] Seeds = new CMSeed[] {
-            new CMSeed("seed1.civil.money:443", "89.36.215.217:443"), // FR
-            new CMSeed("seed2.civil.money:443", "85.255.13.218:443"), // CZ
-            new CMSeed("seed3.civil.money:443", "212.237.61.8:443"), // IT2
-            new CMSeed("seed4.civil.money:443", "185.58.225.189:443"), // UK
-            new CMSeed("seed5.civil.money:443", "89.40.127.213:443"), // DE
-            new CMSeed("seed6.civil.money:443", "89.46.74.86:443") // IT
+            new CMSeed("seed1.civil.money:443", "185.58.225.189:443"), // UK
+            new CMSeed("seed2.civil.money:443", "172.110.9.152:443"), // US
         };
 
         /// <summary>

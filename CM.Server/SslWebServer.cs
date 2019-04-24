@@ -29,10 +29,12 @@ namespace CM.Server {
         private Log _Log;
         private int _Port;
         private AttackMitigation _AttackPrevention;
+        private IPAddress _IP;
 
-        public SslWebServer(X509Certificate2 sslCertificate, int port, Log log, AttackMitigation prevention) {
+        public SslWebServer(X509Certificate2 sslCertificate, IPAddress ip, int port, Log log, AttackMitigation prevention) {
             _Port = port;
             _Log = log;
+            _IP = ip;
             _ConnectedClients = new ConcurrentDictionary<SslWebContext, string>();
             Certificate = sslCertificate;
             _AttackPrevention = prevention;
@@ -59,13 +61,13 @@ namespace CM.Server {
             if (IsListening)
                 return;
 
-            _Listener = new TcpListener(new IPEndPoint(IPAddress.Any, _Port));
+            _Listener = new TcpListener(new IPEndPoint(_IP, _Port));
             // Workaround for linux re-bind bug
             _Listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             // Disable Nagle 
             _Listener.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
-            _Log.Write(this, LogLevel.INFO, "HTTPS listener started.");
+            _Log.Write(this, LogLevel.INFO, $"HTTPS listener started on {_IP}:{_Port}.");
             _Listener.Start();
             IsListening = true;
             _HttpsThread = new Thread(() => {
@@ -83,7 +85,23 @@ namespace CM.Server {
                             client.Dispose();
                         }
                     } catch (Exception ex) {
-                        _Log.Write(this, LogLevel.WARN, "TCP error: " + ex.Message);
+                        
+                        if (ex.Message.IndexOf("Too many open files", StringComparison.Ordinal) > -1) {
+                            //
+                            // TCP error: Too many open files in system
+                            // This shouldn't happen, basically, unless there's exceptionally high traffic. 
+                            //
+                            // If it happens legitimately edit the systemd service to have "LimitNOFILE=640000" 
+                            // and in /etc/security/limits.conf add:
+                            // *    soft nofile 640000
+                            // *    hard nofile 640000
+                            // root soft nofile 640000
+                            // root hard nofile 640000
+                            // .. and reboot.
+                            //
+                        } else {
+                            _Log.Write(this, LogLevel.WARN, "TCP error: " + ex.Message);
+                        }
                     }
                 }
             });
@@ -102,12 +120,12 @@ namespace CM.Server {
         }
 
         public void StartPort80Redirect() {
-            _Port80Listener = new TcpListener(new IPEndPoint(IPAddress.Any, 80));
+            _Port80Listener = new TcpListener(new IPEndPoint(_IP, 80));
             // Workaround for linux re-bind bug
             _Port80Listener.Server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             _Port80Listener.Server.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
 
-            _Log.Write(this, LogLevel.INFO, "HTTP Port 80 redirect started.");
+            _Log.Write(this, LogLevel.INFO, $"HTTP Port 80 redirect started on {_IP}.");
             _Port80Listener.Start();
             _HttpThread = new Thread(() => {
                 while (IsListening) {

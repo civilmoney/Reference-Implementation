@@ -26,6 +26,7 @@ namespace CM.Server {
         public BigInteger? PredecessorID;
         public System.Collections.Concurrent.ConcurrentDictionary<string, SeenEndPoint> Seen = new System.Collections.Concurrent.ConcurrentDictionary<string, SeenEndPoint>();
         public int ServicePort;
+        public System.Net.IPAddress ServiceIP;
         public string Successor;
         public BigInteger? SuccessorID;
         private static readonly BigInteger MaxValue;
@@ -85,18 +86,26 @@ namespace CM.Server {
                 Seen[endpoint] = e;
             }
 
-            lock (e.Sync) {
+            bool hasLock = Monitor.TryEnter(e.Sync, 1000);
+            try {
                 for (int i = 0; i < e.Connections.Count; i++) {
                     var c = e.Connections[i];
-                    lock (c) {
-                        if (!c.IsBusy) {
-                            if (c.IsConnected)
-                                return new ConnectionHandle(c);
-                            else
-                                e.Connections.RemoveAt(i--);
+                    if (Monitor.TryEnter(c, 100)) {
+                        try {
+                            if (!c.IsBusy) {
+                                if (c.IsConnected)
+                                    return new ConnectionHandle(c);
+                                else
+                                    e.Connections.RemoveAt(i--);
+                            }
+                        } finally {
+                            Monitor.Exit(c);
                         }
                     }
                 }
+            } finally {
+                if (hasLock)
+                    Monitor.Exit(e.Sync);
             }
 
             if (!e.CanConnect && !forceRetry)
@@ -104,7 +113,7 @@ namespace CM.Server {
 
             SslWebSocket sock = null;
             try {
-                sock = await SslWebSocket.TryConnectAsync(e.EndPoint,
+                sock = await SslWebSocket.TryConnectAsync(ServiceIP, e.EndPoint,
                     DNS.EndpointToUntrustedDomain(endpoint, false),
                     Constants.WebSocketProtocol, CancellationToken.None);
             } catch { }
@@ -125,9 +134,13 @@ namespace CM.Server {
 
             // ConnectionHandle will mark as Busy before
             // adding to connections.
-            lock (e.Sync)
+            hasLock = Monitor.TryEnter(e.Sync, 100);
+            try {
                 e.Connections.Add(conn);
-
+            } finally {
+                if (hasLock)
+                    Monitor.Exit(e.Sync);
+            }
             // Upon WebSocket close, connections will remove themselves from
             // the pool automatically. 
             conn.ProcessOutboundAsync(Remove);
@@ -577,8 +590,13 @@ namespace CM.Server {
         private void Remove(Connection conn) {
             SeenEndPoint e;
             Seen.TryGetValue(conn.RemoteEndpoint.ToString(), out e);
-            lock (e.Sync)
+            bool hasLock = Monitor.TryEnter(e.Sync, 100);
+            try {
                 e.Connections.Remove(conn);
+            } finally {
+                if (hasLock)
+                    Monitor.Exit(e.Sync);
+            }
         }
 
         /// <summary>
@@ -639,7 +657,7 @@ namespace CM.Server {
                 get {
                     return FailureCount == 0 || (
                         // Begin a retry window 1 minute after any failures ...
-                        (Clock.Elapsed - FailingSince).TotalSeconds > 60 
+                        (Clock.Elapsed - FailingSince).TotalSeconds > 60
                         // ... up to a max of 4 minutes.
                         && (Clock.Elapsed - FailingSince).TotalMinutes < 5
                         );
@@ -655,7 +673,8 @@ namespace CM.Server {
             /// <returns>The number of connections affected.</returns>
             public int CloseIdleConnections() {
                 int count = 0;
-                lock (Sync) {
+                bool hasLock = Monitor.TryEnter(Sync, 100);
+                try {
                     for (int i = 0; i < Connections.Count; i++) {
                         if (Connections[i].IdleTime.TotalSeconds > 120) {
                             if (Connections[i].IsBusy)
@@ -666,6 +685,9 @@ namespace CM.Server {
                             count++;
                         }
                     }
+                } finally {
+                    if (hasLock)
+                        Monitor.Exit(Sync);
                 }
                 return count;
             }

@@ -14,8 +14,8 @@ namespace CM {
         public const string DEFAULT_PORT = "443";
         public const string UNTRUSTED_DOMAIN = "untrusted-server.com";
         public static readonly string[] Nameservers = new string[] {
-            "ns1.civil.money", "ns2.civil.money", "ns3.civil.money",
-            "ns4.civil.money", "ns5.civil.money", "ns6.civil.money" };
+            "ns1.civil.money", "ns2.civil.money"
+        };
 
         /// <summary>
         /// Converts an IP address or domain name (and optional port) into a
@@ -42,7 +42,8 @@ namespace CM {
             if (String.Equals(domainName, UNTRUSTED_DOMAIN, StringComparison.OrdinalIgnoreCase))
                 return UNTRUSTED_DOMAIN + ":" + DEFAULT_PORT;
             var dotted = "." + UNTRUSTED_DOMAIN;
-            if (!domainName.EndsWith(dotted, StringComparison.OrdinalIgnoreCase))
+            
+            if (!domainName.EndsWith(dotted.ToLower())) // No EndsWith(..,StringComparison.OrdinalIgnoreCase) for bridge.net
                 throw new ArgumentException("Invalid untrusted domain name.");
             domainName = domainName.ToLower().Replace(dotted, "");
             // aaa-bbb-ccc-ddd-port -> aaa.bbb.ccc.ddd:port

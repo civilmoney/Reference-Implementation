@@ -46,7 +46,7 @@ namespace CM.Server {
         MandatoryExtension = 1010,
         InternalServerError = 1011
     }
-    
+
     /// <summary>
     /// The function signatures more or less match Microsoft's for ease of code interchange/testing
     /// with .NET runtime versions which couldn't be ported to .NET Core/Mono/etc.
@@ -56,7 +56,7 @@ namespace CM.Server {
         /// <summary>
         /// No message will ever take more than a minute unless something is really wrong.
         /// </summary>
-        private const int WriteTimeoutMilliseconds = 1000 * 60; 
+        private const int WriteTimeoutMilliseconds = 1000 * 60;
 
         private const string DEFLATE_EXTENSION = "permessage-deflate";
 #pragma warning disable CS0649
@@ -151,7 +151,7 @@ namespace CM.Server {
         public async Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer, CancellationToken token) {
             var res = new WebSocketReceiveResult();
             var ctx = _Context;
-            skipPingOrPong:
+        skipPingOrPong:
 
             try {
                 if (_CurrentFrame.Length == 0 || _CurrentFramePos == _CurrentFrame.Length) {
@@ -171,7 +171,7 @@ namespace CM.Server {
             }
 
             switch (_CurrentFrame.OpCode) {
-               
+
                 case OpCode.Continuation:
                 case OpCode.Binary:
                 case OpCode.Text:
@@ -397,16 +397,17 @@ namespace CM.Server {
         /// peers. As such it is always TLS, it does not 'mask', it only uses URL '/' and the host name is
         /// fudged to avoid an unnecessary DNS round-trip for SSL certificate validation purposes.
         /// </summary>
-        public static async Task<SslWebSocket> TryConnectAsync(IPEndPoint ep, string hostName, string protocol, CancellationToken token) {
+        public static async Task<SslWebSocket> TryConnectAsync(IPAddress localNetworkInterface, IPEndPoint remoteEndpoint, string hostName, string protocol, CancellationToken token) {
             SslStream ssl;
-            var c = new Socket(ep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            var c = new Socket(remoteEndpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             c.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+            c.Bind(new IPEndPoint(localNetworkInterface, 0));
             c.SendTimeout = 10000;
             const int connectTimeout = 5 * 1000;
-         
+
             try {
 #if !FULL_CLR
-                var connectTask = c.ConnectAsync(ep.Address, ep.Port);
+                var connectTask = c.ConnectAsync(remoteEndpoint.Address, remoteEndpoint.Port);
                 using (var waitCancel = new CancellationTokenSource()) {
                     await Task.WhenAny(connectTask, Task.Delay(connectTimeout, waitCancel.Token));
                     waitCancel.Cancel();
@@ -416,7 +417,7 @@ namespace CM.Server {
                     return null;
                 }
 #else
-                c.Connect(ep.Address, ep.Port);
+                c.Connect(remoteEndpoint.Address, remoteEndpoint.Port);
 #endif
                 ssl = new SslStream(new NetworkStream(c), false, (sender, cert, chain, errors) => {
                     return true; // All peers are untrusted anyway, so we don't care what their certificate says.
@@ -427,7 +428,7 @@ namespace CM.Server {
             }
             try {
                 var authenticateTask = ssl.AuthenticateAsClientAsync(hostName, null,
-                    System.Security.Authentication.SslProtocols.Tls 
+                    System.Security.Authentication.SslProtocols.Tls
                     | System.Security.Authentication.SslProtocols.Tls11
                     | System.Security.Authentication.SslProtocols.Tls12,
                     false);
@@ -435,9 +436,11 @@ namespace CM.Server {
                     await Task.WhenAny(authenticateTask, Task.Delay(connectTimeout, waitCancel.Token));
                     waitCancel.Cancel();
                 }
+#if !FULL_CLR
                 if (!authenticateTask.IsCompletedSuccessfully) {
                     throw new TimeoutException("TLS authenticate timed out.");
                 }
+#endif
             } catch {
                 ssl.Dispose();
                 c.Dispose();
