@@ -42,8 +42,8 @@ namespace CM {
             if (String.Equals(domainName, UNTRUSTED_DOMAIN, StringComparison.OrdinalIgnoreCase))
                 return UNTRUSTED_DOMAIN + ":" + DEFAULT_PORT;
             var dotted = "." + UNTRUSTED_DOMAIN;
-            
-            if (!domainName.EndsWith(dotted.ToLower())) // No EndsWith(..,StringComparison.OrdinalIgnoreCase) for bridge.net
+
+            if (!domainName.ToLower().EndsWith(dotted.ToLower())) // IgnoreCase is critical but no EndsWith(..,StringComparison.OrdinalIgnoreCase) for bridge.net
                 throw new ArgumentException("Invalid untrusted domain name.");
             domainName = domainName.ToLower().Replace(dotted, "");
             // aaa-bbb-ccc-ddd-port -> aaa.bbb.ccc.ddd:port

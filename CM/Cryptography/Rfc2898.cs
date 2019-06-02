@@ -20,6 +20,9 @@ namespace CM.Cryptography {
     /// </summary>
 #if JAVASCRIPT
     [Bridge.External] // We compile once and move into webworkers.js
+#if Retyped
+    [Bridge.Rules(ArrayIndex = Bridge.ArrayIndexRule.Plain)]
+#endif
 #endif
     internal class HMAC {
         private byte[] _Key;
@@ -88,6 +91,9 @@ namespace CM.Cryptography {
     /// </summary>
 #if JAVASCRIPT
     [Bridge.External] // We compile once and move into webworkers.js
+#if Retyped
+    [Bridge.Rules(ArrayIndex = Bridge.ArrayIndexRule.Plain)]
+#endif
 #endif
     public class Rfc2898 {
 

@@ -11,7 +11,10 @@ namespace CM {
     /// struct should not be used on client UIs.
     /// </summary>
     public struct CMResult {
-        public CMResult(uint code, string desc) { Code = unchecked((int)code); Description = desc; }
+        public CMResult(uint code, string desc) {
+            Code = unchecked((int)code);
+            Description = desc;
+        }
         public int Code;
         public string Description;
 
@@ -54,7 +57,11 @@ namespace CM {
         /// Returns true if the status code is positive or zero.
         /// </summary>
         public bool Success {
-            get { return Code >= SUCCESS; }
+            get {
+                return Code >= SUCCESS
+                  // For bridge
+                  && Code < int.MaxValue;
+            }
         }
 
         /// <summary>
@@ -65,7 +72,7 @@ namespace CM {
         /// Successful, but false
         /// </summary>
         public readonly static CMResult S_False = new CMResult(SUCCESS + 1, "False");
-       
+
         /// <summary>
         /// Successful, At least 1 copy of the item was found, but the minimum number of copies required are not met.
         /// </summary>
@@ -77,7 +84,7 @@ namespace CM {
         /// <summary>
         /// The web socket is not currently connected.
         /// </summary>
-        public readonly static CMResult E_Not_Connected = new CMResult(ERROR+1, "The web socket is not currently connected.");
+        public readonly static CMResult E_Not_Connected = new CMResult(ERROR + 1, "The web socket is not currently connected.");
         /// <summary>
         /// Time-out waiting on a reply.
         /// </summary>

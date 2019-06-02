@@ -5,6 +5,7 @@
 //
 #endregion
 
+using System;
 using System.Collections.Generic;
 
 namespace CM {
@@ -29,27 +30,50 @@ namespace CM {
             return name;
         }
 
+
+#if JAVASCRIPT
+#if Retyped
+        static ISO31662() {
+            var lines = Data.Split('\n');
+            Values = new Region[lines.Length];
+            _Lookup = new Dictionary<string, string>();         
+            var rx = new Retyped.es5.RegExp("\"[^\"]+\"", "gi");
+            for (int i = 0; i < lines.Length; i++) {
+                var bits = lines[i].As<Retyped.Primitive.String>().match(rx);
+                Values[i].ID = bits[0].Replace("\"", "");
+                Values[i].Name = bits[1].Replace("\"", "");
+                _Lookup[Values[i].ID] = Values[i].Name;
+            }
+        }
+#else
         static ISO31662() {
             var lines = Data.Split('\n');
             Values = new Region[lines.Length];
             _Lookup = new Dictionary<string, string>();
-#if JAVASCRIPT
-        
             var rx = new Bridge.Html5.RegExp("\"[^\"]+\"", "gi");
-#endif
             for (int i = 0; i < lines.Length; i++) {
-#if JAVASCRIPT
                 var bits = Bridge.Html5.StringPrototype.Match(lines[i], rx);
                 Values[i].ID = bits[0].Replace("\"", "");
                 Values[i].Name = bits[1].Replace("\"", "");
-#else
-                var bits = System.Text.RegularExpressions.Regex.Matches(lines[i], "\"(?<val>[^\"]+?)\"");
-                Values[i].ID = bits[0].Groups["val"].Value;
-                Values[i].Name = bits[1].Groups["val"].Value;
-#endif
+
                 _Lookup[Values[i].ID] = Values[i].Name;
             }
         }
+#endif
+#else
+        static ISO31662() {
+            var lines = Data.Split('\n');
+            Values = new Region[lines.Length];
+            _Lookup = new Dictionary<string, string>();
+            for (int i = 0; i < lines.Length; i++) {
+                var bits = System.Text.RegularExpressions.Regex.Matches(lines[i], "\"(?<val>[^\"]+?)\"");
+                Values[i].ID = bits[0].Groups["val"].Value;
+                Values[i].Name = bits[1].Groups["val"].Value;
+                _Lookup[Values[i].ID] = Values[i].Name;
+            }
+        }
+
+#endif
 
         private static readonly Dictionary<string, string> _Lookup;
         public static readonly Region[] Values;

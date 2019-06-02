@@ -15,6 +15,11 @@ namespace CM.Cryptography {
     /// <summary>
     /// A portable C# MD5, based on work by Brad Conte (bradconte.com) MIT License
     /// </summary>
+#if JAVASCRIPT
+#if Retyped
+    [Bridge.Rules(ArrayIndex = Bridge.ArrayIndexRule.Plain)]
+#endif
+#endif
     public class MD5 {
         static uint ROTLEFT(uint a, int b) {
             return (uint)(((a) << (b)) | ((a) >> (32 - (b))));

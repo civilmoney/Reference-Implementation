@@ -351,7 +351,8 @@ namespace CM.Server {
                 // Only 1 op allowed at a time
                 // SemaphoreSlim.Wait(token) has an uncatchable ArgumentNullException bug:
                 // SemaphoreSlim.CancellationTokenCanceledEventHandler -> Monitor.Enter
-                sem.Wait();
+                if (!sem.Wait(10000))
+                    return false;
                 hasLock = true;
                 var s = Stream;
                 if (s == null || !s.CanWrite)

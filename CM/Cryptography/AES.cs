@@ -15,6 +15,9 @@ namespace CM.Cryptography {
     /// </summary>
 #if JAVASCRIPT
     [Bridge.External] // We compile once and move into webworkers.js
+#if Retyped
+    [Bridge.Rules(ArrayIndex = Bridge.ArrayIndexRule.Plain)]
+#endif
 #endif
     public class AES {
         private const int AES_128_ROUNDS = 10;

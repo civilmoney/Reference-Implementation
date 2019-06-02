@@ -56,8 +56,17 @@ namespace CM {
                 || !Helpers.IsIDValid(parts[0]))
                 return false;
             try {
-                var b64 = parts[1].Replace("_", "/").Replace("-", "+").Replace("~", "=");
-                var b = Convert.FromBase64String(b64);
+                var b64 = parts[1].Replace("_", "/").Replace("-", "+");
+                byte[] b = null;
+                try {
+                    b = Convert.FromBase64String(b64);
+                } catch {
+                    try {
+                        b = Convert.FromBase64String(b64 + "=");
+                    } catch {
+                        b = Convert.FromBase64String(b64 + "==");
+                    }
+                }
                 var payload = Encoding.UTF8.GetString(b, 0, b.Length);
                 var ar = payload.Split('\n');
                 if (ar.Length != 5)
@@ -74,17 +83,22 @@ namespace CM {
                 return false;
             }
         }
-
-        public override string ToString() {
-            var b = Encoding.UTF8.GetBytes(String.Join("\n", new string[] {
+        public string UrlPath {
+            get {
+                var b = Encoding.UTF8.GetBytes(String.Join("\n", new string[] {
                     Escape(Amount),
                     Escape(PayeeTag),
                     Escape(Memo),
                     IsAmountReadOnly?"1":"",
                     IsMemoReadOnly?"1":""
                 }));
-            var modifiedB64 = Convert.ToBase64String(b).Replace("/", "_").Replace("+", "-").Replace("=", "~");
-            return Constants.TrustedSite + "/" + Payee + "/" + modifiedB64;
+                var modifiedB64 = Convert.ToBase64String(b).Replace("/", "_").Replace("+", "-").Replace("=", "");
+                return "/" + Payee + "/" + modifiedB64;
+            }
+        }
+        public override string ToString() {
+
+            return Constants.TrustedSite + UrlPath;
         }
     }
 }

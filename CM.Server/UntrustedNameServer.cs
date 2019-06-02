@@ -512,6 +512,7 @@ namespace CM.Server {
                             switch (q.Type) {
                                 case DnsType.SOA:
                                 case DnsType.ANAME:
+                                case DnsType.CNAME:
 
                                     if (String.Equals(q.Domain, DNS.UNTRUSTED_DOMAIN, StringComparison.OrdinalIgnoreCase)) {
                                         // SOA or no subdomain
@@ -531,13 +532,15 @@ namespace CM.Server {
                                                     { "Domain", server},
                                                 }
                                             });
-                                            others.Add(new Data() {
-                                                Class = DnsClass.IN,
-                                                Domain = server,
-                                                TTL = 600 - 1,
-                                                Type = DnsType.ANAME,
-                                                Values = { { "IP", ip } }
-                                            });
+                                            if (q.Type == DnsType.ANAME) {
+                                                others.Add(new Data() {
+                                                    Class = DnsClass.IN,
+                                                    Domain = server,
+                                                    TTL = 600 - 1,
+                                                    Type = DnsType.ANAME,
+                                                    Values = { { "IP", ip } }
+                                                });
+                                            }
                                         }
                                         // SOA answer
 
@@ -572,9 +575,13 @@ namespace CM.Server {
                                                     break;
 
                                                 default:
-                                                    var addresses = await Dns.GetHostAddressesAsync(ipOrHostName);
-                                                    ips.AddRange(addresses);
-                                                    ips.RemoveAll(x => x.AddressFamily != AddressFamily.InterNetwork || x.ToString() == "0.0.0.0");
+                                                    if (IPAddress.TryParse(ipOrHostName, out var ip)) {
+                                                        ips.Add(ip);
+                                                    } else {
+                                                        var addresses = await Dns.GetHostAddressesAsync(ipOrHostName);
+                                                        ips.AddRange(addresses);
+                                                        ips.RemoveAll(x => x.AddressFamily != AddressFamily.InterNetwork || x.ToString() == "0.0.0.0");
+                                                    }
                                                     break;
                                             }
                                         }
@@ -610,6 +617,7 @@ namespace CM.Server {
                                     break;
 
                                 case DnsType.NS:
+                                    m.IsAuthoritativeAnswer = true;
                                     for (int i = 0; i < CM.DNS.Nameservers.Length; i++) {
                                         answers.Add(new Data() {
                                             Class = DnsClass.IN,
@@ -624,7 +632,7 @@ namespace CM.Server {
                                     break;
 
                                 case DnsType.TXT: {
-
+                                        m.IsAuthoritativeAnswer = true;
                                         for (int x = 0; x < TXT.Length; x++) {
                                             answers.Add(new Data() {
                                                 Class = DnsClass.IN,
@@ -642,6 +650,7 @@ namespace CM.Server {
                                     break;
 
                                 case DnsType.MX: {
+                                        m.IsAuthoritativeAnswer = true;
                                         for (int x = 0; x < MXes.Length; x++) {
                                             answers.Add(new Data() {
                                                 Class = DnsClass.IN,
@@ -658,9 +667,6 @@ namespace CM.Server {
                                             m.ReturnCode = ReturnCode.Success;
                                     }
                                     break;
-
-                                case DnsType.CNAME:
-                                    break;
                                 case DnsType.DNSKEY:
                                     //https://tools.ietf.org/html/rfc4034
                                     if (String.Equals(q.Domain, DNS.UNTRUSTED_DOMAIN, StringComparison.OrdinalIgnoreCase)) {
@@ -676,7 +682,7 @@ namespace CM.Server {
                             }
                         } catch {
                             // Somebody has queried us for something other than *.untrusted-server.com.
-                            // _Log.Write(this, LogLevel.INFO, "Unrecognised query for " + q.Domain + " from " + sender);
+                            _Log.Write(this, LogLevel.INFO, "Unrecognised query for " + q.Domain);
                         }
                     }
                 } else {

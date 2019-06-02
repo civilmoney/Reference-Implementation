@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
+    <RootNamespace>CM.Server</RootNamespace>
+    <AssemblyName>CM.Server</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="RequestHandler.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="compilerconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="untrusted-server-pass12345678.pfx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="untrusted-server-pass12345678.pfx" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="compilerconfig.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <!--
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.5" PrivateAssets="All" />
+    -->
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CM\CM.csproj" />
+  </ItemGroup>
+
+</Project>

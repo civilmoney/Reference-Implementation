@@ -168,24 +168,23 @@ namespace CM {
                     IsValid = false;
                     return;
                 }
-                int code = -1;
-#if JAVASCRIPT
-                // Workaround for Bridge int.parse bug.
+                uint code = 0xffffffff;
+#if JAVASCRIPT 
+                // Workaround for (old) Bridge int.parse bug.
                 // parseInt handles 0x OK, but it comes out as a long..
                 Bridge.Script.Write("code = parseInt(args[1]);");
                 // ..convert back to signed int.
-                code = (int)long.Parse(code.ToString());
-
+                code = (uint)long.Parse(code.ToString());
 #else
                 var hex = args[1];
                 if (hex.StartsWith("0x"))
                     hex = hex.Substring(2);
-                int.TryParse(hex,
+                uint.TryParse(hex,
                     System.Globalization.NumberStyles.AllowHexSpecifier,
                     System.Globalization.CultureInfo.InvariantCulture,
                     out code);
 #endif
-                Code.Code = code;
+                Code.Code = (int)code;
                 NOnce = args[2];
                 Arguments = args.Skip(3).ToArray();
                 IsValid = true;
@@ -201,7 +200,11 @@ namespace CM {
             /// Returns true if the response is valid and the CMResult code is >= 0.
             /// </summary>
             public bool IsSuccessful {
-                get { return IsValid && Code.Code >= 0; }
+                get { return IsValid 
+                        && Code.Code >= 0
+                        // For Bridge uint -> long
+                        && Code.Code < int.MaxValue;
+                }
             }
 
             public override string ToString() {

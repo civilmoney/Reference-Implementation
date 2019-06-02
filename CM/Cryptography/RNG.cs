@@ -10,9 +10,47 @@ using System;
 namespace CM.Cryptography {
 #if JAVASCRIPT
     [Bridge.External] // We compile once and move into webworkers.js
+#if Retyped
+    [Bridge.Rules(ArrayIndex = Bridge.ArrayIndexRule.Plain)]
+#endif
 #endif
     public class RNG {
 #if JAVASCRIPT
+#if Retyped
+        public static void RandomBytes(byte[] b) {
+            // Only use a proper browser RNG
+            Bridge.Script.Write(@"
+if(typeof(window.Uint8Array)=='function'){
+    var tmp = new Uint8Array(b.length);
+    (window.crypto || window.msCrypto).getRandomValues(tmp);
+    for(var i=0;i<tmp.length;i++)
+    b[i] = tmp[i];
+} else {
+    //throw ""unsupported web browser"";
+");
+            try {
+                var r = new Retyped.dom.XMLHttpRequest();
+                var host = Constants.Seeds[0].Domain;
+#if DEBUG
+                host = DNS.EndpointToUntrustedDomain(host, true);
+#endif
+                r.open("GET", "https://" + host + "/api/get-random?length=" + b.Length, false); // we need to be synchronous here, unfortunately.
+                r.send();
+                if (r.status != 200)
+                    throw new Exception("Unable to get 'last resort' random bytes.");
+                var res = Convert.FromBase64String(r.responseText);
+                for (int i = 0; i < b.Length; i++)
+                    b[i] = res[i];
+            } catch (Exception ex) {
+                Console.Write(ex.ToString());
+                Retyped.dom.window.alert("Unfortunately this web browser is not compatible with Civil Money. Please try a recent version of Internet Explorer, Chrome, FireFox or a more recent smart phone device.");
+            }
+            Bridge.Script.Write(@"
+}
+");
+        }
+
+#else
         public static void RandomBytes(byte[] b) {
             // Only use a proper browser RNG
             Bridge.Script.Write(@"
@@ -45,6 +83,7 @@ if(typeof(window.Uint8Array)=='function'){
 }
 ");
         }
+#endif
 #else
 
         /// <summary>

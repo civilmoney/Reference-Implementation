@@ -18,7 +18,7 @@ Head over to [Microsoft's .NET Core website](https://www.microsoft.com/net/learn
 2. Download and unzip Civil Money
     ```
     $ mkdir /var/civilmoney && cd "$_"
-    $ curl https://update.civil.money/api/get-repo/civilmoney_1.4.zip -o civilmoney_1.4.zip
+    $ curl https://update.civil.money/api/releases/civilmoney_2.0.zip -o civilmoney_1.4.zip
     $ unzip civilmoney_1.4.zip
     ```
 3. Do a test run to make sure everything works
@@ -50,7 +50,7 @@ Head over to [Microsoft's .NET Core website](https://www.microsoft.com/net/learn
 Windows setup is pretty straight forward.
 
 1. Install the [.NET Core SDK 2.0](https://www.microsoft.com/net/download/windows) or higher.
-2. Download the [Civil Money binary](https://update.civil.money/api/get-repo/civilmoney_1.4.zip) and unzip the contents into a folder location on your server.
+2. Download the [Civil Money binary](https://update.civil.money/api/releases/civilmoney_2.0.zip) and unzip the contents into a folder location on your server.
 3. Open an elevated command prompt:
 ```
 > cd <your unzipped folder location>
@@ -83,7 +83,7 @@ The default settings look like this:
 {
   "Settings": {
     "Port": 8000,
-	"IP": "0.0.0.0",
+    "IP": "0.0.0.0",
     "Seeds": "seed1.civil.money,seed2.civil.money",
     "DataFolder": "cm-data",
     "AuthoritativePfxCertificate": "",

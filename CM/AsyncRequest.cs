@@ -15,6 +15,7 @@ namespace CM {
         CMResult Result { get; set; }
 
         void Completed(CMResult res);
+        void UpdateProgress(int percent);
     }
 
     /// <summary>

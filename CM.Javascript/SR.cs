@@ -90,6 +90,7 @@ namespace CM.Javascript {
         /// <summary>A more civilised fiat alternative.</summary>
         public static string LABEL_CIVIL_MONEY_SUB_HEADING;
 
+
         /// <summary>Account age</summary>
         public static string LABEL_ACCOUNT_AGE;
 

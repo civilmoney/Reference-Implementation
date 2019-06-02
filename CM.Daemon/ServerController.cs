@@ -18,7 +18,7 @@ namespace CM.Daemon {
     /// Starts/Stops/Monitors the CM.Server process.
     /// </summary>
     public class ServerController {
-        private const string NETCOREVERSION = "netcoreapp2.0";
+        private const string NETCOREVERSION = "netcoreapp2.1";
         private const string AUTHORITATIVE_DOMAIN = "update.civil.money";//"192-168-0-88-8000.untrusted-server.com:8000";
         private bool _HasCrashed;
         private bool _IsExpectingExit;
@@ -131,6 +131,11 @@ namespace CM.Daemon {
                         Log("Download failed {0}: {1}", res.StatusCode, file.RemoteUrl);
                         return false;
                     }
+
+                    var dir = System.IO.Path.GetDirectoryName(file.LocalPath);
+                    if (!System.IO.Directory.Exists(dir))
+                        System.IO.Directory.CreateDirectory(dir);
+
                     using (var s = System.IO.File.OpenWrite(file.LocalPath)) {
                         s.SetLength(0);
                         await res.GetResponseStream().CopyToAsync(s, 81920, token);
@@ -235,14 +240,14 @@ namespace CM.Daemon {
         }
 
         private void Log(string msg, params object[] args) {
-            var line = DateTime.UtcNow.ToString("s") + ": " + String.Format(msg, args);
+            var line = DateTime.UtcNow.ToString("s") + ": " + (args != null && args.Length > 0 ? String.Format(msg, args) : msg);
             Console.WriteLine(line);
             _LogLines[_LogIndex % _LogLines.Length] = line;
             _LogIndex++;
             try {
                 lock (_LogWriter)
                     _LogWriter.Write(line + "\r\n");
-               
+
             } catch { }
         }
 
@@ -303,8 +308,8 @@ namespace CM.Daemon {
                 if ((time.Elapsed - lastLogFlush).TotalSeconds > 5) {
                     lastLogFlush = time.Elapsed;
                     try {
-                        lock(_LogWriter)
-                        _LogWriter.Flush();
+                        lock (_LogWriter)
+                            _LogWriter.Flush();
                     } catch { }
                 }
 
@@ -347,13 +352,14 @@ namespace CM.Daemon {
                 Console.WriteLine("Error reporting: " + str);
                 str += "\r\n--- LOG ---\r\n";
                 str += ExportLog(10) + "\r\n";
-                var b = Encoding.UTF8.GetBytes(str);
                 var req = System.Net.HttpWebRequest.CreateHttp("https://" + AUTHORITATIVE_DOMAIN + "/api/log-error/server");
                 req.Method = "POST";
-                req.ContentType = "text/plain; charset=utf-8";
-                req.Headers[System.Net.HttpRequestHeader.ContentLength] = b.Length.ToString();
+                req.ContentType = "application/x-www-form-urlencoded";
                 using (var s = await req.GetRequestStreamAsync()) {
-                    s.Write(b, 0, b.Length);
+                    var form = new System.Net.Http.FormUrlEncodedContent(new Dictionary<string, string> {
+                        { "error", str }
+                    });
+                    await form.CopyToAsync(s);
                 }
                 using (var res = await req.GetResponseAsync() as System.Net.HttpWebResponse) {
                     Log("Error reporting returned: " + res.StatusCode);
@@ -365,8 +371,8 @@ namespace CM.Daemon {
 
         private void StartServer(Version v) {
             Debug.Assert(v != null);
-
-            var appPath = System.IO.Path.Combine(AppContext.BaseDirectory, v.ToString());
+            var baseDir = System.IO.Path.Combine(AppContext.BaseDirectory, v.ToString());
+            var appPath = baseDir;
             appPath = System.IO.Path.Combine(appPath, "CM.Server.dll");
             var proc = _Process = new Process();
             proc.StartInfo = new ProcessStartInfo("dotnet", "\"" + appPath + "\"") {
@@ -374,7 +380,7 @@ namespace CM.Daemon {
                 RedirectStandardError = true,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
-                WorkingDirectory = AppContext.BaseDirectory
+                WorkingDirectory = baseDir
             };
             proc.ErrorDataReceived += Proc_ErrorDataReceived;
             proc.OutputDataReceived += Proc_OutputDataReceived;
@@ -401,7 +407,7 @@ namespace CM.Daemon {
             Debug.Assert(proc != null);
 
             _IsExpectingExit = true;
-            proc.StandardInput.WriteLine();
+            proc.StandardInput.Close();
             proc.WaitForExit();
             Debug.Assert(_Process == null);
             Log("Server stopped.");
