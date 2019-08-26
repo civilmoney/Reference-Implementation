@@ -241,6 +241,12 @@ namespace CM.JS {
         /// <summary>Your new RSA private key has been generated...</summary>
         public static string LABEL_STATUS_NEW_KEY_GENERATED_OK;
 
+        /// <summary>There was a problem validating the signature of this governing authority account.</summary>
+        public static string LABEL_STATUS_GOVERNINGAUTHORITY_CHECK_FAILED;
+
+        /// <summary>Governing Authority for {0}</summary>
+        public static string TITLE_GOVERNINGAUTHORITY_FOR_BLANK;
+
         /// <summary>Go to your account</summary>
         public static string LABEL_GO_TO_YOUR_ACCOUNT;
 

@@ -100,7 +100,7 @@ namespace CM.Server {
                     var headers = context.Response.Headers;
                     headers.Add("X-Frame-Options", "DENY");
                     headers.Add("X-XSS-Protection", "1; mode=block");
-                    headers.Add("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' " + Constants.WebSocketTransport + "://*.untrusted-server.com:* " + Constants.WebSocketTransport + "://*.civil.money:* " + Constants.WebSocketTransport + "://civil.money:* https://*.civil.money:* https://civil.money:*;");
+                    headers.Add("Content-Security-Policy", "default-src 'self'; img-src 'self' data:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' " + Constants.WebSocketTransport + "://*.untrusted-server.com:* " + Constants.WebSocketTransport + "://*.civil.money:* " + Constants.WebSocketTransport + "://civil.money:* https://*.civil.money:* https://civil.money:*; frame-src https://player.vimeo.com;");
 
                     await next().ConfigureAwait(false);
                 }
@@ -406,7 +406,9 @@ namespace CM.Server {
             } finally {
                 if (conn != null) {
                     _ActiveConnections.TryRemove(conn, out _);
+                    conn.Dispose();
                 }
+                
             }
         }
 

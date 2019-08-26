@@ -77,7 +77,7 @@ namespace CM {
         /// </summary>
         public static bool Peer_DHT_ID_Uses_Port = true;
 #else
-        public const string WebSocketProtocol = "v1.civil.money";
+        public static string WebSocketProtocol = "v1.civil.money";
 
         // The reason for the IPs is that the client and design is primarily an IP-based
         // protocol, however we need the domain names for web browser SSL to work.
@@ -92,7 +92,7 @@ namespace CM {
         /// from the same address, which can increase their chance of
         /// a consensus attack. 
         /// </summary>
-        public const bool Peer_DHT_ID_Uses_Port = false;
+        public static bool Peer_DHT_ID_Uses_Port = false;
 #endif
 
     }

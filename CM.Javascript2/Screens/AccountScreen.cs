@@ -115,8 +115,7 @@ namespace CM.JS.Screens {
                             OnAccountLoaded();
                             _Progress.Class = "field-prog ok";
                         } else {
-                            _Progress.Width.Animate(0,
-                            Times.Long, Easing.ElasticOut1);
+                            _Progress.Width.Animate(0, Times.Long, Easing.ElasticOut1);
                             _Progress.Class = "field-prog not-found";
                             ShowAccountNotFound(field.Value);
                         }
@@ -179,20 +178,20 @@ namespace CM.JS.Screens {
             App.Instance.UpdateHistory("/", "Civil Money");
             var st = new StackPanel();
             st.HorizontalAlignment = Alignment.Center;
-            st.VerticalAlignment = Alignment.Center;
+            st.VerticalAlignment = Alignment.Top;
 
             var logo = new Element(tagName: "h1", text: "//Civil Money", style: "font-weight: 900;letter-spacing:-2px;white-space:nowrap;");
             logo.AnimFlyIn(new SichboUI.RelativeTransform(0, 0, 0, 0, 0, 0, 0),
                 dur: Times.Long, ease: Easing.ElasticOut1Cubic);
             logo.VerticalAlignment = Alignment.Center;
             logo.HorizontalAlignment = Alignment.Center;
-            st.AnimFadeInOut(Times.Long);
+            st.AnimFadeInOut(Times.Normal);
             logo.Margin.Value = new Thickness(15, 0, 5, 0);
             st.Add(logo);
             st.Div(
                 text: SR.LABEL_CIVIL_MONEY_SUB_HEADING,
-                style: "text-align:center;font-weight: 200;",
-                margin: new Thickness(0, 0, 80, 0));
+                style: "text-align:center;",
+                margin: new Thickness(0, 0, 80, 0)).Width.Value = 200;
 
             var about = new Button(ButtonStyle.NotSet, SR.LABEL_LEARN_MORE, () => { });
             about.HorizontalAlignment = Alignment.Center;

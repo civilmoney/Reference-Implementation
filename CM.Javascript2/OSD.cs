@@ -42,6 +42,7 @@ namespace CM.JS {
             } else {
                 _Current.RemoveAfter = null;
                _Current.TextContent = msg;
+                _Current.InvalidateArrange();
             }
         }
     }

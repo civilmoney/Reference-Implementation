@@ -11,6 +11,9 @@ namespace CM.JS.Controls {
     class AuthoriseControl : Element {
 
         public AuthoriseControl(string id, int newStatus, Action<bool> onDone, params Schema.TransactionIndex[] items) {
+            
+            
+            this.MaxWidth.Value = 1000;
 
             var st = new StackPanel();
             st.HorizontalAlignment = Alignment.Stretch;

@@ -5,33 +5,67 @@
     ViewBag.Title = "Learn About Civil Money";
     ViewBag.NormalPage = true;
 }
-
+<style type="text/css">
+    .vid-pane {
+        background-image: linear-gradient(150deg, #495465, #5e6c82);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    @@media print{
+        .vid-pane {
+            display: none;
+        }
+    }
+</style>
+<div class="vid-pane">
+    <iframe src="https://player.vimeo.com/video/353008998" id="vid" frameborder="0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+</div>
+<script>
+    var vid = document.getElementById('vid');
+    var par = 9.0 / 16.0;
+    vid.style.width = '100%';
+    function resizeVid() {
+        var h = (par * document.body.clientWidth);
+        var w = '100%';
+        var maxHeight = window.innerHeight - 60;
+        if (h > maxHeight) {
+            w = (1 / par) * maxHeight;
+            h = maxHeight;
+        }
+        vid.style.height = h + 'px';
+        vid.style.width = w;
+    }
+    window.addEventListener('resize', resizeVid);
+    resizeVid();
+</script>
 <div class="general-page">
+
     <div><a class="logo" href="/">//Civil Money</a></div>
 
-    <h1>About Civilized Money</h1>
-
+    <h1>Money is nothing.</h1>
     <p>Imagine if you didn't have to work. What would you do?</p>
     <p>Today we work because we need money to survive. But why does it have to be this way?</p>
-    <p>What if instead everybody on Earth had a generous basic income, and people were free to do whatever it is they're passionate about? Not just whatever makes money...</p>
+    <p>What if instead everybody on Earth had a generous basic income, and we were free to do whatever it is we're truly passionate about? Not just whatever makes money...</p>
     <p>People could go back to school, raise their kids properly, or just work on whatever, at their own pace.</p>
     <p>Maybe we could start making things that are designed properly &mdash; long lasting. Beautiful.</p>
     <p>The only reason we don't do these things now is because of money.</p>
     <p>Each and every product produced and even our basic health and well being are negatively impacted by a toxic and unnecessary enterprise culture that puts profits before the greater good.</p>
 
     <h2>There has to be a better way.</h2>
-    <p>We think there might be &mdash; Time.</p>
-    <p>Time is an inflation-proof mathematical constant and an equal common denominator that anybody can expend, at least in some form or another.</p>
+    <p>We think there might be &mdash; time.</p>
+    <p>Time is an inflation-proof mathematical constant and an equal common denominator that everybody can expend, at least in some form or another.</p>
     <p>By switching to time as our new social contract, humanity can step off its income inequality hamster wheel and forgo churning out products for the sake of quarterly revenue targets which is producing a relentless torrent of garbage winding up in landfills and poisoning the very air we need to breathe. </p>
-    <p>All it takes is for people to choose to switch to time as their accept method of payment.</p>
+    <p>All it takes is for people to choose to switch to time as their accepted method of payment.</p>
 
     <h2>Why is traditional money unnecessary?</h2>
     <p>In a word &mdash; computers.</p>
-    <p>You may have learned in economic theory or even high school that banks act as intermediaries, holding people's deposits and savings. This is no longer true.</p>
-    <p>In olden times, banks provided security of assets and protection from charlatans. Today most money exists only as data sitting on bank computers. In other words &mdash; <b>money is nothing.</b> As much as 90% of money in circulation has been created out of thin air by banking institutions each time they've issued loans and credit.</p>
-    <p>This means that for every dollar in your checking account, some person owes a bank somewhere around 90 cents, and is doing their darnedest to make a living and undo that credit database record. Billions of people on Earth are wasting every waking hour doing &quot;something&quot; in order to delete a database entry from a bank computer. Meanwhile those in the finance industries amass a lions share of wealth produced out of nothing under the guise of interest. </p>
-    <p>Since we've established that most money exists only in a virtual sense, banks and financial speculation markets can become obsolete if all transactions are recorded on an open public ledger and a simple consensus can be established regarding the status of any person's account and credit rating.</p>
-    <p>The users of Civil Money are effectively the bank manager now, able to audit customers in the same way banks have traditionally done in the past from behind their desks when authorizing a new loan. Being a bank manager seems like work, so the design of Civil Money allows for a corroborated credit score to be displayed instantly at the point of sale, with the option to perform a more thorough analysis on particularly high value purchases.</p>
+    <p>You may have learned in high school or economic theory that banks act as intermediaries, holding people's deposits and savings. This is no longer their primary role.</p>
+    <p>In olden times, banks provided security of assets and protection from charlatans. Today most money exists only as data sitting on bank computers. In other words &mdash; <b>money is nothing</b>, created out of thin air. As much as 90% of money in circulation has been created by banking institutions each time they've issued loans and credit.</p>
+    <p>This means that for every dollar in your checking account, some person somewhere else owes a bank around 90 cents, and is doing their darnedest to earn a wage in order to undo that credit database record. Billions of people on Earth are wasting every waking hour trying to delete a database entry from a bank computer. Meanwhile those in the finance industries amass a lions share of wealth produced out of nothing under the guise of interest. </p>
+    <p>Since we've identified that most money exists only in a virtual sense, banks and financial speculation markets can become obsolete if all transactions are recorded on an open public ledger and a simple consensus can be established regarding the status of any person's account and credit rating using computers.</p>
+    <p>Participants of Civil Money are effectively a bank manager, able to audit customers in the same way banks have traditionally done in the past from behind their desks when authorizing a new loan. Of course, being a bank manager is work, so the design of Civil Money allows for a corroborated credit score to be displayed instantly at the point of sale, with an option to perform a more thorough analysis on particularly high value purchases.</p>
 
     <h2>The Civil Money design.</h2>
     <p>Because we're dispensing with economic text books and re-writing them:</p>
@@ -46,7 +80,7 @@
     <p>For instance:</p>
     <ol>
         <li>Access to unbounded education or time for scientific or academic research.</li>
-        <li>Improved nutrition through quality-centric agriculture instead of cost-centric and monetary yield.</li>
+        <li>Improved nutrition through quality-centric agriculture and food design, instead of cost-centric and monetary yield.</li>
         <li>The localization of agriculture and affability of locally grown foods, instead of imports produced on the backs of slave labor or weaker currency differentials.</li>
         <li>Strengthened relationships, parenting and families through the availability of time.</li>
         <li>A drastic reduction or elimination in all forms of petty crime.</li>
@@ -58,7 +92,7 @@
 
     <h3>3. The value of one Civil Money is equal to at least one hour of a person's time, with a minimum-wage of USD $50/hr.</h3>
     <p>Civilised Money places no limitations on the cost of goods and services. But to transition away from the old economy, a fixed and reasonable exchange rate is set at <b>//c 1.00 = USD $50</b>. </p>
-    <p>This minimum-wage is based on an upper-middle class USD$ 80,000/yr income over an 8hr work day, 200 days of work a year, which excludes 165 days of weekends/personal/sick/vacation time.</p>
+    <p>This minimum-wage is based on an upper-middle class USD$ 80,000/yr income over an 8hr work day, 200 days of work a year, which excludes 165 days of weekends, personal, sick and vacation time.</p>
     <blockquote>
         USD$ 80,000 / 1600hrs = $50/hr.<br />
         Since 1hr = //c 1.00 it follows that //c 1.00 = USD$50
@@ -138,7 +172,7 @@
     <ul>
         <li>Unlimited access to education for all and unbounded funding for fair teaching wages.</li>
         <li>Unbounded funding for policing, firefighting and all social services.</li>
-        <li>A restoration of honesty and trust throughout all of humanity.</li>
+        <li>A restoration of communication, honesty and trust throughout society.</li>
         <li>Dispute resolution for all, even in regions with no political stability or legal frameworks in place.</li>
         <li>Elimination of 'leaky bucket' self-reporting tax filing systems and laws in use everywhere.</li>
         <li>Near real-time tax revenue acquisition.</li>
@@ -148,11 +182,11 @@
 
         <li>Obsoletion of all debt, savings, loans, banks, investment and retirement funds.</li>
 
-        <li>The elimination of for-profit health care, mining and other essential services and resource creators as we switch to merit-based consumption.</li>
+        <li>The elimination of for-profit health care, resource mining and other essential services as we switch to merit-based consumption.</li>
         <li>Access to health care for all.</li>
         <li>Access to beautiful, well constructed, comfortable and safe living spaces for all.</li>
         <li>Fossil fuels stay in the ground instead of turned into low quality products and plastics.</li>
-        <li>Reduced landfill waste from defective products.</li>
+        <li>Reduced landfill waste from cheap products.</li>
         <li>Reduced pollution from the elimination of shipping unnecessary consumer goods.</li>
         <li>Improved nutrition through quality-centric agriculture instead of cost-centric / monetary yield.</li>
         <li>The localization of agriculture and affability of locally grown foods, instead of imports produced on the backs of slave labor or weaker currency differentials.</li>
@@ -161,8 +195,9 @@
         <li>Improved health and longevity through reduced stress.</li>
         <li>Automation and an elimination of most forms of unpleasant jobs through an open sharing of knowledge and ingenuity.</li>
         <li>Unrestricted funding for grand ideas, inventors and creators.</li>
-        <li>Abolition of the patent system.</li>
-        <li>Unbounded funding for telecommunications as a free public service to all.</li>
+        <li>Abolition of the patent system as we move from profit-driven research to an open sharing of ideas and knowledge due to unbounded funding for all.</li>
+        <li>Deprecation of the insurance industry.</li>
+        <li>Access to telecommunications as a free public service to all.</li>
         <li>Unbounded funding for space exploration and the evolution of the human species beyond Earth.</li>
         <li>Abolition of desperation/monetary based animal poaching.</li>
         <li>A reborn enterprise culture where 'the common good' is its only driving force.</li>
@@ -174,4 +209,9 @@
     <p>Review the technical protocol and source code on <a href="https://github.com/civilmoney/Reference-Implementation/blob/master/API.md">on GitHub</a>.</p>
     <p>Start a discussion <a href="https://www.reddit.com/r/civilmoney">/r/civilmoney</a></p>
     <p>&nbsp;</p>
+    <h3>Further reading:</h3>
+    <ul>
+        <li><a href="https://positivemoney.org/how-money-works/banking-101-video-course/" title="Learn about how banks operate today - Banking 101" target="_blank">Learn about how banks operate today - Banking 101</a></li>
+    </ul>
+
 </div>

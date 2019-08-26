@@ -90,9 +90,9 @@ namespace CM.Server {
             try {
                 _IsClosing = true;
                 if (_Outbound != null && _Outbound.State == WebSocketState.Open)
-                    await _Outbound.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, error, CancellationToken.None).ConfigureAwait(false);
+                    await _Outbound.CloseAsync(WebSocketCloseStatus.NormalClosure, error, CancellationToken.None).ConfigureAwait(false);
                 else if (_Inbound != null && _Inbound.State == WebSocketState.Open)
-                    await _Inbound.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, error, CancellationToken.None).ConfigureAwait(false);
+                    await _Inbound.CloseAsync(WebSocketCloseStatus.NormalClosure, error, CancellationToken.None).ConfigureAwait(false);
             } catch { }
 
             this.Dispose();
@@ -104,7 +104,8 @@ namespace CM.Server {
                 var reader = new MessageReader(OnMessageFromInboundConnection, OnError);
                 var conn = _Inbound;
                 Debug.Assert(conn.State == WebSocketState.Open);
-                while (conn.State == WebSocketState.Open && !_CloseToken.IsCancellationRequested) {
+                while (!conn.CloseStatus.HasValue
+                    && !_CloseToken.IsCancellationRequested) {
                     var receiveResult = await conn.ReceiveAsync(new ArraySegment<byte>(b), _CloseToken.Token).ConfigureAwait(false);
                     if (_CloseToken.IsCancellationRequested)
                         break;
@@ -112,24 +113,22 @@ namespace CM.Server {
                         case WebSocketMessageType.Text:
                             reader.Write(b, 0, receiveResult.Count);
                             break;
-
-                        case WebSocketMessageType.Close:
-                            if (conn.State == WebSocketState.Open)
-                                await conn.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, CancellationToken.None).ConfigureAwait(false);
-                            break;
-
                         case WebSocketMessageType.Binary:
                             await conn.CloseOutputAsync(WebSocketCloseStatus.InvalidMessageType, string.Empty, CancellationToken.None).ConfigureAwait(false);
                             break;
                     }
                 }
-            } catch (OperationCanceledException) { } 
-            catch (WebSocketException) { }
-#if !DEBUG
+
+                await conn.CloseAsync(
+                    conn.CloseStatus.HasValue ? conn.CloseStatus.Value : WebSocketCloseStatus.NormalClosure,
+                    conn.CloseStatusDescription ?? "",
+                    CancellationToken.None).ConfigureAwait(false);
+
+            } catch (OperationCanceledException) { } catch (WebSocketException) { }
             catch { } 
-#endif
             ConnectionLost?.Invoke(this);
             System.Buffers.ArrayPool<byte>.Shared.Return(b);
+            Dispose();
         }
 
         public async void ProcessOutboundAsync(Action<Connection> onclosed) {
@@ -141,7 +140,8 @@ namespace CM.Server {
                 var conn = _Outbound;
                 Debug.Assert(conn.State == WebSocketState.Open);
 
-                while (conn.State == WebSocketState.Open && !_CloseToken.IsCancellationRequested) {
+                while (!conn.CloseStatus.HasValue
+                    && !_CloseToken.IsCancellationRequested) {
                     var receiveResult = await conn.ReceiveAsync(new ArraySegment<byte>(b), _CloseToken.Token).ConfigureAwait(false);
                     if (_CloseToken.IsCancellationRequested)
                         break;
@@ -149,25 +149,22 @@ namespace CM.Server {
                         case WebSocketMessageType.Text:
                             reader.Write(b, 0, receiveResult.Count);
                             break;
-
-                        case WebSocketMessageType.Close:
-                            Debug.Assert(conn.State != WebSocketState.Open); // our WebSocket class should have already closed
-                            //await conn.CloseOutputAsync(WebSocketCloseStatus.NormalClosure, string.Empty, _CloseToken.Token).ConfigureAwait(false);
-                            break;
-
                         case WebSocketMessageType.Binary:
                             await conn.CloseOutputAsync(WebSocketCloseStatus.InvalidMessageType, string.Empty, _CloseToken.Token).ConfigureAwait(false);
                             break;
                     }
                 }
-            } catch (OperationCanceledException) { } 
-            catch (WebSocketException) { }
-#if !DEBUG
-            catch { } // Unlike Tasks, async void exceptions will take out the whole application.
-#endif
+
+                await conn.CloseAsync(
+                 conn.CloseStatus.HasValue ? conn.CloseStatus.Value : WebSocketCloseStatus.NormalClosure,
+                 conn.CloseStatusDescription ?? "",
+                 CancellationToken.None).ConfigureAwait(false);
+
+            } catch (OperationCanceledException) { } catch (WebSocketException) { }
+            catch { }
             onclosed?.Invoke(this);
             System.Buffers.ArrayPool<byte>.Shared.Return(b);
-
+            Dispose();
         }
 
         public async Task<bool> Reply(Message original, CMResult status, Message playload = null, params string[] args) {

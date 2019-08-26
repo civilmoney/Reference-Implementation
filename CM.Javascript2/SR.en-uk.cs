@@ -19,7 +19,7 @@ KEY,REFERENCE,NATIVE
 CHAR_DECIMAL,.,
 CHAR_THOUSAND_SEPERATOR,"","",
 TITLE_CIVIL_MONEY,Civil Money,Civil Money
-LABEL_CIVIL_MONEY_SUB_HEADING,A more civilised nothing.,
+LABEL_CIVIL_MONEY_SUB_HEADING,A more civilised monetary system for humanity.,
 LABEL_ACCOUNT_NAME,Account Name,
 LABEL_GO,Go,
 HTML_CIVIL_MONEY_PROVIDES,""<h3>Civil Money is free to use and aims to provide everybody:</h3>
@@ -249,6 +249,8 @@ LABEL_GENERATE_A_NEW_KEY,Generate a new key,
 LABEL_STATUS_GENERATING_NEW_KEY,Generating a new key, please wait... this can take a minute on slower devices.,
 LABEL_STATUS_NEW_KEY_GENERATED_OK,""Your new RSA private key has been generated. Copy & Paste this blob of text into a safe offline location as a *.key text file. You may then select your *.key text file for signing future transactions."",
 TITLE_THE_CIVIL_MONEY_HONOUR_CODE,The Civil Money Honour Code,
+LABEL_STATUS_GOVERNINGAUTHORITY_CHECK_FAILED, There was a problem validating the signature of this governing authority account.,
+TITLE_GOVERNINGAUTHORITY_FOR_BLANK,Governing Authority for {0},
 HTML_ABOUT,""<h1>A society built on a minted currency is toxic.</h1><p><b>People are working multiple jobs, neglecting their children, even killing one another, all because of nothing more than imaginary computer data sitting on bank servers that we like to call money.</b></p><p>For most of us, every waking hour revolves around doing <em>something</em> in order to undo a mortgage or credit database entry. Money that banks literally create out of thin air and inject into the economy, forcing the majority into a position of slavery for fear of repossession. </p><p>Civil Money is a <a href=""""https://github.com/civilmoney/Reference-Implementation/blob/master/API.md"""" target=""""_blank"""">protocol</a> designed for people who wish to no longer waste their lives working to the benefit of a minority. A global effort to rebuild communities, given the past 200 years of economic adolescence leading current civilisation astray. Here's how it works...</p><img src=/ubi.svg><h2>Every person whether retired, studying, disabled or working receives a generous basic income.</h2><p>Roughly equivalent to USD $60,000 /yr. The idea is that <b>if</b> you work, it is gravy. Work on something because you're actually passionate about it, not because you have to. Stay home and raise your kids properly. Go to school. Do something amazing. If the people and local businesses that you rely on for day-to-day living all chose to accept payment in Civil Money (//c) the decision would be up to you.</p>
 <img src=/taxation.svg>
 <h2>An automatic, inverted taxation system generates money for regions based on their actual contribution to humanity.</h2>

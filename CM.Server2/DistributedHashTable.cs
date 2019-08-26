@@ -282,17 +282,20 @@ namespace CM.Server {
             int count = 0;
             for (int i = 0; i < all.Length; i++) {
                 var p = all[i].Value;
-                count += p.CloseIdleConnections();
+                var cleaned = p.CloseIdleConnections();
+                //if (cleaned > 0) {
+                //    _Log.Write(this, LogLevel.INFO, $"Cleaned up {cleaned} idle connections to {p.EndPoint.Address}.");
+                //}
+                count += cleaned;
                 if (!p.CanConnect
                     && (Clock.Elapsed - p.FailingSince).TotalMinutes > 60) {
                     Seen.TryRemove(all[i].Key, out p);
                     _Log.Write(this, LogLevel.INFO, "Removed {0} from seen peers.", all[i].Key);
                 }
             }
-            if (count > 0) {
-                System.Diagnostics.Debug.WriteLine("Cleaned up {0} idle connections.", count);
-                //_Log.Write(this, LogLevel.INFO, "Cleaned up {0} idle connections.", count);
-            }
+            // if (count > 0) {
+            //     _Log.Write(this, LogLevel.INFO, "Cleaned up {0} idle connections.", count);
+            // }
         }
 
         /// <summary>
@@ -641,7 +644,10 @@ namespace CM.Server {
 #else
                 c.Connect(remoteEndpoint.Address, remoteEndpoint.Port);
 #endif
-                ssl = new System.Net.Security.SslStream(new NetworkStream(c), false, WeTrustNoServersAnyway);
+                ssl = new System.Net.Security.SslStream(
+                    new NetworkStream(c, ownsSocket: true),
+                    leaveInnerStreamOpen: false,
+                    userCertificateValidationCallback: WeTrustNoServersAnyway);
             } catch {
                 c.Dispose();
                 return null;
@@ -781,9 +787,9 @@ namespace CM.Server {
                 bool hasLock = Monitor.TryEnter(Sync, 100);
                 try {
                     for (int i = 0; i < Connections.Count; i++) {
-                        if (Connections[i].IdleTime.TotalSeconds > 120) {
+                        if (Connections[i].IdleTime.TotalMinutes > 10) {
                             if (Connections[i].IsBusy)
-                                System.Diagnostics.Debug.WriteLine("DHT Connection looks hung warning");
+                                Console.WriteLine($"Warning: DHT Connection to {EndPoint.Address} looks hung");
                             Connections[i].Close();
                             //Connections[i].Dispose();
                             Connections.RemoveAt(i--);

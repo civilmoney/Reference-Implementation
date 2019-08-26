@@ -15,7 +15,7 @@ namespace CM.JS {
         /// </summary>
         private static readonly string EN_US = @"
 KEY,REFERENCE,NATIVE
-LABEL_CIVIL_MONEY_SUB_HEADING,A more civilized nothing.,
+LABEL_CIVIL_MONEY_SUB_HEADING,A more civilized monetary system for humanity.,
 HTML_CIVIL_MONEY_PROVIDES,""<h3>Civil Money is free to use and aims to provide everybody:</h3>
 <ul>
 <li>A generous universal basic income</li>

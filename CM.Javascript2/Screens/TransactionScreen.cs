@@ -22,6 +22,7 @@ namespace CM.JS.Screens {
             _Stack = new StackPanel();
             _Stack.HorizontalAlignment = Alignment.Stretch;
             _Stack.Margin.Value = new Thickness(0, 0, 60, 0);
+          
             Add(_Stack);
 
             if (!Helpers.TryParseTransactionID(_ID, out var utc, out _PayeeID, out _PayerID)) {

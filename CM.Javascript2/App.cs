@@ -26,16 +26,21 @@ namespace CM.JS {
             _Back.Remove();
             _OnBack = null; 
         }
+        void ChromeBugWorkaround() {
+          //  Html.style.overflow = "";
+           //Html.style.overflow = "scroll";
+        }
         public App() : base(style: "overflow-x:hidden;overflow-y:auto;") {
             Instance = this;
 
             Client = new Client();
             Client.PeerStateChanged += Client_PeerStateChanged;
             
-            m_Inner = Div();
+            m_Inner = Div("innr");
             m_Inner.MaxWidth.Value = 1000;
             m_Inner.Margin.Value = new Thickness(30);
             m_Inner.SmallMargin.Value = new Thickness(15);
+          
 
             _Back = new Controls.Button(Controls.ButtonStyle.NotSet, null, () => {
                 if (_OnBack == null) {
@@ -81,6 +86,8 @@ namespace CM.JS {
 
 
             Retyped.dom.window.onpopstate = (e) => {
+                if (_Modal != null)
+                    CloseModal();
                 Navigate(dom.window.location.pathname);
             };
           
@@ -93,6 +100,7 @@ namespace CM.JS {
             _Modal = el;
             _Back.Visible = false;
             Add(_Modal);
+            ChromeBugWorkaround();
         }
         public void CloseModal() {
             if (_Modal != null) {
@@ -132,6 +140,7 @@ namespace CM.JS {
         [Bridge.ReadyAttribute]
         public static void Main() {
             Instance = new App();
+            dom.document.body.querySelector("#loading").As<dom.HTMLElement>().RemoveEx();
             dom.document.body.appendChild(Instance.Html);
             Instance.Play();
         }
@@ -179,6 +188,7 @@ namespace CM.JS {
             m_Inner.Clear();
             m_Inner.Add(m_CurrentScreen = ScreenBase.Create(s, url));
             m_CurrentScreenType = s;
+            ChromeBugWorkaround();
         }
     }
 }

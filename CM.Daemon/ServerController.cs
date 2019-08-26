@@ -175,6 +175,9 @@ namespace CM.Daemon {
 
         public void Stop() {
             _IsRunning = false;
+            if (_Process != null) {
+                StopServer();
+            }
             _MonitorThread?.Join();
             _MonitorThread = null;
         }
@@ -407,7 +410,7 @@ namespace CM.Daemon {
             Debug.Assert(proc != null);
 
             _IsExpectingExit = true;
-            proc.StandardInput.Close();
+            proc.Kill();
             proc.WaitForExit();
             Debug.Assert(_Process == null);
             Log("Server stopped.");

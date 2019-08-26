@@ -377,7 +377,7 @@ form {
     .logo {
         font-weight: 900;
         letter-spacing: -1px;
-        font-size: 24px;
+        font-size: 20px;
         color: #ffffff;
         position: fixed;
         top: 30px;
@@ -880,6 +880,17 @@ form {
             display: inline-block;
         }
     }
+
+    .warning {
+        background: #cc0000;
+        color: #fff;
+        padding: 15px;
+    }
+
+    .authority {
+        font-weight: bold;
+        padding: 15px;
+    }
 }
 
 .pill {
@@ -895,4 +906,15 @@ form {
     li {
         padding-bottom: 30px;
     }
+}
+#loading {
+    width: 32px;
+    height: 32px;
+    top: 50%;
+    left: 50%;
+    margin: -16px 0 0 -16px;
+    background: $dark-text;
+    @include button-progress-animate(rgba(255,255,255,0.1));
+    border-radius: 100px;
+    position: absolute;
 }

@@ -315,7 +315,7 @@ form {
   .general-page .logo {
     font-weight: 900;
     letter-spacing: -1px;
-    font-size: 24px;
+    font-size: 20px;
     color: #ffffff;
     position: fixed;
     top: 30px;
@@ -634,6 +634,15 @@ form {
 .account-info .standing > div {
   display: inline-block; }
 
+.account-info .warning {
+  background: #cc0000;
+  color: #fff;
+  padding: 15px; }
+
+.account-info .authority {
+  font-weight: bold;
+  padding: 15px; }
+
 .pill {
   background-color: #495465;
   color: #fff;
@@ -644,3 +653,49 @@ form {
 
 .honour-code li {
   padding-bottom: 30px; }
+
+#loading {
+  width: 32px;
+  height: 32px;
+  top: 50%;
+  left: 50%;
+  margin: -16px 0 0 -16px;
+  background: #495465;
+  cursor: wait;
+  background-image: -webkit-linear-gradient(-45deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0) 25%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, rgba(255, 255, 255, 0) 75%, rgba(255, 255, 255, 0));
+  background-image: -moz-linear-gradient(-45deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0) 25%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, rgba(255, 255, 255, 0) 75%, rgba(255, 255, 255, 0));
+  background-image: -ms-linear-gradient(-45deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0) 25%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, rgba(255, 255, 255, 0) 75%, rgba(255, 255, 255, 0));
+  background-image: -o-linear-gradient(-45deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0) 25%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, rgba(255, 255, 255, 0) 75%, rgba(255, 255, 255, 0));
+  background-image: linear-gradient(-45deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0) 25%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, rgba(255, 255, 255, 0) 75%, rgba(255, 255, 255, 0));
+  -pie-background: linear-gradient(-45deg, rgba(255, 255, 255, 0.1) 25%, rgba(255, 255, 255, 0) 25%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.1) 75%, rgba(255, 255, 255, 0) 75%, rgba(255, 255, 255, 0));
+  background-repeat: repeat;
+  -webkit-background-size: 20px 20px, 100% 100%;
+  -moz-background-size: 20px 20px, 100% 100%;
+  -ms-background-size: 20px 20px, 100% 100%;
+  -o-background-size: 20px 20px, 100% 100%;
+  background-size: 20px 20px, 100% 100%;
+  -webkit-animation: progress-bar-stripes 2s linear infinite;
+  -moz-animation: progress-bar-stripes 2s linear infinite;
+  -ms-animation: progress-bar-stripes 2s linear infinite;
+  -o-animation: progress-bar-stripes 2s linear infinite;
+  animation: progress-bar-stripes 2s linear infinite;
+  border-radius: 100px;
+  position: absolute; }
+
+@-webkit-keyframes progress-bar-stripes {
+  from {
+    background-position: 0 0; }
+  to {
+    background-position: 20px 0; } }
+
+@-moz-keyframes progress-bar-stripes {
+  from {
+    background-position: 0 0; }
+  to {
+    background-position: 20px 0; } }
+
+@keyframes progress-bar-stripes {
+  from {
+    background-position: 0 0; }
+  to {
+    background-position: 20px 0; } }

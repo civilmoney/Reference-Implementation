@@ -43,6 +43,8 @@ namespace CM.Server {
             if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseResponseCompression();
+
             // Support nginx configurations
             app.UseForwardedHeaders(new ForwardedHeadersOptions {
                 ForwardedForHeaderName = "X-Forwarded-For",
@@ -62,6 +64,7 @@ namespace CM.Server {
                     }
                 }
             });
+            
             app.UseWebSockets();
             app.Use(_Server.ProcessHttpRequest);
             app.UseMvc();

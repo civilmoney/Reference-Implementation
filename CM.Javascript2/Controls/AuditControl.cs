@@ -53,7 +53,7 @@ namespace CM.JS.Controls {
             if (_IsQueryRunning)
                 return;
             _IsQueryRunning = true;
-            OSD.Show(SR.LABEL_STATUS_CONTACTING_NETWORK);
+            OSD.Show(SR.LABEL_STATUS_CONTACTING_NETWORK + " ...");
             App.Instance.Client.TryList(_Path, new AsyncRequest<Schema.ListRequest>() {
                 Item = new Schema.ListRequest() {
                     APIVersion = Constants.APIVersion,
@@ -344,9 +344,9 @@ namespace CM.JS.Controls {
             public TickBar(AuditControl owner) : base(style: "background:#fff;") {
                 _Owner = owner;
                 VerticalAlignment = Alignment.Bottom;
-                var bar = new ButtonBar(SR.LABEL_PAYEE_STATUS_ACCEPT_VERB, OnAcceptTicked,
-                      SR.LABEL_CANCEL, OnClearTicked,
-                     SR.LABEL_PAYEE_STATUS_DECLINE_VERB, OnDeclineTicked);
+                var bar = new ButtonBar(SR.LABEL_PAYEE_STATUS_ACCEPT_VERB, OnAcceptClicked,
+                      SR.LABEL_CANCEL, OnClearClicked,
+                     SR.LABEL_PAYEE_STATUS_DECLINE_VERB, OnDeclineClicked);
                 bar.Margin.Value = new Thickness(15);
                 Add(bar);
             }
@@ -373,7 +373,7 @@ namespace CM.JS.Controls {
                 base.OnRemovedOverride();
             }
 
-            private void DoThing(PayeeStatus status) {
+            private void BeginStatusChange(PayeeStatus status) {
                 var el = new Element();
                 var auth = new Controls.AuthoriseControl(_Ticked[0].Value.Payee, (int)status, (changed) => {
                     if (changed) {
@@ -384,14 +384,14 @@ namespace CM.JS.Controls {
                 auth.Margin.Value = new Thickness(30);
                 el.Div(style: "background:#fff;overflow-x:hidden;overflow-y:auto;").Add(auth);
                 App.Instance.ShowModal(el);
-                OnClearTicked();
+                OnClearClicked();
             }
 
-            private void OnAcceptTicked(Button b) {
-                DoThing(PayeeStatus.Accept);
+            private void OnAcceptClicked(Button b) {
+                BeginStatusChange(PayeeStatus.Accept);
             }
 
-            private void OnClearTicked() {
+            private void OnClearClicked() {
                 var ar = _Ticked.ToArray();
                 for (int i = 0; i < ar.Length; i++) {
                     ar[i].CheckField.@checked = false;
@@ -399,8 +399,8 @@ namespace CM.JS.Controls {
                 Remove();
             }
 
-            private void OnDeclineTicked(Button b) {
-                DoThing(PayeeStatus.Decline);
+            private void OnDeclineClicked(Button b) {
+                BeginStatusChange(PayeeStatus.Decline);
             }
         }
     }

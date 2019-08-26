@@ -54,54 +54,72 @@ namespace CM.Schema {
         /// The goal of //c is to level the playing field between the 'haves' and the 'have-nots'.
         /// </summary>
         public static void AppendAccountInfo(this HTMLElement div, Account a, bool includeAge = false) {
-            var calc = a.AccountCalculations;
-            var age = (System.DateTime.UtcNow - a.CreatedUtc);
-            HTMLElement bal = null;
-            if (calc != null
-                && calc.RecentCredits != null
-                && calc.RecentDebits != null
-                && calc.RecentReputation != null) {
 
-                decimal rr = 0;
-                RecentReputation rep;
-                Helpers.CalculateRecentReputation(calc.RecentCredits.Value, calc.RecentDebits.Value, out rr, out rep);
+            // Check governing authority keys if required
+            var gaName = ISO31662.GetName(a.ID);
+            if (gaName != null) {
 
-                div.Div("rep").AmountReputation(rr);
+                var check = new AsyncRequest<bool>();
+                a.CheckIsValidGoverningAuthority(check, JSCryptoFunctions.Identity);
+                if (!check.Item) {
+                    div.Div("warning", text: SR.LABEL_STATUS_GOVERNINGAUTHORITY_CHECK_FAILED);
+                    return;
+                } else {
+                    div.Div("authority", text: String.Format(SR.TITLE_GOVERNINGAUTHORITY_FOR_BLANK, gaName));
+                }
 
-                var glyph = rep == RecentReputation.Good ? Glyphs.CircleTick
-                  : rep == RecentReputation.Overspent ? Glyphs.CircleError
-                  : Glyphs.Warning;
+            } else {
 
-                div.Div("standing").Div(
-                    style: glyph.CSS(rep == RecentReputation.Good ? Colors.C1 : "#cc0000")
-                    + "background-size: 1em;background-position:left center; padding-left: 1.5em;",
-                    text: rep.ToLocalisedName());
+                var calc = a.AccountCalculations;
+                var age = (System.DateTime.UtcNow - a.CreatedUtc);
+                HTMLElement bal = null;
+                if (calc != null
+                    && calc.RecentCredits != null
+                    && calc.RecentDebits != null
+                    && calc.RecentReputation != null) {
 
-                bal = new HTMLDivElement() {
-                    className = "bal"
-                };
-                var balance = Helpers.CalculateAccountBalance(calc.RecentCredits.Value, calc.RecentDebits.Value);
-                bal.Div().Amount(balance, prefix: Constants.Symbol, roundTo2DP: true);
-                bal.Div(style: "font-size:14px;", text: ("USD " + (balance < 0 ? "-" : "") + " $" + Math.Abs(balance * Constants.USDExchange).ToString("N0")));
+                    decimal rr = 0;
+                    RecentReputation rep;
+                    Helpers.CalculateRecentReputation(calc.RecentCredits.Value, calc.RecentDebits.Value, out rr, out rep);
+
+                    div.Div("rep").AmountReputation(rr);
+
+                    var glyph = rep == RecentReputation.Good ? Glyphs.CircleTick
+                      : rep == RecentReputation.Overspent ? Glyphs.CircleError
+                      : Glyphs.Warning;
+
+                    div.Div("standing").Div(
+                        style: glyph.CSS(rep == RecentReputation.Good ? Colors.C1 : "#cc0000")
+                        + "background-size: 1em;background-position:left center; padding-left: 1.5em;",
+                        text: rep.ToLocalisedName());
+
+                    bal = new HTMLDivElement() {
+                        className = "bal"
+                    };
+                    var balance = Helpers.CalculateAccountBalance(calc.RecentCredits.Value, calc.RecentDebits.Value);
+                    bal.Div().Amount(balance, prefix: Constants.Symbol, roundTo2DP: true);
+                    bal.Div(style: "font-size:14px;", text: ("USD " + (balance < 0 ? "-" : "") + " $" + Math.Abs(balance * Constants.USDExchange).ToString("N0")));
+                }
+
+                if (includeAge) {
+                    div.Div("age", text: age.TotalDays / 365 > 1 ? string.Format(SR.LABEL_YEARS_OLD, ((int)age.TotalDays / 365).ToString("N0"))
+                                  : string.Format(SR.LABEL_DAYS_OLD, ((int)age.TotalDays).ToString("N0")));
+                }
+
+                if (!String.IsNullOrEmpty(a.Values[AccountAttributes.IncomeEligibility_Key])) {
+                    div.Div("income", text: a.GetIncomeEligibilityLocalised());
+                }
+
+                var region = ISO31662.GetName(a.Iso31662Region);
+                if (region != null) {
+                    div.Div("region", text: region);
+                }
+
+                div.Div("skills", text: a.GetSkillsSummary());
+                if (bal != null)
+                    div.appendChild(bal);
             }
 
-            if (includeAge) {
-                div.Div("age", text: age.TotalDays / 365 > 1 ? string.Format(SR.LABEL_YEARS_OLD, ((int)age.TotalDays / 365).ToString("N0"))
-                              : string.Format(SR.LABEL_DAYS_OLD, ((int)age.TotalDays).ToString("N0")));
-            }
-
-            if (!String.IsNullOrEmpty(a.Values[AccountAttributes.IncomeEligibility_Key])) {
-                div.Div("income", text: a.GetIncomeEligibilityLocalised());
-            }
-
-            var region = ISO31662.GetName(a.Iso31662Region);
-            if (region != null) {
-                div.Div("region", text: region);
-            }
-
-            div.Div("skills", text: a.GetSkillsSummary());
-            if (bal != null)
-                div.appendChild(bal);
         }
     }
     partial class Account {

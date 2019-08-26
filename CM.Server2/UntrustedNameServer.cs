@@ -25,6 +25,8 @@ namespace CM.Server {
     public class UntrustedNameServer {
         public static string[] TXT = new string[] { };
         private const int DNS_PORT = 53;
+        private const int NS_SOA_TTL = 7200;
+        private const int IP_RESOLUTION_TTL = 86400;
 
         // These are only needed for SSL certificate management with an authority. It doesn't matter
         // if somebody changes these and tries running this name server because our WHOIS points to
@@ -419,6 +421,7 @@ namespace CM.Server {
             } catch { } finally {
                 System.Buffers.ArrayPool<byte>.Shared.Return(b);
                 sock.Close();
+                sock.Dispose();
             }
 
         }
@@ -505,7 +508,7 @@ namespace CM.Server {
                 if (m.ReturnCode == ReturnCode.NameError) {
                     for (int qi = 0; qi < m.Questions.Length; qi++) {
                         var q = m.Questions[qi];
-
+                     
                         try {
                             // This is going to purposefully throw for anything other than an *.untrusted-server.com host name.
 
@@ -526,7 +529,7 @@ namespace CM.Server {
                                             nameservers.Add(new Data() {
                                                 Class = DnsClass.IN,
                                                 Domain = q.Domain,
-                                                TTL = 180 - 1,
+                                                TTL = NS_SOA_TTL - 1,
                                                 Type = DnsType.NS,
                                                 Values = {
                                                     { "Domain", server},
@@ -536,7 +539,7 @@ namespace CM.Server {
                                                 others.Add(new Data() {
                                                     Class = DnsClass.IN,
                                                     Domain = server,
-                                                    TTL = 600 - 1,
+                                                    TTL = NS_SOA_TTL - 1,
                                                     Type = DnsType.ANAME,
                                                     Values = { { "IP", ip } }
                                                 });
@@ -547,7 +550,7 @@ namespace CM.Server {
                                         answers.Add(new Data() {
                                             Class = DnsClass.IN,
                                             Domain = q.Domain,
-                                            TTL = 180 - 1,
+                                            TTL = NS_SOA_TTL - 1,
                                             Type = DnsType.SOA,
                                             Values = {
                                                 { "PrimaryNameServer", CM.DNS.Nameservers[0] },
@@ -589,7 +592,7 @@ namespace CM.Server {
                                             answers.Add(new Data() {
                                                 Class = DnsClass.IN,
                                                 Domain = q.Domain,
-                                                TTL = 600 - 1,
+                                                TTL = IP_RESOLUTION_TTL - 1, // ips never change
                                                 Type = DnsType.ANAME,
                                                 Values = { { "IP", ips[i].ToString() } }
                                             });
@@ -598,7 +601,7 @@ namespace CM.Server {
                                             answers.Add(new Data() {
                                                 Class = DnsClass.IN,
                                                 Domain = q.Domain,
-                                                TTL = 180 - 1,
+                                                TTL = NS_SOA_TTL - 1,
                                                 Type = DnsType.SOA,
                                                 Values = {
                                                 { "PrimaryNameServer", CM.DNS.Nameservers[0] },
@@ -622,7 +625,7 @@ namespace CM.Server {
                                         answers.Add(new Data() {
                                             Class = DnsClass.IN,
                                             Domain = q.Domain,
-                                            TTL = 600 - 1,
+                                            TTL = NS_SOA_TTL - 1,
                                             Type = DnsType.NS,
                                             Values = { { "Domain", CM.DNS.Nameservers[i] } }
                                         });

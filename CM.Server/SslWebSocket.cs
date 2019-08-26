@@ -419,7 +419,7 @@ namespace CM.Server {
 #else
                 c.Connect(remoteEndpoint.Address, remoteEndpoint.Port);
 #endif
-                ssl = new SslStream(new NetworkStream(c), false, (sender, cert, chain, errors) => {
+                ssl = new SslStream(new NetworkStream(c, true), false, (sender, cert, chain, errors) => {
                     return true; // All peers are untrusted anyway, so we don't care what their certificate says.
                 });
             } catch {

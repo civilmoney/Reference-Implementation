@@ -23,7 +23,7 @@ namespace CM.Server {
 
 #if DEBUG
             ApiController.EnableJavascriptAppDebugMode = true;
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 4; i++) {
                 RunTestServer(8000 + i);
             }
             Console.ReadLine();
