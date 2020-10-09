@@ -1,6 +1,6 @@
 About Civil Money
 ===========
-[Civil Money](https://civil.money) is an open source debt-free monetary framework which aims to become a unified global currency that can guide us toward a more civilised society. It includes features such as:
+Civil Money is an open source debt-free monetary framework which aims to become a unified global currency that can guide us toward a more civilised society. It includes features such as:
 
 - A generous universal basic income. 
 - A democratic voting process for any fundamental changes to the system.
@@ -11,6 +11,12 @@ About Civil Money
 - A consensus-based scalable distributed P2P architecture.
 - An efficient and easy to work with messaging format.
 - End-to-end TLS between all peers and user clients.
+
+After a few years of no real interest from anyone, the civil money seed servers are currently offline, but it can be brought back online if anyone's interested in setting up a bunch of seed servers and they have an audience that might be interested in using it.
+
+Please check out the [API specifications](API.md) for technical details of the protocol.
+
+
 
 
 General Inspirations and Design Guidelines
