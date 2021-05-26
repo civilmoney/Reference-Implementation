@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>#ACCOUNT_NUMBER# - Civilised Money</title>
+    <meta name="description" content="#ACCOUNT_NUMBER# global ledger data." />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="/civilmoney.js"></script>
+    <link rel="stylesheet" href="/style.css" />
+    <style>
+        #summary-table .row {
+        }
+
+            #summary-table .row .col:nth-of-type(2) {
+                font-size: 2em;
+                padding-bottom: 1em;
+                font-weight: 800;
+                letter-spacing: -0.05em;
+            }
+
+            #summary-table .row .small {
+                font-size: .5em;
+                font-weight: 100;
+                padding: 0 1em;
+                letter-spacing: -0.02em;
+            }
+    </style>
+</head>
+<body>
+    <div>
+        <a class="corner-logo" href="/"></a>
+        <h1>#ACCOUNT_NUMBER#</h1>
+        <p>Global ledger data for Civilised Money account #ACCOUNT_NUMBER#.</p>
+        <div id="summary-table">
+            <p>If you're reading this, the Account page isn't working.</p>
+        </div>
+        <script>
+            var DETAILS = {};
+            /*
+            DETAILS = {
+                "isValid": true,
+                "branch": {
+                    "isValid": true,
+                    "id": "451 -619",
+                    "latitude": 45.1,
+                    "longitude": -61.9,
+                    "totalAccounts": 0,
+                    "revenue": 0,
+                    "credits": 0,
+                    "debits": 0,
+                    "transactions": [],
+                    "accounts": []
+                },
+                "number": "5591099445561241",
+                "totalPeers": 1,
+                "credits": 10000,
+                "debits": 0,
+                "transactions": [
+                    "451 -619,5591099445561241,451 -619,2520503978812641,202104180128,93121710,10000"
+                ],
+                "peers": {
+                    "(451 -619) 2520503978812641": {
+                        "count": 1,
+                        "sent": 0,
+                        "received": 10000,
+                        "last": "202104180128"
+                    }
+                }
+            };
+            */
+
+            function renderDetails(a) {
+                let div = new Element("div");
+
+                if (!a.isValid) {
+                    div.h2(null, "Invalid Account");
+                    div.div("error", a.error || "There's been a problem loading the page.");
+                } else {
+                    document.title = formatAccountNumber(a.branch.id, a.number);
+
+                    let error = div.div("error", "");
+
+                    let row = div.div("row");
+                    row = div.div("row");
+                    row.div("col", "Civil Branch:");
+                    let col = row.div("col");
+                    //col.link(a.branch.id, "/" + a.branch.id);
+
+                    col.span(null, a.branch.latitude);
+                    col.span("small", "latitude")
+                    col.span(null, a.branch.longitude);
+                    col.span("small", "longitude");
+                    //col.text(b.latitude + " latitude " + b.longitude +" longitude");
+                    const zoom = 2.0;
+                    div.div("row").dom.innerHTML = `<iframe width="100%" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=${a.branch.longitude - zoom}%2C${a.branch.latitude - zoom}%2C${a.branch.longitude + zoom}%2C${a.branch.latitude + zoom}&amp;layer=mapnik&amp;marker=${a.branch.latitude}%2C${a.branch.longitude}" style="border: 0px; margin-bottom: 2em;"></iframe>`
+
+                    row = div.div("row");
+                    row.div("col", "Universal Basic Amount:");
+                    row.div("col", "//c " + UNIVERSAL_BASIC_INCOME_2YR)
+                    //.span("small", formatDecimals(UNIVERSAL_BASIC_INCOME_2YR / 3600, 2) + " hrs or USD$" + parseInt(UNIVERSAL_BASIC_INCOME_2YR / 3600 * 50));
+
+                    row = div.div("row");
+                    row.div("col", "Credits:");
+                    row.div("col", "//c " + a.credits)
+                    //.span("small", formatDecimals(a.credits / 3600, 2) + " hrs or USD$" + parseInt(a.credits / 3600 * 50));
+
+                    row = div.div("row");
+                    row.div("col", "Debits:");
+                    row.div("col", "//c " + a.debits)
+                    //.span("small", formatDecimals(a.debits / 3600, 2) + " hrs or USD$" + parseInt(a.debits / 3600 * 50));
+
+                    row = div.div("row");
+                    let balance = UNIVERSAL_BASIC_INCOME_2YR + a.credits - a.debits;
+                    row.div("col", "Balance:");
+                    row.div("col", "//c " + balance)
+                        .span("small", formatDecimals(balance / 3600, 2) + " hrs or USD$" + parseInt(balance / 3600 * 50));
+
+
+                    div.h2(null, "Recent Transactions");
+                    row = div.div("row");
+                    //row.div("col", "");
+                    col = row.div("col");
+                    for (let i = 0; i < a.transactions.length; i++) {
+                        const tx = new TransactionUrl(a.transactions[i]);
+                        let info = "";
+                        if (tx.fromBranch == a.branch.id && tx.fromNumber == a.number) {
+                            info = `→ Sent //c ${tx.amount} to ${formatAccountNumber(tx.toBranch, tx.toNumber)} `;
+                        } else {
+                            info = `← Received //c ${tx.amount} from ${formatAccountNumber(tx.fromBranch, tx.fromNumber)} `;
+                        }
+                        let item = col.div();
+                        item.link(info, "/" + a.transactions[i]);
+                    }
+
+
+                    div.h2(null, "Recent Peers");
+
+                    row = div.div("row");
+                    //row.div("col", "");
+                    col = row.div("col");
+                    for (const number in a.peers) {
+                        let peer = a.peers[number];
+                        let item = col.div();
+                        item.link(number, `/${number.replace("(", "").replace(/\)\s?/, ",")}`);
+
+                        let transactions = peer.count;
+                        if (transactions > 0) {
+                            item.text(` (${transactions} txn, received //c ${peer.received}, sent //c ${peer.sent})`);
+                        }
+                    }
+
+                }
+                let summary = document.getElementById("summary-table");
+                summary.innerHTML = "";
+                summary.appendChild(div.dom);
+            }
+            renderDetails(DETAILS);
+        </script>
+    </div>
+</body>
+
+</html>

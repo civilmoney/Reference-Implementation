@@ -1,0 +1,170 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Transaction Details - Civilised Money</title>
+    <meta name="description" content="A more civilised economic framework for humanity." />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="/civilmoney.js"></script>
+    <link rel="stylesheet" href="/style.css" />
+    <style>
+        #summary-table .row {
+            display: flex;
+            padding: 0.5em 0;
+            border-bottom: 1px dashed #ccc;
+        }
+            #summary-table .row .col, #summary-table .row .col * {
+                font-family: monospace;
+            }
+
+        #summary-table .row .col:nth-of-type(1) {
+            width: 20%;
+            flex: 0 0 auto;
+        }
+
+        #summary-table .row .col:nth-of-type(2) {
+            
+        }
+
+        #summary-table .error {
+            background: #f44336;
+            color: #fff;
+            padding: 2em 4em;
+        }
+        #summary-table .error:empty{
+            display:none;
+        }
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .buttons{
+            padding-top: 1em;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <a class="corner-logo" href="/"></a>
+        <h1>Transaction details.</h1>
+        <p>Global ledger data for this transaction.</p>
+
+        <div id="summary-table">
+            <p>If you're reading this, the Transaction page isn't working.</p>
+        </div>
+        <script>
+            let DETAILS = {};
+            /*
+            DETAILS = {
+                "isValid": true,
+                "yyyymmddhhmm": "202002011300",
+                "toBranch": {
+                    "isValid": true,
+                    "id": "-55 -559",
+                    "latitude": -5.5,
+                    "longitude": -55.9
+                },
+                "toNumber": "2410994419756559",
+                "fromBranch": {
+                    "isValid": true,
+                    "id": "446 -635",
+                    "latitude": 44.6,
+                    "longitude": -63.5
+                },
+                "fromNumber": "6412535550641217",
+                "unspsc": "72151207",
+                "amount": 1,
+                "_isAdded": false
+            };
+            */
+
+            function renderDetails(t) {
+                let div = new Element("div");
+
+                if (!t.isValid) {
+                    div.h2(null, "Invalid Transaction");
+                    div.div("error", t.error || "There's been a problem loading the page.");
+                } else {
+
+                    let error = div.div("error", "");
+
+                    let row = div.div("row");
+                    row = div.div("row");
+                    row.div("col", "To:");
+                    let col = row.div("col");
+                    col.text("(");
+                    col.link(t.toBranch.id, `/${t.toBranch.id}`);
+                    col.text(") ");
+                    col.link(formatAccountNumber(null, t.toNumber), `/${t.toBranch.id},${t.toNumber}`);
+
+                    row = div.div("row");
+                    row.div("col", "From:");
+                    col = row.div("col");
+                    col.text("(");
+                    col.link(t.fromBranch.id, `/${t.fromBranch.id}`);
+                    col.text(") ");
+                    col.link(formatAccountNumber(null, t.fromNumber), `/${t.fromBranch.id},${t.fromNumber}`);
+
+                    row = div.div("row");
+                    row.div("col", "Date:");
+                    row.div("col", parseUTCDate(t.yyyymmddhhmm).toISOString());
+
+                    row = div.div("row");
+                    row.div("col", "UNSPSC:");
+                    row.div("col", t.unspsc).dom.id="unspsc_field";
+
+                    row = div.div("row");
+                    row.div("col", "Amount:");
+                    row.div("col", "//c " + t.amount + " (USD $" + (parseInt((t.amount / 3600 * 50) * 100) / 100) +")");
+
+                    row = div.div("row");
+                    row.div("col", "Status:");
+                    row.div("col", t._isAdded ? "Added by IP " + t._ip + " (" + t._ipCountry + ") on " + t._utc : "Not yet added");
+
+                    if (!t._isAdded) {
+                        row = div.div("buttons");
+                        row.button("Commit", (button) => {
+                            button.dom.classList.add("loading");
+                            let path = "/" + t.toBranch.id + "," + t.toNumber
+                                + "," + t.fromBranch.id + "," + t.fromNumber
+                                + "," + t.yyyymmddhhmm + "," + t.unspsc + "," + t.amount;
+                            sendAndReceive("PUT", path, null, (res) => {
+                                button.dom.classList.remove("loading");
+                                if (res.Error !== undefined) {
+                                    error.dom.textContent = res.Error;
+                                } else {
+                                    DETAILS = res;
+                                    renderDetails(DETAILS);
+                                }
+                            });
+                        });
+                    }
+                }
+                let summary = document.getElementById("summary-table");
+                summary.innerHTML = "";
+                summary.appendChild(div.dom);
+
+            }
+
+
+            renderDetails(DETAILS);
+
+        </script>
+    </div>
+    <script src="https://civilmoney.pages.dev/unspsc.js" async defer onload="tryResolveUNSPSC()"></script>
+    <script>
+        function tryResolveUNSPSC() {
+            var field = document.getElementById("unspsc_field");
+            if (field !== null) {
+                var description = unspsc_data[DETAILS.unspsc];
+                if (description !== undefined) {
+                    field.innerHTML = "(" + DETAILS.unspsc + ")<br/>"
+                        + HTMLEncode(description).replace(/\|/g, "<br/>");
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>

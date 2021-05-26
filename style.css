@@ -1,0 +1,250 @@
+﻿@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700;900&display=swap');
+
+* {
+    font-family: 'Roboto Slab', Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+.corner-logo {
+    position: absolute;
+    text-decoration: none;
+    color: #000;
+    margin-top: -1em;
+}
+.corner-logo::before {
+    content: '//Civilised';
+    font-size: 2em;
+    font-weight: 800;   
+    letter-spacing: -0.05em;
+}
+.corner-logo::after {
+    content: 'Money';
+    font-size: 2em;
+    font-weight: 100;
+    letter-spacing: -0.05em;
+}
+.pasteBox {
+    display: flex;
+    top: 0;
+    left: 10vw;
+    right: 10vw;
+    padding: 0;
+    z-index: 1;
+    flex-direction: column;
+}
+.pasteBox > div {
+    color: #01579b;
+    padding: 0.5em 1em;
+    font-size: 0.6em;
+    text-align: center;
+    font-weight: bold;
+}
+.pasteBox > div:empty {
+    display: none;
+}
+.pasteBox input{
+    flex: 1 1 auto;
+}
+h1 {
+    font-size: 3em;
+    font-weight: 100;
+    letter-spacing: -0.05em;
+}
+
+h1 b {
+    font-weight: 800;
+}
+
+h2 {
+    font-weight: bold;
+    letter-spacing: -0.02em;
+}
+
+p {
+    line-height: 1.5em;
+    letter-spacing: -0.01em;
+    text-align: justify;
+    margin: 0.5em 0 2em 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+body > div {
+    display: block;
+    max-width: 800px;
+    padding: 5vw 10vw;
+    margin: auto;
+}
+@media print {
+    h1 {
+        margin: 20vh 0;
+        page-break-after:always;
+        text-align: center;
+    }
+    .dont-print {
+        display: none !important;
+    }
+    body > div {
+
+        padding: 5vw 5vw;
+    }
+} 
+blockquote {
+    line-height: 2em;
+    background: #eee;
+    margin: 0 0 2em 0;
+    padding: 1vw 5vw;
+}
+
+table {
+    background: #eee;
+    border-collapse: collapse;
+}
+
+thead {
+    border-bottom: 3px double #000;
+}
+
+tbody tr {
+    border-bottom: 1px solid #000;
+}
+
+td {
+    font-size: 0.9em;
+    padding: 0.5em;
+    vertical-align: top;
+}
+
+thead td {
+    font-weight: bold;
+}
+/*
+    height: 53.98px;
+    width: 85.60px;
+    border-radius: 3.48px;
+*/
+#newAccountPreview {
+    height: 11.34em;
+    width: 18em;
+    border-radius: 0.5em;
+    display: flex;
+    color: #fff;
+    background: #01579b;
+    box-shadow: 0 0 17px -9px #000 inset;
+    position: relative;
+   
+}
+#newAccountPreview * {
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1.05em;
+}
+
+#newAccountPreview::before {
+    position: absolute;
+    opacity: 0.075;
+    font-weight: 900;
+    font-size: 15em;
+    top: 0;
+    left: 0;
+    content: '//c';
+    line-height: 200px;
+    font-family: sans-serif;
+    letter-spacing: -0.12em;
+    pointer-events: none;
+}
+
+#newAccountPreview > div {
+    padding: 0 1.5em;
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    justify-content: center;
+}
+#newAccountPreview > div > div:nth-of-type(1) {
+    margin: 3em 0 3em 0;
+    text-align: center;
+}
+#newAccountPreview > div > div:nth-of-type(2) {
+    display: flex;
+}
+
+#newAcccountCardLabel {
+    text-transform: uppercase;
+    flex: 1 1 auto;
+}
+
+#newAcccountCVC {
+    flex: 0 0 auto;
+}
+
+#newAccountPhrase {
+    width: 50%;
+}
+
+#newAccountLat, #newAccountLon {
+    width: 5em;
+}
+
+fieldset {
+    border: 0;
+    padding: 5vw;
+    margin: 0 -5vw;
+    box-shadow: 0 20px 40px -20px;
+}
+
+    fieldset h3, fieldset p {
+        margin: 0 0 1em 0;
+    }
+
+button, input {
+    border: 0;
+    border-bottom: 1px solid #01579b;
+    padding: 1em 2em;
+    border-radius: 0;
+}
+
+button {
+    background: #01579b;
+    color: #fff;
+}
+
+fieldset .hint {
+    display: block;
+    padding: 0.5em 1em;
+    background: #eee;
+    margin-top: 0.5em;
+}
+
+    fieldset .hint:empty {
+        display: none;
+    }
+
+.date-field input {
+    width: 3em;
+}
+
+.account-field input:nth-of-type(1) {
+    width: 24em;
+}
+
+.unspsc-field input {
+    width: 5em;
+}
+
+.amount-field input {
+    width: 5em;
+}
+
+.amount-field::before {
+    display: block;
+    position: absolute;
+    content: '//c';
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin: 1.95em 0 0 0;
+}
