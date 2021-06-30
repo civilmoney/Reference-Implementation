@@ -6,7 +6,7 @@ Let's be more civilised.
 
  
 
-Every person on Earth now has a universal basic income. We ask that you stop working, in lieu of depleting resources and causing pollution for no reason beyond money. Unless your work brings you personal joy, fulfilment or benefits your community — stop.
+Every person on Earth now has a universal basic income. We ask that you stop working, in lieu of depleting resources and causing pollution for no reason beyond money. Unless your work brings you personal joy, fulfilment or benefits your community — please stop.
 
 Time is now our preferred unit of currency.
 
@@ -16,7 +16,7 @@ Your account and identity is not important and you can start over at any time.
 
 Time spent on any positive action, cause or endeavour is considered valuable and deserving of compensation in the civilised economy.
 
-Any ad-hoc collaboration, creature or resource may establish a Civilised Money account. Animal welfare and environmental preservation as well as education, healthcare, research and social services are fully funded by default.
+Any ad-hoc collaboration, creature or resource may establish a Civilised Money account. Animal welfare, environmental preservation as well as education, healthcare, research and social services are fully funded by default.
 
 We ask that you give the utmost respect to people doing unpleasant work.
 
@@ -24,7 +24,7 @@ We also ask that you strive to eliminate unpleasant work and manual labour throu
 
 If you're making something that uses resources, we ask that you take your time with it and make it beautiful and long-lasting.
 
-We ask that you accept anybody's payment, even if you don't trust or like them. People are only deceitful or sociopathic because money, either a lack of access to or an overabundance, caused them to become that way under the old economic system. It will take us several generations for our society to heal.
+We ask that you accept anybody's payment, even if you don't trust or like them. People are only deceitful or sociopathic because money, either a lack of access to or an overabundance, has caused them to become that way under the old economic system. It will take us several generations for our society to heal.
 
 Money is no longer capital.
 
@@ -72,19 +72,19 @@ Civilised Money is recorded in units of seconds. So 1hr = 3600 seconds and its s
 ```
 USD $10.77 = (10.77 ÷ 50) × 3600 = //c 775
 ```
-On the seller's and buyer's personal ledgers, simply record matching details along with a valid United Nations Standard Products and Services Code (UNSPSC):
+On the seller's and buyer's personal ledgers, simply record matching details along with a valid United Nations Standard Products and Services Code (UNSPSC). Multiple UNSPSCs can be in a single transaction broken down by "code:sub-amount;".
 
 
 | To                            	|  From                         	|  UTC             	|  UNSPSC  	|  Amount //c | 
 |---------------------------------|---------------------------------|-------------------|-----------|-------------|
-| (-55 -559) 2410 9944 1975 6559	|  (446 -635) 6412 5355 5064 1217	|  2021-04-15 13:00	|  90101503	|  (+/-)775   | 
+| (-55 -559) 2410 9944 1975 6559	|  (446 -635) 6412 5355 5064 1217	|  2021-04-15 13:00	|  50192701:600; 50201706:175	|  (+/-)775   | 
 
 
 **Transactions are to be removed from your ledger after 2 years.** This way buyers are forgiven their debt and over-accumulation of wealth by sellers (the 1% problem) is impossible. Since time is a mathematical constant, we also keep inflation at bay.
 
-Your ledger is maintained privately and it is your concrete record of activity. Most people will use a simple and convenient phone app, excel sheet or store their ledger on the internet, but a pen and paper can also work.
+**Your ledger is maintained privately** and it is your concrete record of activity. Most people will use a simple and convenient phone app, excel sheet or store their ledger on the internet, but a pen and paper can also work.
 
-If you go to buy a home, car or other big ticket item, your ledger/history is to be scrutinised by the seller, just as banks do today when issuing a loan. For this reason, when you record a payment, you are obliged to also record some sort of Proof of Time.
+If you go to buy a home, car or other big ticket item, your ledger/history is to be scrutinised by the seller, just as banks do today when issuing a loan. For this reason, when you record a payment, you are obliged to also record some sort of **Proof of Time**.
 
 Proof of Time can be anything from a signature by the payer, or in the case of a transaction on behalf of an animal's welfare or environmental preservation, a unique selfie with the subject also in frame. The only requirement is that it needs to be truthful, relevant to the UNSPSC, and clearly obvious and discernible in relevance to a potential future seller "at a quick glance".
 
@@ -107,12 +107,12 @@ Civilised Money obsoletes money created by banks out of thin air under the old e
 
 You have the power to pay yourself from a Civilised Money account established on behalf of your children, an animal's welfare or an environment's conservation or maintenance. In other words, your time is always valued under the civilised economy, and you can be duly rewarded even if a task is thankless, as is the case for most work needed to protect our biosphere.
 
-Example:
+An example acceptable endogeneous payment:
 
 > Simon rarely has spare time away from his programming business to mow his lawn, but doing so improves the general appearance of the neighbourhood and it provides a certain amount of satisfaction and happiness in having done so. Simon can now establish an Civilised Money account on behalf of his household and pay himself for not only mowing his own lawn, but also dealing with daily upkeep and necessities, or even taking time out from his work to play with and enrich the lives of his cats.
 
 
-Time spent on any positive action, cause or endeavour is considered valuable and deserving of compensation under the civilised economy.
+Time spent on any positive action, cause or endeavour is valuable and deserving of compensation in the civilised economy, however it is ultimately up to the individual people and businesses you rely on for day to day necessities, to conclude whether or not you and your ledger are deserving of their goods or services.
 
 It is ultimately up to the individual people and businesses you rely on for day to day necessities, to conclude whether or not you and your ledger are deserving of their goods or services.
 
@@ -137,7 +137,7 @@ Example:
 > civil.money/(-55 -559) 2410 9944 1975 6559, (446 -635) 6412 5355 5064 1217, 2021-04-15 @ 13:00, 90101503, 775
 
 
-If you're writing software, HTTP GET will validate the info and will return a json response. HTTP PUT will commit it to the ledger. A transaction is considered logged if the server returns a 201 Created or 200 OK response to a PUT request.
+If you're writing software, HTTP GET will validate the info and will return a json response. HTTP POST will commit it to the ledger, the body should contain the Proof of Time in base64 url coded form "data:image/webp;base64,..." to a max of 1MB. A transaction is considered logged if the server returns a 201 Created or 200 OK response to a POST request.
 
 Note that a transaction Globally Unique Identifier consists of:
 
@@ -153,6 +153,8 @@ Communities or governing authorities may opt to host their own independent local
 
 ## Dealing with jerks.
 
+The civilised economic system does not have a concept of "crime". It is impossible to steal Civilised Money because all ledgers are private and without value except between the original creator and their established (and often offline) relationships with the people they choose to interact with. The system does not impose an artificial scarcity which can cause acts of despiration or discriminate against a person's race, gender, upbringing or life circumstance.
+
 Ignoring spurious transactions or accounts that appear to have been established for the sole purpose of artificial tax revenue is a computer sciences problem. Large transactions submitted without pre-authorisation by a local participating governing authority, or accounts having abnormally high volumes over time, can be silently ignored.
 
 Unrecognised activity may also appear under your account number on the global ledger because more than one person can select their number using a similar or identical phrase as you in your community. Under the traditional zero-sum economic system this would be disastrous. Under Civilised Money it's immaterial, because the only ledger that matters is the one you hold in your possession and choose to maintain privately. The public ledger merely acts as a sink for governing authority revenue and is not a proof of legitimacy. The data on the public ledger does not define "you".
@@ -162,3 +164,4 @@ That you know the account number of another person means nothing under the civil
 The only way to truly "win" security, is to not need it in the first place.
 
 Civilised Money is not a zero-sum economy and the only thing that matters is how much a seller likes you "in real life". Behaving like a jerk will get you nowhere.
+

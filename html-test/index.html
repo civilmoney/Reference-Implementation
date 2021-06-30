@@ -3,18 +3,19 @@
 <head>
     <meta charset="utf-8" />
     <title>Civilised Money</title>
-    <meta name="description" content="A more civilised economic system for humanity." />
+    <meta name="description" content="A more civilised way to pay for things." />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script>
         var DEFAULTS = {};
 
     </script>
-    <script src="/civilmoney.js"></script>
-    <link rel="stylesheet" href="/style.css" />
+    <script src="/common/civilmoney-common.js"></script>
+    <link rel="stylesheet" href="/style-cachebust4.css" />
 </head>
 <body>
-
+    <a class="app-link" href="/app/" title="Go to the offline CivilMoney Private Ledger App" aria-label="Go to the offline CivilMoney Private Ledger Application.">App</a>
     <div>
+        <p class="dont-print big-space">&nbsp;</p>
         <h1><b>//Civilised</b> Money.</h1>
 
         <p>
@@ -23,11 +24,11 @@
             created a toxic society and laid waste to our planet.
         </p>
         <p>Let's be more civilised.</p>
-        <p class="dont-print">&nbsp;</p>
+        <p class="dont-print big-space">&nbsp;</p>
         <p>
             Every person on Earth now has a universal basic income. We ask that you stop working,
             in lieu of depleting resources and causing pollution for no reason beyond money.
-            Unless your work brings you personal joy, fulfilment or benefits your community &mdash; stop.
+            Unless your work brings you personal joy, fulfilment or benefits your community &mdash; please stop.
         </p>
         <p>Time is now our preferred unit of currency.</p>
         <p>
@@ -43,7 +44,7 @@
             deserving of compensation in the civilised economy.
         </p>
         <p>
-            Any ad-hoc collaboration, creature or resource may establish a Civilised Money account. Animal welfare and environmental preservation as well as
+            Any ad-hoc collaboration, creature or resource may establish a Civilised Money account. Animal welfare, environmental preservation as well as
             education, healthcare, research and social services are fully funded by default.
         </p>
         <p>We ask that you give the utmost respect to people doing unpleasant work.</p>
@@ -58,52 +59,59 @@
         <p>
             We ask that you accept anybody's payment, even if you don't trust or like them.
             People are only deceitful or sociopathic because money, either a lack of access to or an overabundance,
-            caused them to become that way under the old economic system. It will take us several
+            has caused them to become that way under the old economic system. It will take us several
             generations for our society to heal.
         </p>
         <p>Money is no longer capital.</p>
         <p>&nbsp;</p>
+        <p class="dont-print big-space">&nbsp;</p>
         <h2>Civilised Money works without computers, the internet or banks.</h2>
         <p>All you need is a pencil and paper (but a calculator helps.)</p>
         <p>&nbsp;</p>
         <p><b>Step 1.</b> Create an account number from thin air &mdash; just as banks do today.</p>
         <p>Think of a memorable sentence, remove spaces and convert it to ASCII (hint: a = 97.)</p>
-        <blockquote>
+        <figure>
             "the pig is in the poke" = <b>116, 104, 101, 112, 105, 103, 105, 115, 105, 110, 116, 104, 101, 112, 111, 107, 101</b>
-        </blockquote>
+        </figure>
         <p>
             Remove leading 1s and 0s, but keep 1 or 0 if that's the only number left. Then keep the
-            first 16 digits and group into fours:
+            first 16 digits and group into fours.
         </p>
-        <blockquote>
+        <figure>
             11<b>6</b>, 10<b>4</b>, 10<b>1</b>, 11<b>2</b>, 10<b>5</b>, 10<b>3</b>, 10<b>5</b>, 11<b>5</b>, 10<b>5</b>, 11<b>0</b>, 11<b>6</b>, 10<b>4</b>, 10<b>1</b>, 11<b>2</b>, 11<b>1</b>, 10<b>7</b>, 101<br />
             = <b>6412 5355 5064 1217</b>
-        </blockquote>
+            <figcaption>An example account number</figcaption>
+        </figure>
         <p>
             A civil branch number is established based on your place of residence by taking
-            Latitude &times; 10 and Longitude &times; 10 and discarding the decimals:
+            Latitude &times; 10 and Longitude &times; 10 and discarding the decimals.
         </p>
-        <blockquote>
+        <figure>
             <b>44.6</b>51070 <b>-63.5</b>82687 (Halifax, NS Canada) = <b>446 -635</b>
-        </blockquote>
+            <figcaption>An example branch number</figcaption>
+        </figure>
         <p>This account number is: (446 -635) 6412 5355 5064 1217</p>
-        <p>Example 2:</p>
-        <blockquote>
+
+        <figure>
             <b>-5.5</b>742889,<b>-55.9</b>235554 Trairão Brazil = (-55 -559)<br />
             "french roast is best roast" = 10<b>2</b>, 11<b>4</b>, 10<b>1</b>, 11<b>0</b>, <b>99</b>, 10<b>4</b>, 11<b>4</b>, 11<b>1</b>, <b>97</b>, 11<b>5</b>, 11<b>6</b>, 10<b>5</b>, 11<b>5</b>, <b>9</b>8, 101, 115, 116, 114, 111, 97, 115, 116<br />
             Account: (-55 -559) 2410 9944 1975 6559
-        </blockquote>
+            <figcaption>Example 2</figcaption>
+        </figure>
         <p>
             The 16 digits you use are ultimately irrelevant, this was just a way to make something quasi unique and which you can recover from memory given a pen and paper.
         </p>
         <p>The only rule is that 0000 0000 0000 0000 is reserved as the account number of the local community for tax revenue spending.</p>
         <p>&nbsp;</p>
-        <h2 class="dont-print">Example account number generator.</h2>
+        <h2 class="dont-print">An example account number generator.</h2>
         <fieldset class="dont-print">
 
             <p>
                 <label for="newAccountLat"><b>Civil Branch Number:</b><br />Enter the latitude and longitude of your current place of residence.</label><br /><br />
-                Latitude: <input type="text" id="newAccountLat" aria-label="Latitude" /> Longitude: <input type="text" id="newAccountLon" aria-label="Longitude" /> <span id="newAccountLatLonError" class="hint"></span>
+                <span class="latlon-label">Latitude:</span> <input type="text" id="newAccountLat" aria-label="Latitude" /><br />
+                <span class="latlon-label">Longitude:</span> <input type="text" id="newAccountLon" aria-label="Longitude" />
+                <span id="newAccountLatLonError" class="hint"></span>
+                <span id="latLonExample" class="hint"></span>
             </p>
             <p>
                 You can lookup your Latitude/Longitude on <a href="https://www.openstreetmap.org/" id="mapUrl" target="_blank">openstreetmap</a> by right-clicking wherever you are on the map and choosing 'Show address'.
@@ -125,18 +133,22 @@
             <p>&nbsp;</p>
             <p>
                 <label for="newAccountLabel"><b>Label (optional)</b>:</label><br />
-                <input type="text" id="newAccountLabel" placeholder="Name/Collaboration" />
+                <input type="text" id="newAccountLabel" placeholder="i.e. Your name, a collaboration or resource" />
             </p>
             <p>
                 <button id="newAccountSaveButton">Save As Personal Ledger *.CSV File</button>
                 <!--
-                <button id="newAccountPrintButton">Print Card</button>
-                -->
+            <button id="newAccountPrintButton">Print Card</button>
+            -->
             </p>
+
             <script>
                 if (DEFAULTS.locationName !== undefined) {
-                    newAccountLatLonError.innerHTML = "Example: " + DEFAULTS.locationName + " is latitude " + DEFAULTS.latitude + " longitude " + DEFAULTS.longitude + ".";
+                    document.getElementById('latLonExample').innerHTML = "Example: " + DEFAULTS.locationName + " is latitude " + DEFAULTS.latitude + " longitude " + DEFAULTS.longitude + ".";
                     document.getElementById("mapUrl").href = "https://www.openstreetmap.org/#map=9/" + DEFAULTS.latitude + "/" + DEFAULTS.longitude;
+                    document.getElementById('newAccountLat').value = DEFAULTS.latitude;
+                    document.getElementById('newAccountLon').value = DEFAULTS.longitude;
+
                 }
 
                 function generateCivilMoneyAccount(latitudeInDecimals, longitudeInDecimals, phraseText) {
@@ -231,37 +243,15 @@
                 label.onkeyup = updateLabel;
 
                 document.getElementById("newAccountSaveButton").onclick = function () {
+                    var url = new TransactionUrl(newAcccountNumber.textContent
+                        + ",(451 -619) 2520 5039 7881 2641," + dateToUtcYYYYMMDDHHMM(new Date()) + ",93121710:10000,10000,\"Select columns A11 - E11 (To -> Amount) and copy & paste on https://civil.money/#submit to report this.\",\"No proof of time necessary :)\"");
+                    var file = new LedgerCSVFile(phrase.value.toLowerCase(), url.toBranch, url.toNumber, newAcccountCardLabel.textContent);
 
-                    var id = (newAcccountCardLabel.textContent + " " + newAcccountNumber.textContent).trim();
-                    var csv = "My memorable phrase:, " + phrase.value.toLowerCase()
-                        + "\r\nNumber:, " + newAcccountNumber.textContent
-                        + "\r\nBasic Allowance:, " + UNIVERSAL_BASIC_INCOME_2YR
-                        + "\r\nMy useful United Nations Standard Products and Services Codes (UNSPSC):,"
-                        + "\r\n"
-                        + "\r\nNotes:"
-                        + "\r\n* Submit transactions periodically to your community branch ledger @ https://civil.money/#submit"
-                        + "\r\n* Delete rows from your ledger after 2 years.,,,,,,Balance,,"
-                        + "\r\nTo,From,*YYYY-MM-DD HH:MM (UTC),UNSPSC,Amount,//C,USD$,Proof of Time,Memo"
-                        // opening balance line
-                        + "\r\n" + newAcccountNumber.textContent + ",(451 -619) 2520 5039 7881 2641," + new Date().toISOString().substr(0, "0000-00-00T00-00".length).replace("T", " @ ") + ",93121710,10000,=$B$3+E10,\"=ROUND(F10/3600 *50,2)\",,Welcome to civilisation :) Select columns A10 - E10 (To -> Amount) and copy & paste on https://civil.money/#submit to report this."
-                        + "\r\n,,,,,=E11 + F10,\"=ROUND(F11/3600 *50,2)\","
-                        + "\r\n,,,,,=E12 + F11,\"=ROUND(F12/3600 *50,2)\","
-                        + "\r\n,,,,,=E13 + F12,\"=ROUND(F13/3600 *50,2)\","
-                        + "\r\n,,,,,=E14 + F13,\"=ROUND(F14/3600 *50,2)\",";
-                    var bl = null;
-                    try {
-                        bl = new File([csv], id + ".csv", {
-                            type: "application/octet-stream",
-                        });
-                    } catch (err) {
-                        bl = new Blob([csv], {
-                            type: "application/octet-stream",
-                        });
-                    }
-
+                    file.appendTransaction(url);
+                    var bl = file.toCsvBlob();
                     var a = document.createElement("a");
                     a.href = URL.createObjectURL(bl);
-                    a.download = id + ".csv";
+                    a.download = file.fileName();
                     a.click();
                 };
 
@@ -282,23 +272,28 @@
             Civilised Money is recorded in units of seconds. So 1hr = 3600 seconds and its
             symbol is <b>//c</b>, pronounced simply as <b>time</b>.
         </p>
-        <blockquote>
+        <figure>
             USD $10.77 = (10.77 &divide; 50) &times; 3600 =
             <b>//c 775</b>
-        </blockquote>
-        <p>On the seller's and buyer's personal ledgers, simply record matching details along with a valid <a href="https://open.canada.ca/data/en/dataset/92214e02-bb86-433e-81b9-c2a78a518e75" title="Download United Nations Standard Products and Services Codes (UNSPSC)" target="_blank">United Nations Standard Products and Services Code (UNSPSC)</a>:</p>
-        <table>
-            <thead>
-                <tr><td>To</td><td>From</td><td>Date &amp; Time (UTC)</td><td>UNSPSC</td><td>Amount</td></tr>
-            </thead>
-            <tbody>
-                <tr><td>(-55 -559) 2410 9944 1975 6559</td><td>(446 -635) 6412 5355 5064 1217</td><td>2021-04-15 13:00</td><td>90101503</td><td>(+/-)775</td></tr>
-            </tbody>
+            <figcaption>An example conversion from USD to //c</figcaption>
+        </figure>
+        <p>On the seller's and buyer's personal ledgers, simply record matching details along with valid <a href="https://open.canada.ca/data/en/dataset/92214e02-bb86-433e-81b9-c2a78a518e75" title="Download United Nations Standard Products and Services Codes (UNSPSC)" target="_blank">United Nations Standard Products and Services Codes (UNSPSC)</a>. Multiple UNSPSCs can be in a single transaction broken down by "code:sub-amount;".</p>
 
-        </table>
+        <figure>
+            <table>
+                <thead>
+                    <tr><th>To</th><th>From</th><th>Date &amp; Time (UTC)</th><th>UNSPSCs</th><th>Amount</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>(-55 -559) 2410 9944 1975 6559</td><td>(446 -635) 6412 5355 5064 1217</td><td>2021-04-15 13:00</td><td>50192701:600; 50201706:175</td><td>(+/-) 775</td></tr>
+                </tbody>
+
+            </table>
+            <figcaption>An example ledger entry</figcaption>
+        </figure>
         <p>&nbsp;</p>
         <p>
-            Transactions are to be removed from your ledger after 2 years. This way buyers are forgiven their debt and over-accumulation of wealth by sellers (the 1% problem)
+            <b>Transactions are to be removed from your ledger after 2 years.</b> This way buyers are forgiven their debt and over-accumulation of wealth by sellers (the 1% problem)
             is impossible. Since time is a mathematical constant, we also keep inflation at bay.
         </p>
         <p><b>Your ledger is maintained privately</b> and it is your concrete record of activity. Most people will use a simple and convenient phone app, excel sheet or store their ledger on the internet, but a pen and paper can also work.</p>
@@ -328,9 +323,9 @@
         </p>
         <p>
             By convention:
-            <blockquote>
+            <figure>
                 Balance = BasicYearlyAllowance (1200 hours) &times; 2 + RecentCredits &minus; RecentDebits
-            </blockquote>
+            </figure>
         <p>So an opening balance is <b>//c 8,640,000</b> or <b>USD $120,000</b>. BasicYearlyAllowance is non-accumulating year-on-year, but rather a fixed number that never changes. As transactions expire after two years, your universal basic income is perpetually replenished.</p>
 
         <p>
@@ -348,14 +343,12 @@
             under the civilised economy, and you can be duly rewarded even if a task is thankless, as is the case for most work needed
             to protect our biosphere.
         </p>
-        <p>
-            Example:
-            <blockquote>
-                Simon rarely has spare time away from his programming business to mow his lawn, but doing so improves the general appearance of the neighbourhood and it provides a certain amount of satisfaction and happiness in having done so. Simon can now establish an Civilised Money account on behalf of his household and pay himself for not only mowing his own lawn, but also dealing with daily upkeep and necessities, or even taking time out from his work to play with and enrich the lives of his cats.
-            </blockquote>
-        </p>
-        <p>Time spent on any <strong>positive</strong> action, cause or endeavour is considered valuable and deserving of compensation under the civilised economy.</p>
-        <p>It is ultimately up to the individual people and businesses you rely on for day to day necessities, to conclude whether or not you and your ledger are deserving of their goods or services.</p>
+        <figure>
+            Simon rarely has spare time away from his programming business to mow his lawn, but doing so improves the general appearance of the neighbourhood and it provides a certain amount of satisfaction and happiness in having done so. Simon can now establish an Civilised Money account on behalf of his household and pay himself for not only mowing his own lawn, but also dealing with daily upkeep and necessities, or even taking time out from his work to play with and enrich the lives of his cats.
+            <figcaption>An example acceptable endogeneous payment</figcaption>
+        </figure>
+
+        <p>Time spent on any positive action, cause or endeavour is valuable and deserving of compensation in the civilised economy, however it is ultimately up to the individual people and businesses you rely on for day to day necessities, to conclude whether or not you and your ledger are deserving of their goods or services.</p>
         <p>
             It's up to a seller's discretion to define their own policy on Proof of Time checks, but in
             most cases for small purchases or business with repeat clients where a relationship is already established,
@@ -384,7 +377,7 @@
         <p>
             Activity can be reported in-person amongst participating governing authorities by bringing them your private ledger for
             import into the community's tax revenue ledger. That sounds like work, of course, so to automate and democratise the Civilised Money economy, transactions can also be recorded on a global
-            public ledger with nothing more than an internet connected web browser. <span class="dont-print">Simply use the form below to submit a transaction:</span>
+            public ledger with nothing more than an internet connected web browser. <span class="dont-print">Simply use the CivilMoney app or form below to submit a transaction:</span>
         </p>
 
         <p class="dont-print">&nbsp;</p>
@@ -394,12 +387,12 @@
 
             <p class="account-field">
                 <label for="txTo">To:</label><br />
-                <input type="text" id="txTo" aria-label="To account branch, number" placeholder="(+/-0000 +/-0000) 0000 0000 0000 0000" />
+                <input type="text" id="txTo" aria-label="To account branch, number" placeholder="(±0000 ±0000) 0000 0000 0000 0000" />
                 <span id="txToError" class="hint"></span>
             </p>
             <p class="account-field">
                 <label for="txFrom">From:</label><br />
-                <input type="text" id="txFrom" aria-label="From account branch, number" placeholder="(+/-0000 +/-0000) 0000 0000 0000 0000" />
+                <input type="text" id="txFrom" aria-label="From account branch, number" placeholder="(±0000 ±0000) 0000 0000 0000 0000" />
                 <span id="txFromError" class="hint"></span>
             </p>
             <p class="date-field">
@@ -408,12 +401,12 @@
                 <span id="txDateError" class="hint"></span>
             </p>
             <p class="unspsc-field">
-                <label for="txUNSPSC">United Nations Standard Products and Services Code (<a href="https://open.canada.ca/data/en/dataset/92214e02-bb86-433e-81b9-c2a78a518e75" target="_blank">locate</a>):</label><br />
-                <input type="text" id="txUNSPSC" aria-label="United Nations Standard Products and Services Code" placeholder="0000000" />
+                <label for="txUNSPSC">United Nations Standard Products and Services Codes (<a href="https://open.canada.ca/data/en/dataset/92214e02-bb86-433e-81b9-c2a78a518e75" target="_blank">locate</a>):</label><br />
+                <input type="text" id="txUNSPSC" aria-label="United Nations Standard Products and Services Codes" placeholder="0000000: Amount; 0000000: Amount;" />
                 <span id="txUNSPSCError" class="hint"></span>
             </p>
             <p class="amount-field">
-                <label for="txAmount">Amount:</label><br />
+                <label for="txAmount">Total:</label><br />
                 <input type="number" id="txAmount" aria-label="Civilised Money Amount" placeholder="0" />
                 <span id="txAmountError" class="hint"></span>
             </p>
@@ -482,7 +475,7 @@
                 }
 
                 if (!isUNSPSCValid(removeWhiteSpace(txUNSPSC.value))) {
-                    txUNSPSCError.textContent = "UNSPSC should be 8 digits.";
+                    txUNSPSCError.textContent = "UNSPSC should be 8 digits followed by a colon and amount. Multiple codes can be separated by a semicolon. Example: 11111111:50; 22222222:100; ";
                     errors = true;
                 } else {
                     txUNSPSCError.textContent = "";
@@ -516,12 +509,12 @@
             People can also go to a transaction submission page directly, by entering a URL written in the following way:
         </p>
         <p style="word-break: break-all;font-family:monospace;">
-            civil.money/(To Branch) To Number, (From Branch) From Number, YYYY-MM-DD @ HH:MM, UNSPSC, Amount
+            civil.money/(To Branch) To Number, (From Branch) From Number, YYYY-MM-DD @ HH:MM, UNSPSC[:Amount;UNSPSC:Amount;...], Total
         </p>
 
         <p>Example:</p>
         <blockquote style="word-break: break-all;">
-            (-55 -559) 2410 9944 1975 6559, (446 -635) 6412 5355 5064 1217, 2021-04-15 @ 13:00, 90101503, 775
+            (-55 -559) 2410 9944 1975 6559, (446 -635) 6412 5355 5064 1217, 2021-04-15 @ 13:00, 50192701:600;50201706:175, 775
         </blockquote>
 
         <p id="submit" class="dont-print"><b>Try it!</b> Copy &amp; paste a line from your own personal *.csv ledger or use the example above and hit enter.</p>
@@ -555,7 +548,7 @@
         </script>
         <p>&nbsp;</p>
         <p>&nbsp;</p>
-        <p>If you're writing software, HTTP GET will validate the info and will return a json response. HTTP PUT will commit it to the ledger. A transaction is considered logged if the server returns a 201 Created or 200 OK response to a PUT request.</p>
+        <p>If you're writing software, HTTP GET will validate the info and will return a json response. HTTP POST will commit it to the ledger, the body should contain the Proof of Time in base64 url coded form "data:image/webp;base64,..." to a max of 1MB. A transaction is considered logged if the server returns a 201 Created or 200 OK response to a POST request.</p>
         <p>Note that a transaction Globally Unique Identifier consists of:</p>
         <blockquote>
             To Branch,To Number,From Branch,From Number,YYYYMMDDHHMM
@@ -573,7 +566,11 @@
         </p>
         <p>&nbsp;</p>
         <h2>Dealing with jerks.</h2>
-
+        <p>
+            The civilised economic system does not have a concept of "crime". It is impossible to steal Civilised Money because all ledgers are private and without value except
+            between the original creator and their established (and often offline) relationships with the people they choose to interact with. The system does not impose an artificial scarcity which can
+            cause acts of despiration or discriminate against a person's race, gender, upbringing or life circumstance.
+        </p>
         <p>
             Ignoring spurious transactions or accounts that appear to have been established for the sole purpose of
             artificial tax revenue is a computer sciences problem. Large transactions submitted without pre-authorisation
@@ -605,11 +602,15 @@
 
         <p>&nbsp;</p>
         <h2 class="dont-print">More tools.</h2>
-
+        <h3>Offline CivilMoney App</h3>
+        <p>Saves on using paper and makes it really easy to exchange Proof of Time between two people with computers or smartphones.</p>
+        <p><button onclick="window.location='/app/'">Open</button></p>
         <fieldset class="dont-print">
-            <h3>Go to an account.</h3>
+            <h3>Explore an account on the global ledger.</h3>
+            <p>Data on the global ledger does not define any individual person or account. It is an open data sink for computing geographical Civilised Money tax revenue.</p>
             <p class="account-field">
-                <input type="text" id="accountLookup" aria-label="To account branch, number" placeholder="(+/-0000 +/-0000) 0000 0000 0000 0000" />
+                <label>(Branch) Account Number:</label><br />
+                <input type="text" id="accountLookup" aria-label="Account branch, number" placeholder="(±0000 ±0000) 0000 0000 0000 0000" />
                 <span id="accountLookupError" class="hint"></span>
             </p>
             <p>
@@ -621,7 +622,7 @@
                 var accountLookupError = document.getElementById("accountLookupError");
 
                 document.getElementById("accountLookupButton").onclick = function () {
-
+                    var errors = false;
                     var to = null;
                     try {
                         to = new TransactionUrl(accountLookup.value);
@@ -647,8 +648,8 @@
         <fieldset class="dont-print">
             <h3>Explore tax revenue.</h3>
             <p class="account-field">
-                <label>Branch</label><br />
-                <input type="text" id="branchLookup" aria-label="Branch Number" placeholder="(+/-0000 +/-0000)" />
+                <label>Branch:</label><br />
+                <input type="text" id="branchLookup" aria-label="Branch Number" placeholder="(±0000 ±0000)" />
                 <span id="branchLookupError" class="hint"></span>
             </p>
             <p>
@@ -668,6 +669,10 @@
                 };
             </script>
         </fieldset>
+
+        <h3>Source code</h3>
+        <p>Everything's on github.</p>
+        <p><button onclick="window.location='https://github.com/civilmoney/reference-implementation'">github.com/civilmoney</button></p>
         <p>&nbsp;</p>
         <p><center>Contact: <a href="mailto:hello@civil.money">hello@civil.money</a></center></p>
         <p>&nbsp;</p>

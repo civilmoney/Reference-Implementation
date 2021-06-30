@@ -5,7 +5,8 @@
     <title>Civil branch ##BRANCH_NUMBER# - Civilised Money</title>
     <meta name="description" content="#BRANCH_NUMBER# global ledger data." />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="/civilmoney.js"></script>
+    <script src="/common/civilmoney-common.js"></script>
+    <script src="/common/civilmoney-dom.js"></script>
     <link rel="stylesheet" href="/style.css" />
     <style>
         #summary-table .row {
@@ -28,7 +29,7 @@
 </head>
 <body>
     <div>
-        <a class="corner-logo" href="/"></a>
+        <a class="corner-logo" href="/" title="Go to the CivilMoney homepage" aria-label="Go to the CivilMoney homepage"></a>
         <h1>Civil branch #<b>#BRANCH_NUMBER#</b></h1>
         <p>The globally distributed ledger data for Civilised Money tax revenue collection and spending.</p>
         <div id="summary-table">
@@ -86,7 +87,7 @@
                     //col.text(b.latitude + " latitude " + b.longitude +" longitude");
                     row.div("col");
                     const zoom = 2.0;
-                    div.div("row").dom.innerHTML = `<iframe width="100%" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=${b.longitude - zoom}%2C${b.latitude - zoom}%2C${b.longitude + zoom}%2C${b.latitude + zoom}&amp;layer=mapnik&amp;marker=${b.latitude}%2C${b.longitude}" style="border: 0px; margin-bottom: 2em;"></iframe>`
+                    div.div("row").dom.innerHTML = `<iframe title="Branch geographic map" width="100%" height="200" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="https://www.openstreetmap.org/export/embed.html?bbox=${b.longitude - zoom}%2C${b.latitude - zoom}%2C${b.longitude + zoom}%2C${b.latitude + zoom}&amp;layer=mapnik&amp;marker=${b.latitude}%2C${b.longitude}" style="border: 0px; margin-bottom: 2em;"></iframe>`
 
                     row = div.div("row");
                     row.div("col", "Universal Basic Amount:");
@@ -96,14 +97,14 @@
                     row = div.div("row");
                     row.div("col", "Tax Revenue:");
                     row.div("col", "//c " + b.revenue)
-                        .span("small", "unverified");
+                        .span("small", (b.pendingRevenue > 0 ? " (//c " + b.pendingRevenue + " pending review)" : ""));
                     // .span("small", formatDecimals(b.revenue / 3600, 2) + " hrs or USD$" + parseInt(b.revenue / 3600 * 50));
 
                     if (b.credits > 0) {
                         row = div.div("row");
                         row.div("col", "Branch Credits:");
                         row.div("col", "//c " + b.credits)
-                            .span("small", "unverified");
+                            .span("small", b.pendingCredits > 0 ? " (//c " + b.pendingCredits + " pending review)" : "");
                         //  .span("small", formatDecimals(b.credits / 3600, 2) + " hrs or USD$" + parseInt(b.credits / 3600 * 50));
                     }
 
@@ -111,15 +112,14 @@
                         row = div.div("row");
                         row.div("col", "Branch Debits:");
                         row.div("col", "//c " + b.debits)
-                            .span("small", "unverified");
+                            .span("small", b.pendingCredits > 0 ? " (" + b.pendingCredits + " pending review)" : "");
                         // .span("small", formatDecimals(b.debits / 3600, 2) + " hrs or USD$" + parseInt(b.debits / 3600 * 50));
                     }
 
                     row = div.div("row");
                     let balance = UNIVERSAL_BASIC_INCOME_2YR + b.revenue + b.credits - b.debits;
                     row.div("col", "Balance:");
-                    row.div("col", "//c " + balance)
-                        .span("small", "unverified");
+                    row.div("col", "//c " + balance);
                     //.span("small", formatDecimals(balance / 3600, 2) + " hrs or USD$" + parseInt(balance / 3600 * 50));
 
                     div.h2(null, "Recent Accounts");

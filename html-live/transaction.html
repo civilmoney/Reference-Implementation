@@ -5,7 +5,8 @@
     <title>Transaction Details - Civilised Money</title>
     <meta name="description" content="A more civilised economic framework for humanity." />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="/civilmoney.js"></script>
+    <script src="/common/civilmoney-common.js"></script>
+    <script src="/common/civilmoney-dom.js"></script>
     <link rel="stylesheet" href="/style.css" />
     <style>
         #summary-table .row {
@@ -13,32 +14,35 @@
             padding: 0.5em 0;
             border-bottom: 1px dashed #ccc;
         }
+
             #summary-table .row .col, #summary-table .row .col * {
                 font-family: monospace;
             }
 
-        #summary-table .row .col:nth-of-type(1) {
-            width: 20%;
-            flex: 0 0 auto;
-        }
+                #summary-table .row .col:nth-of-type(1) {
+                    width: 20%;
+                    flex: 0 0 auto;
+                }
 
-        #summary-table .row .col:nth-of-type(2) {
-            
-        }
+                #summary-table .row .col:nth-of-type(2) {
+                }
 
         #summary-table .error {
             background: #f44336;
             color: #fff;
             padding: 2em 4em;
         }
-        #summary-table .error:empty{
-            display:none;
-        }
+
+            #summary-table .error:empty {
+                display: none;
+            }
+
         .loading {
             opacity: 0.5;
             pointer-events: none;
         }
-        .buttons{
+
+        .buttons {
             padding-top: 1em;
             text-align: right;
         }
@@ -94,18 +98,18 @@
                     row.div("col", "To:");
                     let col = row.div("col");
                     col.text("(");
-                    col.link(t.toBranch.id, `/${t.toBranch.id}`);
+                    col.link(t.toBranch, `/${t.toBranch}`);
                     col.text(") ");
-                    col.link(formatAccountNumber(null, t.toNumber), `/${t.toBranch.id},${t.toNumber}`);
+                    col.link(formatAccountNumber(null, t.toNumber), `/${t.toBranch},${t.toNumber}`);
 
                     row = div.div("row");
                     row.div("col", "From:");
                     col = row.div("col");
                     col.text("(");
-                    col.link(t.fromBranch.id, `/${t.fromBranch.id}`);
+                    col.link(t.fromBranch, `/${t.fromBranch}`);
                     col.text(") ");
-                    col.link(formatAccountNumber(null, t.fromNumber), `/${t.fromBranch.id},${t.fromNumber}`);
-
+                    col.link(formatAccountNumber(null, t.fromNumber), `/${t.fromBranch},${t.fromNumber}`);
+                  
                     row = div.div("row");
                     row.div("col", "Date:");
                     row.div("col", parseUTCDate(t.yyyymmddhhmm).toISOString());
@@ -120,24 +124,56 @@
 
                     row = div.div("row");
                     row.div("col", "Status:");
-                    row.div("col", t._isAdded ? "Added by IP " + t._ip + " (" + t._ipCountry + ") on " + t._utc : "Not yet added");
+                    row.div("col", t._taxRevenueStatus ? "Submitted on " + t._utc : "Not yet submitted");
 
-                    if (!t._isAdded) {
+                    if (!t._taxRevenueStatus) {
+                        row = div.div("row");
+                        row.div("col", "Proof of Time:");
+                        const f = document.createElement("input");
+                        f.type = "file";
+                        f.accept = ".jpg,.jpeg,.webm,.webp,.m4a";
+                        f.multiple = false;
+                        const proof = row.div("col");
+                        proof.div(null, "Relavent audio, signature, photo or selfie from the payer (or resource) account number " + formatAccountNumber(t.fromBranch, t.fromNumber)+". Max 1MB.");
+                        proof.dom.appendChild(f);
+                        const proofError = proof.div("error");
+
                         row = div.div("buttons");
-                        row.button("Commit", (button) => {
+                        row.button("Commit", async (button) => {
+
+                            if (f.files.length == 0) {
+                                proofError.dom.textContent = "No proof of time was specified.";
+                                return;
+                            }
+                            let base64 = null;
+                            const reader = new FileReader();
+                            reader.addEventListener("load", async () => {
+                            // convert image file to base64 string
+                            const proof = reader.result;
                             button.dom.classList.add("loading");
-                            let path = "/" + t.toBranch.id + "," + t.toNumber
-                                + "," + t.fromBranch.id + "," + t.fromNumber
+                            let path = "/" + t.toBranch + "," + t.toNumber
+                                + "," + t.fromBranch + "," + t.fromNumber
                                 + "," + t.yyyymmddhhmm + "," + t.unspsc + "," + t.amount;
-                            sendAndReceive("PUT", path, null, (res) => {
+                            const res = await fetch(path,
+                                {
+                                    method: "POST",
+                                    headers: {
+                                        'Content-Type': 'text/plain;charset=utf-8'
+                                    },
+                                    body: proof
+                                });
                                 button.dom.classList.remove("loading");
-                                if (res.Error !== undefined) {
-                                    error.dom.textContent = res.Error;
-                                } else {
-                                    DETAILS = res;
+                                let json = await res.json();
+                                if (res.status === 201 || res.status === 200) {
+                                    DETAILS = json;
                                     renderDetails(DETAILS);
+                                } else {
+                                    proofError.dom.textContent = json.error || res.statusText;
                                 }
-                            });
+                            }, false);
+
+                            reader.readAsDataURL(f.files[0]);
+
                         });
                     }
                 }
@@ -154,14 +190,25 @@
     </div>
     <script src="https://civilmoney.pages.dev/unspsc.js" async defer onload="tryResolveUNSPSC()"></script>
     <script>
-        function tryResolveUNSPSC() {
-            var field = document.getElementById("unspsc_field");
-            if (field !== null) {
-                var description = unspsc_data[DETAILS.unspsc];
-                if (description !== undefined) {
-                    field.innerHTML = "(" + DETAILS.unspsc + ")<br/>"
-                        + HTMLEncode(description).replace(/\|/g, "<br/>");
+        function formatFriendlyUNSPSCs(unspscItems, total) {
+            let s = "";
+            for (let i = 0; i < unspscItems.length; i++) {
+                const item = unspscItems[i];
+                if (i > 0) {
+                    s += "<br/>";
                 }
+                s += `<b>${item.unspsc}</b> ${unspsc_data[item.unspsc].replace(/\|/g, " → ")}`;
+                if (item.amount !== 0) {
+                    s += " //c " + formatDecimals(item.amount);
+                }
+            }
+            return s;
+        }
+        function tryResolveUNSPSC() {
+            const field = document.getElementById("unspsc_field");
+            if (field !== null) {
+                const items = unspscItemsFromString(DETAILS.unspsc);
+                field.innerHTML = formatFriendlyUNSPSCs(items, DETAILS.amount);
             }
         }
     </script>
